@@ -23,7 +23,7 @@
 void TestSafeMemory()
 {
 	ColorPrintf(AQUA, "开始测试SafeMemory模块：\n");
-	
+    printf("Hello!\n");
 	{
 		Malloc IMG_Header;
 
@@ -167,9 +167,9 @@ int main(int argc, char **argv)
 	{
 		int argIndex;
 		struct Arg_parser parser;
-		const struct ap_Option options[] = 
+		const struct ap_Option options[] =
 		{
-			/*! 
+			/*!
 				短选项超过unsigned char范围则认为无短选项，
 				长选项为NULL则认为无长选项，
 				ap_yes代表（如：-a）选项后面跟有参数，
