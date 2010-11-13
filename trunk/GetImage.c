@@ -163,6 +163,7 @@ int main(int argc, char **argv)
 	//TestDebugFlag();//测试debug宏
 	//TestSafeMemory();//测试SafeMemory模块
 	//TestColorPrint();//测试彩色输出
+	printf("刘宝修改了GetImage.c，演示冲突处理\n");
 	ShowTitle();
 	{
 		int argIndex;
