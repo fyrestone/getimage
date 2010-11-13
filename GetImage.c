@@ -23,7 +23,6 @@
 void TestSafeMemory()
 {
 	ColorPrintf(AQUA, "¿ªÊ¼²âÊÔSafeMemoryÄ£¿é£º\n");
-    printf("Hello!\n");
 	{
 		Malloc IMG_Header;
 
