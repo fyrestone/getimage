@@ -9,7 +9,7 @@ static int TestBootRecordVolDesc(const BootRecordVolDesc *pcBRVD);
 static int TestValidationEntry(const ValidationEntry *pcVE);
 static int TestInitialEntry(const InitialEntry *pcIE);
 
-const PrimVolDesc *JumpToPrimVolDesc(const File *mapFile)
+const PrimVolDesc *JumpToISOPrimVolDesc(const File *mapFile)
 {
 	const PrimVolDesc *retVal = NULL;
 
@@ -17,31 +17,19 @@ const PrimVolDesc *JumpToPrimVolDesc(const File *mapFile)
 		retVal = (const PrimVolDesc *)JUMP_PTR_BY_LENGTH(mapFile, mapFile->pvFile, SECTOR_SIZE * 16);
 
 	return CHECK_PTR_SPACE_IS_VALID(mapFile, retVal, sizeof(PrimVolDesc)) ? retVal : NULL;
-	///*! 检查指针是否越界*/
-	//if(mapFile->size > SECTOR_SIZE * 16 + sizeof(PrimVolDesc))
-	//	return (const PrimVolDesc *)((const char *)mapFile->pvFile + SECTOR_SIZE * 16);
-	//else
-	//	return NULL;
 }
 
-const BootRecordVolDesc *JumpToBootRecordVolDesc(const File *mapFile, const PrimVolDesc *pcPVD)
+const BootRecordVolDesc *JumpToISOBootRecordVolDesc(const File *mapFile, const PrimVolDesc *pcPVD)
 {
-	//assert(CHECK_FILE_PTR_IS_VALID(mapFile) && pcPVD);
 	const BootRecordVolDesc *retVal = NULL;
 
 	if(CHECK_FILE_PTR_IS_VALID(mapFile) && pcPVD)
 		retVal = (const BootRecordVolDesc *)JUMP_PTR_BY_LENGTH(mapFile, pcPVD, sizeof(PrimVolDesc));
 
 	return CHECK_PTR_SPACE_IS_VALID(mapFile, retVal, sizeof(BootRecordVolDesc)) ? retVal : NULL;
-
-	///*! 即跳转到第17扇区*/
-	//if(mapFile->size > SECTOR_SIZE * 16 + sizeof(PrimVolDesc) + sizeof(BootRecordVolDesc))
-	//	return (const BootRecordVolDesc *)((const char *)pcPVD + sizeof(PrimVolDesc));
-	//else
-	//	return NULL;
 }
 
-const ValidationEntry *JumpToValidationEntry(const File *mapFile, const BootRecordVolDesc *pcBRVD)
+const ValidationEntry *JumpToISOValidationEntry(const File *mapFile, const BootRecordVolDesc *pcBRVD)
 {
 	const ValidationEntry *retVal = NULL;
 
@@ -54,19 +42,9 @@ const ValidationEntry *JumpToValidationEntry(const File *mapFile, const BootReco
 	}
 
 	return CHECK_PTR_SPACE_IS_VALID(mapFile, retVal, sizeof(ValidationEntry)) ? retVal : NULL;
-	//assert(CHECK_FILE_PTR_IS_VALID(mapFile) && pcBRVD);
-
-	//{
-	//	uint32_t absoluteOffset = LD_UINT32(pcBRVD->SecToBootCat);
-
-	//	if(mapFile->size > SECTOR_SIZE * absoluteOffset + sizeof(ValidationEntry))
-	//		return (const ValidationEntry *)((const char *)mapFile->pvFile + SECTOR_SIZE * absoluteOffset);
-	//	else
-	//		return NULL;
-	//}
 }
 
-const InitialEntry *JumpToInitialEntry(const File *mapFile, const ValidationEntry *pcVE)
+const InitialEntry *JumpToISOInitialEntry(const File *mapFile, const ValidationEntry *pcVE)
 {
 	const InitialEntry *retVal = NULL;
 
@@ -74,15 +52,9 @@ const InitialEntry *JumpToInitialEntry(const File *mapFile, const ValidationEntr
 		retVal = (const InitialEntry *)JUMP_PTR_BY_LENGTH(mapFile, pcVE, sizeof(ValidationEntry));
 
 	return CHECK_PTR_SPACE_IS_VALID(mapFile, retVal, sizeof(InitialEntry)) ? retVal : NULL;
-	//assert(CHECK_FILE_PTR_IS_VALID(mapFile) && pcVE);
-
-	//if(mapFile->size > ((const char *)pcVE - (const char *)mapFile->pvFile) + sizeof(ValidationEntry))
-	//	return (const InitialEntry *)((const char *)pcVE + sizeof(ValidationEntry));
-	//else
-	//	return NULL;
 }
 
-const void *JumpToBootableImage(const File *mapFile, const InitialEntry *pcIE)
+const void *JumpToISOBootableImage(const File *mapFile, const InitialEntry *pcIE)
 {
 	const void *retVal = NULL;
 
@@ -95,16 +67,6 @@ const void *JumpToBootableImage(const File *mapFile, const InitialEntry *pcIE)
 	}
 
 	return retVal;
-	//assert(CHECK_FILE_PTR_IS_VALID(mapFile) && pcIE);
-
-	//{
-	//	uint32_t absoluteOffset = LD_UINT32(pcIE->LoadRBA);
-
-	//	if(mapFile->size > SECTOR_SIZE * absoluteOffset)
-	//		return (const void *)((const char *)mapFile->pvFile + SECTOR_SIZE * absoluteOffset);
-	//	else
-	//		return NULL;
-	//}
 }
 
 static int TestPrimVolDesc(const PrimVolDesc *pcPVD)
@@ -148,7 +110,7 @@ static int TestBootRecordVolDesc(const BootRecordVolDesc *pcBRVD)
 			break;
 
 		/*! 符合El Torito标准的启动盘此处应为EL TORITO SPECIFICATION */
-		if(CheckBootIdentifier(pcBRVD) != ISO_PROCESS_SUCCESS)
+		if(CheckISOBootIdentifier(pcBRVD) != ISO_PROCESS_SUCCESS)
 			break;
 
 		/*! 当前描述版本号为1 */
@@ -221,7 +183,7 @@ int CheckISOIdentifier(const PrimVolDesc *pcPVD)
 		return ISO_PROCESS_SUCCESS;
 }
 
-int CheckBootIdentifier(const BootRecordVolDesc *pcBRVD)
+int CheckISOBootIdentifier(const BootRecordVolDesc *pcBRVD)
 {
 	static const char *BootSystemIdentifier = "EL TORITO SPECIFICATION";
 
@@ -231,31 +193,35 @@ int CheckBootIdentifier(const BootRecordVolDesc *pcBRVD)
 		return ISO_PROCESS_SUCCESS;
 }
 
-const char *CheckBootIndicator(const InitialEntry *pcIE)
+int CheckISOIsBootable(const InitialEntry *pcIE)
 {
-	static const char *BootType[] = 
-	{
-		"可启动光盘",
-		"不可启动光盘"
-	};
-
-	const char *retVal = NULL;
-
-	if(pcIE)
-	{
-		switch(pcIE->BootIndicator)
-		{
-		case 0x88:
-			retVal = BootType[0];//可启动光盘。
-		case 0x00:
-			retVal = BootType[1];//不可启动光盘。
-		}
-	}
-
-	return retVal;
+	if(pcIE && pcIE->BootIndicator)
+		return ISO_PROCESS_SUCCESS;
+	else
+		return ISO_PROCESS_FAILED;
 }
 
-const char *CheckBootMediaType(const InitialEntry *pcIE)
+const char *GetISOPlatformID(const ValidationEntry *pcVE)
+{
+	static const char *Platform[] = 
+	{
+		"80x86",
+		"Power PC",
+		"Mac"
+	};
+
+	if(pcVE)
+	{
+		uint8_t index = pcVE->PlatformID;
+
+		if(index >= 0 && index <= 2)
+			return Platform[index];
+	}
+
+	return NULL;
+}
+
+const char *GetISOBootMediaType(const InitialEntry *pcIE)
 {
 	static const char *BootMediaType[] =
 	{
@@ -309,8 +275,8 @@ void ISOTestUnit(const File *mapFile)
 		/*! 测试PrimVolDesc */
 		ColorPrintf(WHITE, "正在测试PrimVolDesc\t\t");
 		TEST_IF_TRUE_SET_ERR_AND_BREAK(
-			!(pcPVD = JumpToPrimVolDesc(mapFile)),//跳转到PrimVolDesc
-			JumpToPrimVolDesc跳转到NULL)
+			!(pcPVD = JumpToISOPrimVolDesc(mapFile)),//跳转到PrimVolDesc
+			JumpToISOPrimVolDesc跳转到NULL)
 		TEST_IF_TRUE_SET_ERR_AND_BREAK(
 			TestPrimVolDesc(pcPVD) != ISO_PROCESS_SUCCESS,
 			TestPrimVolDesc检测失败)
@@ -319,8 +285,8 @@ void ISOTestUnit(const File *mapFile)
 		/*! 测试BootRecordVolDesc */
 		ColorPrintf(WHITE, "正在测试BootRecordVolDesc\t");
 		TEST_IF_TRUE_SET_ERR_AND_BREAK(
-			!(pcBRVD = JumpToBootRecordVolDesc(mapFile, pcPVD)),//跳转到BootRecordVolDesc
-			JumpToBootRecordVolDesc跳转到NULL)
+			!(pcBRVD = JumpToISOBootRecordVolDesc(mapFile, pcPVD)),//跳转到BootRecordVolDesc
+			JumpToISOBootRecordVolDesc跳转到NULL)
 		TEST_IF_TRUE_SET_ERR_AND_BREAK(
 			TestBootRecordVolDesc(pcBRVD) != ISO_PROCESS_SUCCESS,
 			TestBootRecordVolDesc检测失败)
@@ -329,8 +295,8 @@ void ISOTestUnit(const File *mapFile)
 		/*! 测试ValidationEntry */
 		ColorPrintf(WHITE, "正在测试ValidationEntry\t\t");
 		TEST_IF_TRUE_SET_ERR_AND_BREAK(
-			!(pcVE = JumpToValidationEntry(mapFile, pcBRVD)),//跳转到ValidationEntry
-			JumpToValidationEntry跳转到NULL)
+			!(pcVE = JumpToISOValidationEntry(mapFile, pcBRVD)),//跳转到ValidationEntry
+			JumpToISOValidationEntry跳转到NULL)
 		TEST_IF_TRUE_SET_ERR_AND_BREAK(
 			TestValidationEntry(pcVE) != ISO_PROCESS_SUCCESS,
 			TestValidationEntry检测失败)
@@ -339,8 +305,8 @@ void ISOTestUnit(const File *mapFile)
 		/*! 测试InitialEntry */
 		ColorPrintf(WHITE, "正在测试InitialEntry\t\t");
 		TEST_IF_TRUE_SET_ERR_AND_BREAK(
-			!(pcIE = JumpToInitialEntry(mapFile, pcVE)),//跳转到InitialEntry
-			JumpToInitialEntry跳转到NULL)
+			!(pcIE = JumpToISOInitialEntry(mapFile, pcVE)),//跳转到InitialEntry
+			JumpToISOInitialEntry跳转到NULL)
 		TEST_IF_TRUE_SET_ERR_AND_BREAK(
 			TestInitialEntry(pcIE) != ISO_PROCESS_SUCCESS,
 			TestInitialEntry检测失败)

@@ -28,7 +28,7 @@ typedef int FS_TYPE;
 	以保证数据正确对齐。在对移植性要求较高情况下应当使用宏定义相对偏移量来代替结构体！
 */
 
-typedef struct _ImageBPBCommon
+typedef struct _BPBCommon
 {
 	uint8_t BS_JmpBoot[3];		/*!< 跳转指令，跳转到DBR中的引导程序 */
 	uint8_t BS_OEMName[8];		/*!< 卷的OEM名称 */
@@ -44,9 +44,9 @@ typedef struct _ImageBPBCommon
 	uint8_t BPB_NumHeads[2];	/*!< 卷磁头数 */
 	uint8_t BPB_HiddSec[4];		/*!< 卷隐藏磁头数 */
 	uint8_t BPB_TotSec32[4];	/*!< 卷扇区总数，大于65535个扇区的卷用本字段表示 */
-}ImageBPBCommon;//=>Fat12/16/32共用部分。
+}BPBCommon;//=>Fat12/16/32共用部分。
 
-typedef struct _ImageBPBFat16
+typedef struct _BPBFat16
 {
 	uint8_t BS_DrvNum[1];		/*!< 驱动器编号 */
 	uint8_t BS_Reserved1[1];	/*!< 保留字段 */
@@ -54,9 +54,9 @@ typedef struct _ImageBPBFat16
 	uint8_t BS_VolID[4];		/*!< 磁盘卷ID */
 	uint8_t BS_VolLab[11];		/*!< 磁盘卷标 */
 	uint8_t BS_FilSysType[8];	/*!< 磁盘上的文件系统类型 */
-}ImageBPBFat16;//=>Fat16特殊部分。
+}BPBFat16;//=>Fat16特殊部分。
 
-typedef struct _ImageBPBFat32
+typedef struct _BPBFat32
 {
 	uint8_t BPB_FATSz32[4];
 	uint8_t BPB_ExtFlags[2];
@@ -71,26 +71,26 @@ typedef struct _ImageBPBFat32
 	uint8_t BS_VolID[4];
 	uint8_t BS_VolLab[11];
 	uint8_t BS_FilSysType[8];
-}ImageBPBFat32;//=>Fat32特殊部分。
+}BPBFat32;//=>Fat32特殊部分。
 
-typedef struct _ImageBPB
+typedef struct _BPB
 {
-	ImageBPBCommon Common;
+	BPBCommon Common;
 	union
 	{
-		ImageBPBFat16 Fat16;
-		ImageBPBFat32 Fat32;
+		BPBFat16 Fat16;
+		BPBFat32 Fat32;
 	}Special;
 	uint8_t Interval[420];		/*!< 应为Fat32格式下启动程序 */
 	uint8_t EndFlag[2];			/*!< DBR结束签名 */
-}ImageBPB;//=>512比特IMG头部。
+}BPB;//=>512比特IMG头部。
 
-int CheckImageIdentifier(const File *mapFile);
+int CheckIMGIdentifier(const File *mapFile);
 
-int CheckFileSystem(const File *mapFile);
+int CheckIMGFileSystem(const File *mapFile);
 
-FS_TYPE GetImageType(const ImageBPB *pcBPB);
+FS_TYPE GetIMGType(const BPB *pcBPB);
 
-void ImageTestUnit(const File *mapFile);
+void IMGTestUnit(const File *mapFile);
 
 #endif

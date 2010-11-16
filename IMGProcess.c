@@ -1,8 +1,8 @@
 #include <assert.h>
-#include "ImageProcess.h"
+#include "IMGProcess.h"
 #include "ColorPrint.h"
 
-int CheckImageIdentifier(const File *mapFile)
+int CheckIMGIdentifier(const File *mapFile)
 {
 	int retVal = IMAGE_PROCESS_FAILED;
 
@@ -22,7 +22,7 @@ int CheckImageIdentifier(const File *mapFile)
 	return retVal;
 }
 
-int CheckFileSystem(const File *mapFile)
+int CheckIMGFileSystem(const File *mapFile)
 {
 	if(CHECK_FILE_PTR_IS_VALID(mapFile))
 	{
@@ -33,7 +33,7 @@ int CheckFileSystem(const File *mapFile)
 			/*»Ù0x55AAΩ·Œ≤£¨»œŒ™∆‰Œ™BR*/
 			if(LD_UINT16(beginOfFile + 510) == (uint16_t)0xAA55)
 			{
-				const ImageBPB *pcBPB = (const ImageBPB *)beginOfFile;
+				const BPB *pcBPB = (const BPB *)beginOfFile;
 
 				/*ºÏ≤‚°∞FAT°±◊÷∑˚¥Æ*/
 				if((LD_UINT32(pcBPB->Special.Fat16.BS_FilSysType) & 0xFFFFFF) == 0x544146)
@@ -48,7 +48,7 @@ int CheckFileSystem(const File *mapFile)
 	return IMAGE_PROCESS_FAILED;//ºÏ≤‚ ß∞‹
 }
 
-FS_TYPE GetImageType(const ImageBPB *pcBPB)
+FS_TYPE GetIMGType(const BPB *pcBPB)
 {
 	FS_TYPE retVal = FAT_ERR;
 
@@ -99,7 +99,7 @@ FS_TYPE GetImageType(const ImageBPB *pcBPB)
 	return retVal;
 }
 
-void ImageTestUnit(const File *mapFile)
+void IMGTestUnit(const File *mapFile)
 {
 #define TEST_IF_TRUE_SET_ERR_AND_BREAK(condition, errStr)	\
 	if(condition)											\
