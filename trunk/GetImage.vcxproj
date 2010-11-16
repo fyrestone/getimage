@@ -93,7 +93,7 @@
     <ClCompile Include="ArgParser\carg_parser.c" />
     <ClCompile Include="ColorPrint.c" />
     <ClCompile Include="GetImage.c" />
-    <ClCompile Include="ImageProcess.c" />
+    <ClCompile Include="IMGProcess.c" />
     <ClCompile Include="ISOProcess.c" />
     <ClCompile Include="MapFile.c" />
     <ClCompile Include="Process.c" />
@@ -102,7 +102,7 @@
   <ItemGroup>
     <ClInclude Include="ArgParser\carg_parser.h" />
     <ClInclude Include="ColorPrint.h" />
-    <ClInclude Include="ImageProcess.h" />
+    <ClInclude Include="IMGProcess.h" />
     <ClInclude Include="IntTypes.h" />
     <ClInclude Include="ISOProcess.h" />
     <ClInclude Include="MapFile.h" />

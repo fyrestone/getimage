@@ -16,7 +16,7 @@ RELEASE_FLAGS = -O2 -fno-strict-aliasing -Wall $(RELEASE_DEF) #-fno-strict-alias
 EXTENDS_FLAGS = -dumpversion
 
 ##中间文件
-OBJECTS = GetImage.o Process.o ISOProcess.o ImageProcess.o MapFile.o ColorPrint.o SafeMemory.o
+OBJECTS = GetImage.o Process.o ISOProcess.o IMGProcess.o MapFile.o ColorPrint.o SafeMemory.o
 ARG_PARSER_OBJECT = carg_parser.o
 
 ##对外接口

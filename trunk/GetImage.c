@@ -85,43 +85,7 @@ void ShowVersion()
 	printf("%s %s\n", PROGRAM_NAME, PROGRAM_VERSION);
 }
 
-int DumpIMGFromISO(const File *mapFile, const char *path)
-{
-	int retVal = FAIL;
-
-	File entry;
-
-	if(CHECK_FILE_PTR_IS_VALID(mapFile) && path)
-	{
-		ColorPrintf(WHITE, "正在寻找IMG入口\t\t\t\t\t");
-		if(GetBootEntryFromISO(mapFile, &entry) == PROCESS_SUCCESS)
-		{
-			ColorPrintf(LIME, "OK\n");
-			ColorPrintf(WHITE, "正在写入IMG文件\t\t\t\t\t");
-			if(WriteIMGToFile(&entry, path) == PROCESS_SUCCESS)
-			{
-				ColorPrintf(LIME, "OK\n");
-				ColorPrintf(WHITE, "处理完毕\n");
-				retVal = SUCCESS;//写入成功！
-			}
-			else
-				ColorPrintf(RED, "FAIL\n");
-		}
-		else
-			ColorPrintf(RED, "FAIL\n");
-	}
-
-	return retVal;
-}
-
-int DisplayInfoOfIMG(const File *mapFile)
-{
-	int retVal = FAIL;
-	//todo
-	return retVal;
-}
-
-int defaultOption(int argc, char **argv)
+int DefaultOption(int argc, char **argv)
 {
 	int retVal = FAIL;
 
@@ -131,24 +95,25 @@ int defaultOption(int argc, char **argv)
 		ColorPrintf(RED, "输入文件：%s 映射失败！\n", argv[1]);
 	else
 	{
-		ColorPrintf(WHITE, "%s", "检测到输入文件为：");
+		ColorPrintf(WHITE, "%s", "检测到输入文件为");
 
 		switch(GetInputType(&mapFile))
 		{
 		case ISO:
 			ColorPrintf(LIME, "%s", "ISO");
 			ColorPrintf(WHITE, "，默认作为Acronis启动ISO处理：\n\n");
-			retVal = DumpIMGFromISO(&mapFile, GetOutPath(argv[1], ".img"));
+			DisplayISOInfo(&mapFile);
+			retVal = DumpIMGFromISO(&mapFile, argv[1]);
 			//TestISO(&mapFile);//ISOProcess测试用例
 			break;
 		case IMG:
 			ColorPrintf(LIME, "%s", "IMG");
 			ColorPrintf(WHITE, "，默认显示IMG磁盘映像规格：\n\n");
-			retVal = DisplayInfoOfIMG(&mapFile);
-			//TestImage(&mapFile);
+			retVal = DisplayIMGInfo(&mapFile);
+			//TestIMG(&mapFile);
 			break;
 		default:
-			ColorPrintf(RED, "%s\n", "未知");
+			ColorPrintf(RED, "%s\n", "未知类型");
 		}
 
 		UnmapFile(mapFile.pvFile);
@@ -162,7 +127,7 @@ int main(int argc, char **argv)
 	//TestDebugFlag();//测试debug宏
 	//TestSafeMemory();//测试SafeMemory模块
 	//TestColorPrint();//测试彩色输出
-	printf("刘宝修改了GetImage.c，演示冲突处理\n");
+
 	ShowTitle();
 	{
 		int argIndex;
@@ -221,7 +186,7 @@ int main(int argc, char **argv)
 				break;
 			default:
 				if(!argIndex)
-					defaultOption(argc, argv);
+					DefaultOption(argc, argv);
 			}
 
 			if(!code) break;

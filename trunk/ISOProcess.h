@@ -22,11 +22,11 @@ typedef struct _PrimVolDesc
 	uint8_t SysID[32];				/*!< System Identifier */
 	uint8_t VolID[32];				/*!< Volumn Identifier */
 	uint8_t Unused_2[8];			/*!< 应为00 */
-	uint8_t VolSpaceSz[8];			/*!< Volumn Space Size */
+	uint8_t VolSpaceSz[8];			/*!< Volumn Space Size,733标准 */
 	uint8_t Unused_3[32];			/*!< 应为00 */
 	uint8_t VolSetSz[4];			/*!< Volumn Set Size */
 	uint8_t VolSeqNum[4];			/*!< Volumn Sequence Number */
-	uint8_t LogicalBlockSz[4];		/*!< Logical Block Size */
+	uint8_t LogicalBlockSz[4];		/*!< Logical Block Size,723标准 */
 	uint8_t PathTableSz[8];			/*!< Path Table Size */
 	uint8_t TypeIPathTable[4];		/*!< Location of Occurrence of Type L Path Table */
 	uint8_t OptTypeIPathTable[4];	/*!< Location of Optional Occurrence of Type L Path Table */
@@ -102,23 +102,25 @@ typedef struct _ISO9660TimeStr{
   int8_t GMTOffset;					/*!< 偏离格林威治时间的值，以15分钟间隔为单位，从-48（东部）到+52（西部） */
 }ISO9660TimeStr;
 
-const PrimVolDesc *JumpToPrimVolDesc(const File *mapFile);
+const PrimVolDesc *JumpToISOPrimVolDesc(const File *mapFile);
 
-const BootRecordVolDesc *JumpToBootRecordVolDesc(const File *mapFile, const PrimVolDesc *pcPVD);
+const BootRecordVolDesc *JumpToISOBootRecordVolDesc(const File *mapFile, const PrimVolDesc *pcPVD);
 
-const ValidationEntry *JumpToValidationEntry(const File *mapFile, const BootRecordVolDesc *pcBRVD);
+const ValidationEntry *JumpToISOValidationEntry(const File *mapFile, const BootRecordVolDesc *pcBRVD);
 
-const InitialEntry *JumpToInitialEntry(const File *mapFile, const ValidationEntry *pcVE);
+const InitialEntry *JumpToISOInitialEntry(const File *mapFile, const ValidationEntry *pcVE);
 
-const void *JumpToBootableImage(const File *mapFile, const InitialEntry *pcIE);
+const void *JumpToISOBootableImage(const File *mapFile, const InitialEntry *pcIE);
 
 int CheckISOIdentifier(const PrimVolDesc *pcPVD);
 
-int CheckBootIdentifier(const BootRecordVolDesc *pcBRVD);
+int CheckISOBootIdentifier(const BootRecordVolDesc *pcBRVD);
 
-const char *CheckBootIndicator(const InitialEntry *pcIE);
+int CheckISOIsBootable(const InitialEntry *pcIE);
 
-const char *CheckBootMediaType(const InitialEntry *pcIE);
+const char *GetISOPlatformID(const ValidationEntry *pcVE);
+
+const char *GetISOBootMediaType(const InitialEntry *pcIE);
 
 void ISOTestUnit(const File *mapFile);
 

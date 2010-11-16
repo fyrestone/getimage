@@ -21,9 +21,6 @@
     <ClCompile Include="GetImage.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ImageProcess.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="ISOProcess.c">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -39,12 +36,12 @@
     <ClCompile Include="ArgParser\carg_parser.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="IMGProcess.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColorPrint.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ImageProcess.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="IntTypes.h">
@@ -63,6 +60,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ArgParser\carg_parser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IMGProcess.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

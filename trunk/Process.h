@@ -13,16 +13,16 @@ typedef int MEDIA_TYPE;
 #define IMG 0x1				/*!< IMG格式 */
 #define ISO 0x2				/*!< ISO格式 */
 
-const char *GetOutPath(const char *selfPath, const char *extention);
-
 MEDIA_TYPE GetInputType(const File *mapFile);
 
-int WriteIMGToFile(const File *entry, const char *selfPath);
+int DumpIMGFromISO(const File *mapFile, const char *path);
 
-int GetBootEntryFromISO(const File *mapFile, File *entry);
+int DisplayISOInfo(const File *mapFile);
+
+int DisplayIMGInfo(const File *mapFile);
 
 void TestISO(const File *mapFile);
 
-void TestImage(const File *mapFile);
+void TestIMG(const File *mapFile);
 
 #endif
