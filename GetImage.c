@@ -20,20 +20,6 @@
 		_getch();							\
 	}while(0)
 
-void TestSafeMemory()
-{
-	ColorPrintf(AQUA, "开始测试SafeMemory模块：\n");
-	{
-		Malloc IMG_Header;
-
-		if(SafeMalloc(&IMG_Header, 10) != SafeMallocSuccess)
-			puts("SafeMallocFailed!");
-		else
-			puts("SafeMemoryTestSuccess!");
-
-		SafeFree(&IMG_Header);
-	}
-}
 
 void TestDebugFlag()
 {
@@ -45,12 +31,6 @@ void TestDebugFlag()
 #ifdef NDEBUG
 	puts("当前宏为：NDEBUG");
 #endif
-}
-
-void TestColorPrint()
-{
-	ColorPrintf(AQUA, "开始测试彩色输出：\n");
-	PrintAllColor();
 }
 
 void ShowTitle()
@@ -125,8 +105,11 @@ int DefaultOption(int argc, char **argv)
 int main(int argc, char **argv)
 {
 	//TestDebugFlag();//测试debug宏
-	//TestSafeMemory();//测试SafeMemory模块
-	//TestColorPrint();//测试彩色输出
+	{
+		//MapTestUnit(argv[1]);
+		//media_t media = OpenMedia(argv[1], 0x111);
+		//ColorPrintf(RED, "media:%p\n", media);
+	}
 
 	ShowTitle();
 	{

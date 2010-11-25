@@ -122,6 +122,8 @@ const char *GetISOPlatformID(const ValidationEntry *pcVE);
 
 const char *GetISOBootMediaType(const InitialEntry *pcIE);
 
-void ISOTestUnit(const File *mapFile);
+#ifdef _DEBUG
+	void ISOTestUnit(const File *mapFile);
+#endif
 
 #endif

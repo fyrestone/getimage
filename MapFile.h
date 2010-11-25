@@ -31,4 +31,24 @@ int MapFile(File *mapFile, const char *file);
 
 void UnmapFile(const void *pvFile);
 
+#define MEDIA_CUR 0
+#define MEDIA_SET 1
+
+#define T media_t
+
+typedef struct T *T;
+
+T OpenMedia(const char *path, uint32_t viewSize);
+
+int RewindMedia(T media);
+
+int SeekMedia(T media, int64_t offset, int base);
+
+void CloseMedia(T *media);
+
+#ifdef _DEBUG
+	void MapTestUnit(const char *path);
+#endif
+
+#undef T
 #endif

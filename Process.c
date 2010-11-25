@@ -241,33 +241,31 @@ int DisplayISOInfo(const File *mapFile)
 		}
 
 		/*! 输出BootRecordVolDesc中信息 */
-		if((pcBRVD = JumpToISOBootRecordVolDesc(mapFile, pcPVD)))
+		if((pcBRVD = JumpToISOBootRecordVolDesc(mapFile, pcPVD)) &&
+			(CheckISOBootIdentifier(pcBRVD) == ISO_PROCESS_SUCCESS))
 		{
-			if(CheckISOBootIdentifier(pcBRVD) == ISO_PROCESS_SUCCESS)
+			ColorPrintf(YELLOW, "%s启动规范：\t\t\t\t", leftMargin);
+			ColorPrintf(AQUA, "EL TORITO\n");
+
+			/*! 输出ValidationEntry中信息 */
+			if((pcVE = JumpToISOValidationEntry(mapFile, pcBRVD)))
 			{
-				ColorPrintf(YELLOW, "%s启动规范：\t\t\t\t", leftMargin);
-				ColorPrintf(AQUA, "EL TORITO\n");
+				ColorPrintf(WHITE, "%s支持平台：\t\t\t\t", leftMargin);
+				ColorPrintf(LIME, "%s\n", GetISOPlatformID(pcVE));
 			}
-		}
 
-		/*! 输出ValidationEntry中信息 */
-		if((pcVE = JumpToISOValidationEntry(mapFile, pcBRVD)))
-		{
-			ColorPrintf(WHITE, "%s支持平台：\t\t\t\t", leftMargin);
-			ColorPrintf(LIME, "%s\n", GetISOPlatformID(pcVE));
-		}
+			/*! 输出InitialEntry中信息 */
+			if((pcIE = JumpToISOInitialEntry(mapFile, pcVE)))
+			{
+				ColorPrintf(WHITE, "%s光盘类型：\t\t\t\t", leftMargin);
+				if(CheckISOIsBootable(pcIE) == ISO_PROCESS_SUCCESS)
+					ColorPrintf(LIME, "可启动光盘\n");
+				else
+					ColorPrintf(LIME, "非启动光盘\n");
 
-		/*! 输出InitialEntry中信息 */
-		if((pcIE = JumpToISOInitialEntry(mapFile, pcVE)))
-		{
-			ColorPrintf(WHITE, "%s光盘类型：\t\t\t\t", leftMargin);
-			if(CheckISOIsBootable(pcIE) == ISO_PROCESS_SUCCESS)
-				ColorPrintf(LIME, "可启动光盘\n");
-			else
-				ColorPrintf(LIME, "非启动光盘\n");
-
-			ColorPrintf(YELLOW, "%s启动介质类型：\t\t\t", leftMargin);
-			ColorPrintf(AQUA, "%s\n", GetISOBootMediaType(pcIE));
+				ColorPrintf(YELLOW, "%s启动介质类型：\t\t\t", leftMargin);
+				ColorPrintf(AQUA, "%s\n", GetISOBootMediaType(pcIE));
+			}
 		}
 
 		printf("\n");
@@ -292,8 +290,8 @@ int DisplayIMGInfo(const File *mapFile)
 	{
 		const BPB *pcBPB = (const BPB *)(mapFile->pvFile);
 		const char *fsType = NULL;
-		uint32_t totalSec, numTrks, volID, secPerFat;
-		uint8_t drvNum;
+		uint32_t totalSec, numTrks, volID = 0, secPerFat = 0;
+		uint8_t drvNum = 0;
 
 		if(LD_UINT16(pcBPB->Common.BPB_TotSec16))
 			totalSec = LD_UINT16(pcBPB->Common.BPB_TotSec16);
@@ -377,6 +375,10 @@ int DisplayIMGInfo(const File *mapFile)
 	return retVal;
 }
 
+//========================测试代码开始=============================
+
+#ifdef _DEBUG
+
 void TestISO(const File *mapFile)
 {
 	ISOTestUnit(mapFile);
@@ -386,3 +388,7 @@ void TestIMG(const File *mapFile)
 {
 	IMGTestUnit(mapFile);
 }
+
+#endif
+
+//========================测试代码结束=============================

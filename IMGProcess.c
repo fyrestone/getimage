@@ -99,6 +99,10 @@ FS_TYPE GetIMGType(const BPB *pcBPB)
 	return retVal;
 }
 
+//========================测试代码开始=============================
+
+#ifdef _DEBUG
+
 void IMGTestUnit(const File *mapFile)
 {
 #define TEST_IF_TRUE_SET_ERR_AND_BREAK(condition, errStr)	\
@@ -124,4 +128,8 @@ void IMGTestUnit(const File *mapFile)
 
 #undef TEST_IF_TRUE_SET_ERR_AND_BREAK
 }
+
+#endif
+
+//========================测试代码结束=============================
 
