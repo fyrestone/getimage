@@ -3,12 +3,6 @@
 #include "ISOProcess.h"
 #include "ColorPrint.h"
 
-/*! 私有函数声明 */
-static int TestPrimVolDesc(const PrimVolDesc *pcPVD);
-static int TestBootRecordVolDesc(const BootRecordVolDesc *pcBRVD);
-static int TestValidationEntry(const ValidationEntry *pcVE);
-static int TestInitialEntry(const InitialEntry *pcIE);
-
 const PrimVolDesc *JumpToISOPrimVolDesc(const File *mapFile)
 {
 	const PrimVolDesc *retVal = NULL;
@@ -16,7 +10,11 @@ const PrimVolDesc *JumpToISOPrimVolDesc(const File *mapFile)
 	if(CHECK_FILE_PTR_IS_VALID(mapFile))
 		retVal = (const PrimVolDesc *)JUMP_PTR_BY_LENGTH(mapFile, mapFile->pvFile, SECTOR_SIZE * 16);
 
-	return CHECK_PTR_SPACE_IS_VALID(mapFile, retVal, sizeof(PrimVolDesc)) ? retVal : NULL;
+	/*! 检查可用空间以及PrimVolDesc的识别标记 */
+	if(CHECK_PTR_SPACE_IS_VALID(mapFile, retVal, sizeof(PrimVolDesc)) && retVal->PrimaryIndicator == 0x1)
+		return retVal;
+	else
+		return NULL;
 }
 
 const BootRecordVolDesc *JumpToISOBootRecordVolDesc(const File *mapFile, const PrimVolDesc *pcPVD)
@@ -26,7 +24,11 @@ const BootRecordVolDesc *JumpToISOBootRecordVolDesc(const File *mapFile, const P
 	if(CHECK_FILE_PTR_IS_VALID(mapFile) && pcPVD)
 		retVal = (const BootRecordVolDesc *)JUMP_PTR_BY_LENGTH(mapFile, pcPVD, sizeof(PrimVolDesc));
 
-	return CHECK_PTR_SPACE_IS_VALID(mapFile, retVal, sizeof(BootRecordVolDesc)) ? retVal : NULL;
+	/*! 检查可用空间以及BootRecordVolDesc的识别标记 */
+	if(CHECK_PTR_SPACE_IS_VALID(mapFile, retVal, sizeof(BootRecordVolDesc)) && retVal->BootRecordIndic ==0x0)
+		return retVal;
+	else
+		return 0;
 }
 
 const ValidationEntry *JumpToISOValidationEntry(const File *mapFile, const BootRecordVolDesc *pcBRVD)
@@ -41,7 +43,11 @@ const ValidationEntry *JumpToISOValidationEntry(const File *mapFile, const BootR
 		retVal = (const ValidationEntry *)JUMP_PTR_BY_LENGTH(mapFile, mapFile->pvFile, absoluteOffset);
 	}
 
-	return CHECK_PTR_SPACE_IS_VALID(mapFile, retVal, sizeof(ValidationEntry)) ? retVal : NULL;
+	/*! 检查可用空间以及ValidationEntry的识别标记 */
+	if(CHECK_PTR_SPACE_IS_VALID(mapFile, retVal, sizeof(ValidationEntry)) && retVal->HeaderID == 0x01)
+		return retVal;
+	else
+		return NULL;
 }
 
 const InitialEntry *JumpToISOInitialEntry(const File *mapFile, const ValidationEntry *pcVE)
@@ -51,6 +57,7 @@ const InitialEntry *JumpToISOInitialEntry(const File *mapFile, const ValidationE
 	if(CHECK_FILE_PTR_IS_VALID(mapFile) && pcVE)
 		retVal = (const InitialEntry *)JUMP_PTR_BY_LENGTH(mapFile, pcVE, sizeof(ValidationEntry));
 
+	/*! 仅检查可用空间，InitialEntry无识别标记 */
 	return CHECK_PTR_SPACE_IS_VALID(mapFile, retVal, sizeof(InitialEntry)) ? retVal : NULL;
 }
 
@@ -66,8 +73,89 @@ const void *JumpToISOBootableImage(const File *mapFile, const InitialEntry *pcIE
 		retVal = JUMP_PTR_BY_LENGTH(mapFile, mapFile->pvFile, absoluteOffset);
 	}
 
+	/*! 无法确定BootImage，不进行检查 */
 	return retVal;
 }
+
+int CheckISOIdentifier(const PrimVolDesc *pcPVD)
+{
+	static const char *ISO9660Identifier = "CD001";
+
+	if(pcPVD && memcmp(pcPVD->ISO9660Identifier, ISO9660Identifier, strlen(ISO9660Identifier)))
+		return ISO_PROCESS_FAILED;
+	else
+		return ISO_PROCESS_SUCCESS;
+}
+
+int CheckISOBootIdentifier(const BootRecordVolDesc *pcBRVD)
+{
+	static const char *BootSystemIdentifier = "EL TORITO SPECIFICATION";
+
+	if(pcBRVD && memcmp(pcBRVD->BootSysID, BootSystemIdentifier, strlen(BootSystemIdentifier)))
+		return ISO_PROCESS_FAILED;
+	else
+		return ISO_PROCESS_SUCCESS;
+}
+
+int CheckISOIsBootable(const InitialEntry *pcIE)
+{
+	if(pcIE && pcIE->BootIndicator == 0x88)
+		return ISO_PROCESS_SUCCESS;
+	else
+		return ISO_PROCESS_FAILED;
+}
+
+const char *GetISOPlatformID(const ValidationEntry *pcVE)
+{
+	static const char *Platform[] = 
+	{
+		"80x86",
+		"Power PC",
+		"Mac"
+	};
+
+	if(pcVE)
+	{
+		uint8_t index = pcVE->PlatformID;
+
+		if(index >= 0 && index <= 2)
+			return Platform[index];
+	}
+
+	return NULL;
+}
+
+const char *GetISOBootMediaType(const InitialEntry *pcIE)
+{
+	static const char *BootMediaType[] =
+	{
+		"非模拟",
+		"1.2M 软盘模拟",
+		"1.44M 软盘模拟",
+		"2.88M 软盘模拟",
+		"硬盘模拟"
+	};
+
+	if(pcIE)
+	{
+		uint8_t index = pcIE->BootMediaType;
+
+		if(index >= 0 && index <= 4)
+			return BootMediaType[index];
+	}
+
+	return NULL;
+}
+
+//========================测试代码开始=============================
+
+#ifdef _DEBUG
+
+/*! 私有函数声明 */
+static int TestPrimVolDesc(const PrimVolDesc *pcPVD);
+static int TestBootRecordVolDesc(const BootRecordVolDesc *pcBRVD);
+static int TestValidationEntry(const ValidationEntry *pcVE);
+static int TestInitialEntry(const InitialEntry *pcIE);
 
 static int TestPrimVolDesc(const PrimVolDesc *pcPVD)
 {
@@ -173,76 +261,6 @@ static int TestInitialEntry(const InitialEntry *pcIE)
 	return retVal;
 }
 
-int CheckISOIdentifier(const PrimVolDesc *pcPVD)
-{
-	static const char *ISO9660Identifier = "CD001";
-
-	if(pcPVD && memcmp(pcPVD->ISO9660Identifier, ISO9660Identifier, strlen(ISO9660Identifier)))
-		return ISO_PROCESS_FAILED;
-	else
-		return ISO_PROCESS_SUCCESS;
-}
-
-int CheckISOBootIdentifier(const BootRecordVolDesc *pcBRVD)
-{
-	static const char *BootSystemIdentifier = "EL TORITO SPECIFICATION";
-
-	if(pcBRVD && memcmp(pcBRVD->BootSysID, BootSystemIdentifier, strlen(BootSystemIdentifier)))
-		return ISO_PROCESS_FAILED;
-	else
-		return ISO_PROCESS_SUCCESS;
-}
-
-int CheckISOIsBootable(const InitialEntry *pcIE)
-{
-	if(pcIE && pcIE->BootIndicator)
-		return ISO_PROCESS_SUCCESS;
-	else
-		return ISO_PROCESS_FAILED;
-}
-
-const char *GetISOPlatformID(const ValidationEntry *pcVE)
-{
-	static const char *Platform[] = 
-	{
-		"80x86",
-		"Power PC",
-		"Mac"
-	};
-
-	if(pcVE)
-	{
-		uint8_t index = pcVE->PlatformID;
-
-		if(index >= 0 && index <= 2)
-			return Platform[index];
-	}
-
-	return NULL;
-}
-
-const char *GetISOBootMediaType(const InitialEntry *pcIE)
-{
-	static const char *BootMediaType[] =
-	{
-		"非模拟",
-		"1.2M 软盘模拟",
-		"1.44M 软盘模拟",
-		"2.88M 软盘模拟",
-		"硬盘模拟"
-	};
-
-	if(pcIE)
-	{
-		uint8_t index = pcIE->BootMediaType;
-
-		if(index >= 0 && index <= 4)
-			return BootMediaType[index];
-	}
-
-	return NULL;
-}
-
 void ISOTestUnit(const File *mapFile)
 {
 #define TEST_IF_TRUE_SET_ERR_AND_BREAK(condition, errStr)	\
@@ -323,3 +341,7 @@ void ISOTestUnit(const File *mapFile)
 
 #undef TEST_IF_TRUE_SET_ERR_AND_BREAK
 }
+
+#endif
+
+//========================测试代码结束=============================

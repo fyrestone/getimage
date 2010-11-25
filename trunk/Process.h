@@ -21,8 +21,10 @@ int DisplayISOInfo(const File *mapFile);
 
 int DisplayIMGInfo(const File *mapFile);
 
-void TestISO(const File *mapFile);
+#ifdef _DEBUG
+	void TestISO(const File *mapFile);
 
-void TestIMG(const File *mapFile);
+	void TestIMG(const File *mapFile);
+#endif
 
 #endif

@@ -91,6 +91,8 @@ int CheckIMGFileSystem(const File *mapFile);
 
 FS_TYPE GetIMGType(const BPB *pcBPB);
 
-void IMGTestUnit(const File *mapFile);
+#ifdef _DEBUG
+	void IMGTestUnit(const File *mapFile);
+#endif
 
 #endif
