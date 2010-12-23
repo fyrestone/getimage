@@ -102,28 +102,18 @@ typedef struct _ISO9660TimeStr{
   int8_t GMTOffset;					/*!< 偏离格林威治时间的值，以15分钟间隔为单位，从-48（东部）到+52（西部） */
 }ISO9660TimeStr;
 
-const PrimVolDesc *JumpToISOPrimVolDesc(const File *mapFile);
+int JumpToISOPrimVolDesc(media_t media);
 
-const BootRecordVolDesc *JumpToISOBootRecordVolDesc(const File *mapFile, const PrimVolDesc *pcPVD);
+int JumpToISOBootRecordVolDesc(media_t media);
 
-const ValidationEntry *JumpToISOValidationEntry(const File *mapFile, const BootRecordVolDesc *pcBRVD);
+int JumpToISOValidationEntry(media_t media);
 
-const InitialEntry *JumpToISOInitialEntry(const File *mapFile, const ValidationEntry *pcVE);
+int JumpToISOInitialEntry(media_t media);
 
-const void *JumpToISOBootableImage(const File *mapFile, const InitialEntry *pcIE);
+int JumpToISOBootableImage(media_t media);
 
-int CheckISOIdentifier(const PrimVolDesc *pcPVD);
+const char *GetISOPlatformID(media_t media);
 
-int CheckISOBootIdentifier(const BootRecordVolDesc *pcBRVD);
-
-int CheckISOIsBootable(const InitialEntry *pcIE);
-
-const char *GetISOPlatformID(const ValidationEntry *pcVE);
-
-const char *GetISOBootMediaType(const InitialEntry *pcIE);
-
-#ifdef _DEBUG
-	void ISOTestUnit(const File *mapFile);
-#endif
+const char *GetISOBootMediaType(media_t media);
 
 #endif

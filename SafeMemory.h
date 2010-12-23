@@ -13,10 +13,20 @@
 #define NEW(p) ((p) = MALLOC(sizeof *(p)))
 #define FREE(p) Mem_free(p, __FILE__, __LINE__)
 
-/*! 安全内存分配函数，分配成功返回指针。 */
+/*!
+安全内存分配，不推荐直接调用，请使用MALLOC、NEW
+\param size 分配内存大小
+\param file 调用内存分配的代码文件
+\param line 调用内存分配的代码行
+*/
 void *Mem_alloc(size_t size, const char *file, int line);
 
-/*! 安全内存释放函数。 */
+/*!
+安全内存释放函数，不推荐直接调用，请使用FREE
+\param ptr 内存块指针
+\param file 调用内存释放的代码文件
+\param line 调用内存释放的代码行
+*/
 void Mem_free(void *ptr, const char *file, int line);
 
 #endif

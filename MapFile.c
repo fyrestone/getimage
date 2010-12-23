@@ -1,55 +1,10 @@
 #define WINVER 0x0500	/*!< 为了使用GetFileSizeEx */
 
-#include <stdio.h>
 #include <Windows.h>
 #include <io.h>			/*!< _access，检测文件存在 */
 #include <assert.h>
 #include "MapFile.h"
 #include "SafeMemory.h"
-#include "ColorPrint.h"	/*!< 测试用例使用 */
-
-int MapFile(File *mapFile, const char *file)
-{
-	int retVal = MAP_FAILED;
-
-	HANDLE hFile, hFileMapping;
-	PVOID pvFile;
-	uint32_t fileSize;
-
-	assert(mapFile && file);
-
-	hFile = CreateFileA(
-		file, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-
-	if(hFile != INVALID_HANDLE_VALUE)
-	{
-
-		fileSize = GetFileSize(hFile, NULL);//获得文件大小
-		hFileMapping = CreateFileMapping(
-			hFile, NULL, PAGE_READONLY, 0, fileSize, NULL);
-
-		CloseHandle(hFile);
-		if(hFileMapping)
-		{
-			pvFile = MapViewOfFile(hFileMapping, FILE_MAP_READ, 0, 0, 0);
-
-			CloseHandle(hFileMapping);
-			if(pvFile)
-			{
-				mapFile->pvFile = pvFile;
-				mapFile->size = fileSize;
-				retVal = MAP_SUCCESS;//映射成功
-			}
-		}
-	}
-
-	return retVal;
-}
-
-void UnmapFile(const void *pvFile)
-{
-	(void)UnmapViewOfFile((PVOID)pvFile);
-}
 
 #define T media_t
 
@@ -57,8 +12,8 @@ struct T
 {
 	const char *name;			/*!< 打开的介质名（路径） */
 	HANDLE hFile;				/*!< 映射介质时使用的句柄 */
-	PVOID pView;				/*!< 映射介质时，视图指针 */
 	FILE *pFile;				/*!< 直接IO时使用的结构体 */
+	PVOID pView;				/*!< 映射介质时，视图指针 */
 	uint32_t allocGran;			/*!< 内存分配粒度 */
 	uint32_t viewSize;			/*!< 视图大小，映射时使用VIEW，直接IO时使用重定向缓冲区大小 */
 	uint32_t actualViewSize;	/*!< 实际视图大小，实际视图大小根据不同情况可能小于等于viewSize */
@@ -245,8 +200,8 @@ static int SeekRawMedia(T media, int64_t offset, int base)
 
 	if(media && offset)
 	{
-		assert(1);
-	//:TODO
+		assert(0);
+		//TODO:使用fopen打开
 	}
 
 	return retVal;
@@ -334,7 +289,7 @@ T OpenMedia(const char *path, uint32_t viewSize)
 	{
 		if(_access(path, 0/* 检测存在 */))//如果文件不存在
 		{
-			assert(1);
+			assert(0);
 		}
 		else//如果文件存在
 			retVal = OpenMapMedia(media, path, viewSize);
@@ -358,14 +313,109 @@ void CloseMedia(T *media)
 		}
 		else if(mediaCopy->pFile)//如果是fopen打开介质
 		{
-			assert(1);
+			assert(0);
 		}
 	}
+}
+
+int GetMediaAccess(T media, media_access *access, uint32_t len)
+{
+	int retVal = MAP_FAILED;
+
+	if(media && access && len)
+	{
+		if(media->hFile)
+		{
+			if(len <= media->accessSize)
+			{
+				access->begin = (unsigned char *)media->pView + media->viewSize - media->accessSize;
+				access->len = len;
+				retVal = MAP_SUCCESS;
+			}
+			else
+			{
+				assert(0);
+				//TODO:动态分配内存空间
+			}
+		}
+		else if(media->pFile)
+		{
+			assert(0);
+		}
+	}
+	
+	return retVal;
+}
+
+int DumpMedia(T media, FILE *fp, int64_t size)
+{
+	int retVal = MAP_FAILED;
+
+	if(media && fp && size)
+	{
+		LARGE_INTEGER currPos = media->currPos;
+
+#ifdef _DEBUG
+		media_t media_bak;	
+		assert(NEW(media_bak));
+		memcpy(media_bak, media, sizeof(*media));
+#endif
+
+		if(media->hFile)//如果是文件映射
+		{
+			int hasError = 0;
+
+			while(size > media->accessSize)
+			{
+				const unsigned char *writePtr = (const unsigned char *)media->pView + media->viewSize - media->accessSize;
+				uint32_t writeLen;//写入长度
+
+				if(fwrite(writePtr, media->accessSize, 1, fp) != 1)
+				{
+					hasError = 1;
+					break;
+				}
+
+				writeLen = media->accessSize;//保存写入的长度
+				
+				/* 向后跳转，会修改media->accessSize */
+				if(SeekMedia(media, media->accessSize, MEDIA_CUR) != MAP_SUCCESS)
+				{
+					hasError = 1;
+					break;
+				}
+
+				size -= writeLen;
+			}
+
+			if(!hasError)
+			{
+				if(size && fwrite(media->pView, (size_t)size, 1, fp) == 1)
+					retVal = MAP_SUCCESS;
+			}
+		}
+		else if(media->pFile)
+		{
+			assert(0);
+			//TODO:
+		}
+
+		if(SeekMedia(media, currPos.QuadPart, MEDIA_SET) != MAP_SUCCESS)
+			retVal = MAP_FAILED;
+
+#ifdef _DEBUG
+		assert(!memcmp(media_bak, media, sizeof(*media)));
+#endif
+	}
+
+	return retVal;
 }
 
 //========================测试代码开始=============================
 
 #ifdef _DEBUG
+
+#include "ColorPrint.h"	/*!< 测试用例使用 */
 
 void MapTestUnit(const char *path)
 {
