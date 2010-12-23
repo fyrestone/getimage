@@ -69,34 +69,34 @@ int DefaultOption(int argc, char **argv)
 {
 	int retVal = FAIL;
 
-	File mapFile;
+	media_t media;
 
-	if(argc != 2 || MapFile(&mapFile, argv[1]) != PROCESS_SUCCESS)
+	if(argc != 2 || !(media = OpenMedia(argv[1], 128000)))
 		ColorPrintf(RED, "输入文件：%s 映射失败！\n", argv[1]);
 	else
 	{
 		ColorPrintf(WHITE, "%s", "检测到输入文件为");
 
-		switch(GetInputType(&mapFile))
+		switch(GetInputType(media))
 		{
 		case ISO:
 			ColorPrintf(LIME, "%s", "ISO");
 			ColorPrintf(WHITE, "，默认作为Acronis启动ISO处理：\n\n");
-			DisplayISOInfo(&mapFile);
-			retVal = DumpIMGFromISO(&mapFile, argv[1]);
+			DisplayISOInfo(media);
+			retVal = DumpIMGFromISO(media, argv[1]);
 			//TestISO(&mapFile);//ISOProcess测试用例
 			break;
 		case IMG:
 			ColorPrintf(LIME, "%s", "IMG");
 			ColorPrintf(WHITE, "，默认显示IMG磁盘映像规格：\n\n");
-			retVal = DisplayIMGInfo(&mapFile);
+			retVal = DisplayIMGInfo(media);
 			//TestIMG(&mapFile);
 			break;
 		default:
 			ColorPrintf(RED, "%s\n", "未知类型");
 		}
 
-		UnmapFile(mapFile.pvFile);
+		CloseMedia(&media);
 	}
 
 	return retVal;

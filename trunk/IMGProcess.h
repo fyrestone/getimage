@@ -85,14 +85,14 @@ typedef struct _BPB
 	uint8_t EndFlag[2];			/*!< DBR结束签名 */
 }BPB;//=>512比特IMG头部。
 
-int CheckIMGIdentifier(const File *mapFile);
+int CheckIMGIdentifier(media_t media);
 
-int CheckIMGFileSystem(const File *mapFile);
+int CheckIMGFileSystem(media_t media);
 
 FS_TYPE GetIMGType(const BPB *pcBPB);
 
 #ifdef _DEBUG
-	void IMGTestUnit(const File *mapFile);
+	void IMGTestUnit(media_t media);
 #endif
 
 #endif
