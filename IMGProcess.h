@@ -1,10 +1,14 @@
+/*!
+\file IMGProcess.h
+\author LiuBao
+\version 1.0
+\date 2010/12/25
+\brief 提供IMG处理函数，以及IMG的结构体
+*/
 #ifndef IMAGE_PROCESS
 #define IMAGE_PROCESS
 
 #include "MapFile.h"
-
-#define IMAGE_PROCESS_SUCCESS 0
-#define IMAGE_PROCESS_FAILED -1
 
 /*! 用于检测磁盘格式 */
 #define MIN_FAT16 4085			/*!< FAT16数据最少簇数 */
@@ -85,14 +89,25 @@ typedef struct _BPB
 	uint8_t EndFlag[2];			/*!< DBR结束签名 */
 }BPB;//=>512比特IMG头部。
 
+/*!
+检查IMG文件的识别标记（文件头）
+\param media 位置在IMG头部的media_t
+\return 如果检测通过（是IMG）返回SUCCESS；否则返回FAILED
+*/
 int CheckIMGIdentifier(media_t media);
 
+/*!
+检查IMG文件系统识别标记
+\param media 位置在IMG头部的media_t
+\return 如果检测通过（是IMG文件系统）返回SUCCESS；否则返回FAILED
+*/
 int CheckIMGFileSystem(media_t media);
 
+/*!
+获取IMG文件系统类型
+\param pcBPB BPB结构体指针
+\return FAT12/FAT16/FAT32/FAT_ERR
+*/
 FS_TYPE GetIMGType(const BPB *pcBPB);
-
-#ifdef _DEBUG
-	void IMGTestUnit(media_t media);
-#endif
 
 #endif

@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="ArgParser">
+      <UniqueIdentifier>{1d41483d-742a-4d49-a72f-e39debd4c295}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ArgParser\头文件">
+      <UniqueIdentifier>{eef6e51c-adb8-4aa1-824b-ce95d1f7b93d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ArgParser\源文件">
+      <UniqueIdentifier>{2848b8d4-48c5-478d-86ef-76d280ca1c81}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ColorPrint.c">
@@ -33,11 +42,11 @@
     <ClCompile Include="SafeMemory.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ArgParser\carg_parser.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="IMGProcess.c">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ArgParser\carg_parser.c">
+      <Filter>ArgParser\源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -59,10 +68,13 @@
     <ClInclude Include="SafeMemory.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ArgParser\carg_parser.h">
+    <ClInclude Include="IMGProcess.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="IMGProcess.h">
+    <ClInclude Include="ArgParser\carg_parser.h">
+      <Filter>ArgParser\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjDef.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

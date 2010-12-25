@@ -1,10 +1,14 @@
+/*!
+\file ISOProcess.h
+\authon LiuBao
+\version 1.0
+\date 2010/12/24
+\brief 提供ISO处理函数，以及ISO的结构体
+*/
 #ifndef ISO_PROCESS
 #define ISO_PROCESS
 
 #include "MapFile.h"
-
-#define ISO_PROCESS_SUCCESS 0
-#define ISO_PROCESS_FAILED -1
 
 #define SECTOR_SIZE 2048			/*!< ISO每扇区比特数 */
 
@@ -102,18 +106,54 @@ typedef struct _ISO9660TimeStr{
   int8_t GMTOffset;					/*!< 偏离格林威治时间的值，以15分钟间隔为单位，从-48（东部）到+52（西部） */
 }ISO9660TimeStr;
 
+/*!
+从光盘起始位置跳转到PrimVolDesc开始处
+\param media 位于光盘起始位置的media_t
+\return 跳转成功返回SUCCESS；否则返回FAILED
+*/
 int JumpToISOPrimVolDesc(media_t media);
 
+/*!
+从PrimVolDesc开始处跳转到BootRecordVolDesc开始处
+\param media 位于PrimVolDesc起始位置的media_t
+\return 跳转成功返回SUCCESS；否则返回FAILED
+*/
 int JumpToISOBootRecordVolDesc(media_t media);
 
+/*!
+从BootRecordVolDesc开始处跳转到ValidationEntry
+\param media 位于BootRecordVolDesc起始位置的media_t
+\return 跳转成功返回SUCCESS；否则返回FAILED
+*/
 int JumpToISOValidationEntry(media_t media);
 
+/*!
+从ValidationEntry开始处跳转到InitialEntry
+\param media 位于ValidationEntry起始位置的media_t
+\return 跳转成功返回SUCCESS；否则返回FAILED
+*/
 int JumpToISOInitialEntry(media_t media);
 
+/*!
+从InitialEntry开始处跳转到启动映像位置（可能是IMG格式映像也可能是引导程序）
+\param media 位于InitialEntry起始位置的media_t
+\return 跳转成功返回SUCCESS；否则返回FAILED
+*/
 int JumpToISOBootableImage(media_t media);
 
+/*!
+从位于ValidationEntry的media_t获得PlatformID（"80x86"/"Power PC"/"Mac"）
+\param media 位于ValidationEntry起始位置的media_t
+\return 获得的PlatformID字符串
+*/
 const char *GetISOPlatformID(media_t media);
 
+/*!
+从位于InitialEntry的media_t获得BootMediaType\
+（"非模拟"/"1.2M 软盘模拟"/"1.44M 软盘模拟"/"2.88M 软盘模拟"/"硬盘模拟"）
+\param media 位于InitialEntry起始位置的media_t
+\return 获得的启动介质类型字符串
+*/
 const char *GetISOBootMediaType(media_t media);
 
 #endif

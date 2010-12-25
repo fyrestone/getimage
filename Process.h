@@ -3,9 +3,6 @@
 
 #include "MapFile.h"
 
-#define PROCESS_SUCCESS 0
-#define PROCESS_FAILED -1
-
 /*! 介质格式定义 */
 typedef int MEDIA_TYPE;
 

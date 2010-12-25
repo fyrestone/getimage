@@ -1,9 +1,16 @@
+/*!
+\file SafeMemory.h
+\author LiuBao
+\version 1.0
+\date 2010/12/25
+\brief 安全的内存操作接口MALLOC/NEW/FREE
+*/
 #ifndef SAFE_MEMORY
 #define SAFE_MEMORY
 
 #include <stddef.h>		/*!< 使用size_t */
 
-#define MEM_DETAIL 0	/*!< 内存分配销毁信息输出宏，置0关闭输出，置1开启输出 */
+#define MEM_DETAIL 1	/*!< 内存分配销毁信息跟踪宏，置0关闭输出，置1开启输出，仅debug下有效 */
 
 /*! 禁用malloc和free */
 #define malloc 不要直接调用malloc!
