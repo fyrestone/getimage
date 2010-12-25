@@ -4,9 +4,6 @@
 #include <stdio.h>		/*!< FILE */
 #include "IntTypes.h"
 
-#define MAP_SUCCESS 0
-#define MAP_FAILED -1
-
 #define MEDIA_CUR 0		/*!< 当前位置 */
 #define MEDIA_SET 1		/*!< 起始位置 */
 
@@ -19,7 +16,6 @@ typedef struct media_access
 	const unsigned char *begin;
 	uint32_t len;
 }media_access;
-	
 
 /*!
 打开介质，使用内存映射
@@ -32,7 +28,7 @@ T OpenMedia(const char *path, uint32_t viewSize);
 /*!
 打开位置复位
 \param media 需要复位的media_t
-\return 成功返回MAP_SUCCESS；否则返回MAP_FAILED
+\return 成功返回SUCCESS；否则返回FAILED
 */
 int RewindMedia(T media);
 
@@ -41,7 +37,7 @@ int RewindMedia(T media);
 \param media 需要跳转的media_t
 \param offset 跳转偏移量，可以为正（向前跳转）或负（向后跳转）
 \param base 可能取值为MEDIA_CUR（相对于当前位置）和MEDIA_SET（相对于起始位置）
-\return 成功返回MAP_SUCCESS；否则返回MAP_FAILED
+\return 成功返回SUCCESS；否则返回FAILED
 */
 int SeekMedia(T media, int64_t offset, int base);
 
@@ -56,7 +52,7 @@ void CloseMedia(T *media);
 \param media 需要获取访问结构的media_t
 \param access 访问结构体指针
 \param len 从当前位置向后可访问长度
-\return 成功获取返回MAP_SUCCESS；否则返回MAP_FAILED
+\return 成功获取返回SUCCESS；否则返回FAILED
 */
 int GetMediaAccess(T media, media_access *access, uint32_t len);
 
@@ -66,7 +62,7 @@ int GetMediaAccess(T media, media_access *access, uint32_t len);
 \param media 需要抽取数据的media_t
 \param fp 输出指针，可以stdout或者可写的文件指针
 \param size 抽取大小
-\return 抽取成功返回MAP_SUCCESS；否则返回MAP_FAILED
+\return 抽取成功返回SUCCESS；否则返回FAILED
 */
 int DumpMedia(T media, FILE *fp, int64_t size);
 

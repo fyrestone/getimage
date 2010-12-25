@@ -1,3 +1,10 @@
+/*!
+\file SafeMemory.c
+\author LiuBao
+\version 1.0
+\date 2010/12/25
+\brief 安全内存操作实现
+*/
 #include <stdlib.h>		/*< malloc/free */
 #include <memory.h>		/*< memset */
 #include <assert.h>		/*< assert */
@@ -44,6 +51,7 @@ void *Mem_alloc(size_t size, const char *file, int line)
 
 void Mem_free(void *ptr, const char *file, int line)
 {
+#ifdef _DEBUG
 	void *mallocPtr = NULL;
 	size_t mallocSize = 0;
 
@@ -54,12 +62,13 @@ void Mem_free(void *ptr, const char *file, int line)
 
 	assert(*((char*)ptr + mallocSize) == (char)EndByte);//检测是否越界。
 
-#ifdef _DEBUG
 	memset(ptr, GarbageByte, mallocSize);
 #if MEM_DETAIL
 	ColorPrintf(YELLOW, "内存销毁（%p）：%s：%d->%u\n", mallocPtr, file, line, mallocSize);
 #endif
-#endif // _DEBUG
 
 	free(mallocPtr);
+#else
+	free(ptr);
+#endif // _DEBUG
 }

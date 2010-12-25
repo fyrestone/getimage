@@ -1,17 +1,26 @@
+/*!
+\file ISOProcess.c
+\authon LiuBao
+\version 1.0
+\date 2010/12/24
+\brief ISO处理函数
+*/
 #include <string.h>		/*< memcmp */
 #include <assert.h>
+#include "ProjDef.h"
 #include "ISOProcess.h"
 
 int JumpToISOPrimVolDesc(media_t media)
 {
 	static const char *ISO9660Identifier = "CD001";
 
-	int retVal = ISO_PROCESS_FAILED;
+	int retVal = FAILED;
 
-	if(SeekMedia(media, SECTOR_SIZE * 16, MEDIA_SET) == MAP_SUCCESS)
+	/* 跳转到相对于ISO起始的16扇区处 */
+	if(SeekMedia(media, SECTOR_SIZE * 16, MEDIA_SET) == SUCCESS)
 	{
 		media_access access;
-		if(GetMediaAccess(media, &access, sizeof(PrimVolDesc)) == MAP_SUCCESS)
+		if(GetMediaAccess(media, &access, sizeof(PrimVolDesc)) == SUCCESS)
 		{
 			/* 检查PrimVolDesc的识别标记 */
 			if(*access.begin == 1)
@@ -20,7 +29,7 @@ int JumpToISOPrimVolDesc(media_t media)
 
 				/* 检查ISO9660标记 */
 				if(!memcmp(pcPVD->ISO9660Identifier, ISO9660Identifier, strlen(ISO9660Identifier)))
-					retVal = ISO_PROCESS_SUCCESS;
+					retVal = SUCCESS;
 			}
 		}
 	}
@@ -32,12 +41,13 @@ int JumpToISOBootRecordVolDesc(media_t media)
 {
 	static const char *BootSystemIdentifier = "EL TORITO SPECIFICATION";
 
-	int retVal = ISO_PROCESS_FAILED;
+	int retVal = FAILED;
 
-	if(SeekMedia(media, sizeof(PrimVolDesc), MEDIA_CUR) == MAP_SUCCESS)
+	/* 跳转到PrimVolDesc后（BootRecordVolDesc的起始） */
+	if(SeekMedia(media, sizeof(PrimVolDesc), MEDIA_CUR) == SUCCESS)
 	{
 		media_access access;
-		if(GetMediaAccess(media, &access, sizeof(BootRecordVolDesc)) == MAP_SUCCESS)
+		if(GetMediaAccess(media, &access, sizeof(BootRecordVolDesc)) == SUCCESS)
 		{
 			/* 检查BootRecordVolDesc的识别标记 */
 			if(*access.begin == 0)
@@ -46,7 +56,7 @@ int JumpToISOBootRecordVolDesc(media_t media)
 
 				/* 检查是否符合EL TORITO启动规范 */
 				if(!memcmp(pcBRVD->BootSysID, BootSystemIdentifier, strlen(BootSystemIdentifier)))
-					retVal = ISO_PROCESS_SUCCESS;
+					retVal = SUCCESS;
 			}
 		}
 	}
@@ -56,12 +66,13 @@ int JumpToISOBootRecordVolDesc(media_t media)
 
 int JumpToISOValidationEntry(media_t media)
 {
-	int retVal = ISO_PROCESS_FAILED;
+	int retVal = FAILED;
 
 	media_access access;
-	uint32_t absoluteOffset;
+	uint32_t absoluteOffset = 0;//ValidationEntry的绝对偏移量
 
-	if(GetMediaAccess(media, &access, sizeof(BootRecordVolDesc)) == MAP_SUCCESS)
+	/* 从BootRecordVolDesc中计算出ValidationEntry的位置（绝对偏移量） */
+	if(GetMediaAccess(media, &access, sizeof(BootRecordVolDesc)) == SUCCESS)
 	{
 		const BootRecordVolDesc *pcBRVD = (const BootRecordVolDesc *)access.begin;
 
@@ -69,9 +80,10 @@ int JumpToISOValidationEntry(media_t media)
 		absoluteOffset = offsetValue * SECTOR_SIZE/*offsetUnit*/;
 	}
 
-	if(SeekMedia(media, absoluteOffset, MEDIA_SET) == MAP_SUCCESS)
+	/* 跳转到ValidationEntry */
+	if(absoluteOffset && SeekMedia(media, absoluteOffset, MEDIA_SET) == SUCCESS)
 	{
-		if(GetMediaAccess(media, &access, sizeof(ValidationEntry)) == MAP_SUCCESS)
+		if(GetMediaAccess(media, &access, sizeof(ValidationEntry)) == SUCCESS)
 		{
 			/* 检查ValidationEntry的识别标记 */
 			if(*access.begin == 1)
@@ -80,7 +92,7 @@ int JumpToISOValidationEntry(media_t media)
 
 				/* 检查ValidationEntry结尾标记 */
 				if(LD_UINT16(pcVE->EndofVE) == (uint16_t)0xAA55)
-					retVal = ISO_PROCESS_SUCCESS;
+					retVal = SUCCESS;
 			}
 		}
 	}
@@ -90,18 +102,19 @@ int JumpToISOValidationEntry(media_t media)
 
 int JumpToISOInitialEntry(media_t media)
 {
-	int retVal = ISO_PROCESS_FAILED;
+	int retVal = FAILED;
 
-	if(SeekMedia(media, sizeof(ValidationEntry), MEDIA_CUR) == MAP_SUCCESS)
+	/* 跳转到ValidationEntry后（InitialEntry的起始） */
+	if(SeekMedia(media, sizeof(ValidationEntry), MEDIA_CUR) == SUCCESS)
 	{
 		media_access access;
-		if(GetMediaAccess(media, &access, sizeof(InitialEntry)) == MAP_SUCCESS)
+		if(GetMediaAccess(media, &access, sizeof(InitialEntry)) == SUCCESS)
 		{
 			const InitialEntry *pcIE = (const InitialEntry *)access.begin;
 
 			/*! 检查启动标记 */
 			if(pcIE->BootIndicator == 0x88)
-				retVal = ISO_PROCESS_SUCCESS;
+				retVal = SUCCESS;
 		}
 	}
 
@@ -110,12 +123,13 @@ int JumpToISOInitialEntry(media_t media)
 
 int JumpToISOBootableImage(media_t media)
 {
-	int retVal = ISO_PROCESS_FAILED;
+	int retVal = FAILED;
 
 	media_access access;
-	uint32_t absoluteOffset;
+	uint32_t absoluteOffset = 0;//BootImage的绝对偏移量
 
-	if(GetMediaAccess(media, &access, sizeof(BootRecordVolDesc)) == MAP_SUCCESS)
+	/* 从InitialEntry中计算出BootImage的位置（绝对偏移量） */
+	if(GetMediaAccess(media, &access, sizeof(InitialEntry)) == SUCCESS)
 	{
 		const InitialEntry *pcIE = (const InitialEntry *)access.begin;
 
@@ -123,8 +137,9 @@ int JumpToISOBootableImage(media_t media)
 		absoluteOffset = offsetValue * SECTOR_SIZE/*offsetUnit*/;
 	}
 
-	if(SeekMedia(media, absoluteOffset, MEDIA_SET) == MAP_SUCCESS)
-		retVal = ISO_PROCESS_SUCCESS;
+	/* 跳转到BootImage */
+	if(absoluteOffset && SeekMedia(media, absoluteOffset, MEDIA_SET) == SUCCESS)
+		retVal = SUCCESS;
 
 	return retVal;
 }
@@ -140,7 +155,8 @@ const char *GetISOPlatformID(media_t media)
 
 	media_access access;
 
-	if(GetMediaAccess(media, &access, sizeof(ValidationEntry)) == MAP_SUCCESS)
+	/* 从ValidationEntry中得到平台ID */
+	if(GetMediaAccess(media, &access, sizeof(ValidationEntry)) == SUCCESS)
 	{
 		const ValidationEntry *pcVE = (const ValidationEntry *)access.begin;
 
@@ -165,7 +181,9 @@ const char *GetISOBootMediaType(media_t media)
 	};
 
 	media_access access;
-	if(GetMediaAccess(media, &access, sizeof(InitialEntry)) == MAP_SUCCESS)
+
+	/* 从InitialEntry中得到启动介质类型 */
+	if(GetMediaAccess(media, &access, sizeof(InitialEntry)) == SUCCESS)
 	{
 		const InitialEntry *pcIE = (const InitialEntry *)access.begin;
 

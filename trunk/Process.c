@@ -1,6 +1,7 @@
 #include <Windows.h>	/*!< 使用MAX_PATH宏 */
 #include <stdio.h>		/*!< 使用FILE */
 #include <assert.h>
+#include "ProjDef.h"
 #include "ColorPrint.h"
 #include "Process.h"
 #include "IMGProcess.h"
@@ -43,17 +44,17 @@ static const char *GetOutPath(const char *path, const char *extention)
 从img起始位置提取出img写入到selfPath路径
 \param imageEntry 位置在img起始的media_t
 \param selfPath img写入路径
-\return 成功返回PROCESS_SUCCESS；否则返回PROCESS_FAILED
+\return 成功返回SUCCESS；否则返回FAILED
 */
 static int WriteIMGToFile(media_t imageEntry, const char *path)
 {
-	int retVal = PROCESS_FAILED;
+	int retVal = FAILED;
 	
 	if(imageEntry && path)
 	{
 		media_access access;
 
-		if(GetMediaAccess(imageEntry, &access, sizeof(BPB)) == MAP_SUCCESS)
+		if(GetMediaAccess(imageEntry, &access, sizeof(BPB)) == SUCCESS)
 		{
 			const BPB *pcBPB = (const BPB *)access.begin;
 			size_t totalSize = 0;//IMG大小
@@ -74,8 +75,8 @@ static int WriteIMGToFile(media_t imageEntry, const char *path)
 			{
 				FILE *outfp = fopen(path, "wb");
 
-				if(DumpMedia(imageEntry, outfp, totalSize) == MAP_SUCCESS)
-					retVal = PROCESS_SUCCESS;
+				if(DumpMedia(imageEntry, outfp, totalSize) == SUCCESS)
+					retVal = SUCCESS;
 
 				fclose(outfp);
 			}
@@ -88,27 +89,27 @@ static int WriteIMGToFile(media_t imageEntry, const char *path)
 /*!
 从ISO文件头部跳转到启动IMG头部，内部自动处理Acronis启动光盘
 \param media ISO文件的media_t
-\return 成功返回PROCESS_SUCCESS；否则返回PROCESS_FAILED
+\return 成功返回SUCCESS；否则返回FAILED
 */
 static int JumpToISOBootEntry(media_t media)
 {
-	int retVal = PROCESS_FAILED;
+	int retVal = FAILED;
 
 	if(media)
 	{
 		/*连续跳转指针*/
-		if(JumpToISOPrimVolDesc(media) == ISO_PROCESS_SUCCESS &&
-			JumpToISOBootRecordVolDesc(media) == ISO_PROCESS_SUCCESS &&
-			JumpToISOValidationEntry(media) == ISO_PROCESS_SUCCESS &&
-			JumpToISOInitialEntry(media) == ISO_PROCESS_SUCCESS &&
-			JumpToISOBootableImage(media) == ISO_PROCESS_SUCCESS)
+		if(JumpToISOPrimVolDesc(media) == SUCCESS &&
+			JumpToISOBootRecordVolDesc(media) == SUCCESS &&
+			JumpToISOValidationEntry(media) == SUCCESS &&
+			JumpToISOInitialEntry(media) == SUCCESS &&
+			JumpToISOBootableImage(media) == SUCCESS)
 		{
 
 			/*尝试从ISO的BootImage入口跳转到IMG入口*/
-			if(CheckIMGIdentifier(media) != IMAGE_PROCESS_SUCCESS)
+			if(CheckIMGIdentifier(media) != SUCCESS)
 			{
 				media_access access;
-				if(GetMediaAccess(media, &access, 512) == MAP_SUCCESS)
+				if(GetMediaAccess(media, &access, 512) == SUCCESS)
 				{
 					/* Acronis光盘特殊跳转 */
 					uint32_t offsetValue = LD_UINT8(access.begin + 244);
@@ -122,11 +123,11 @@ static int JumpToISOBootEntry(media_t media)
 		/* 检查入口是否为FAT格式 */
 		{
 			media_access access;
-			if(GetMediaAccess(media, &access, 512) == MAP_SUCCESS)
+			if(GetMediaAccess(media, &access, 512) == SUCCESS)
 			{
-				if(CheckIMGIdentifier(media) == IMAGE_PROCESS_SUCCESS &&
-					CheckIMGFileSystem(media) == IMAGE_PROCESS_SUCCESS)
-					retVal = PROCESS_SUCCESS;//找到IMG入口
+				if(CheckIMGIdentifier(media) == SUCCESS &&
+					CheckIMGFileSystem(media) == SUCCESS)
+					retVal = SUCCESS;//找到IMG入口
 			}
 		}
 	}
@@ -140,9 +141,9 @@ MEDIA_TYPE GetInputType(media_t media)
 
 	if(media)
 	{
-		if(CheckIMGIdentifier(media) == IMAGE_PROCESS_SUCCESS)
+		if(CheckIMGIdentifier(media) == SUCCESS)
 			retVal = IMG;//是IMG格式
-		else if(JumpToISOPrimVolDesc(media) == ISO_PROCESS_SUCCESS)
+		else if(JumpToISOPrimVolDesc(media) == SUCCESS)
 		{
 			(void)RewindMedia(media);
 			retVal = ISO;//是ISO格式
@@ -154,7 +155,7 @@ MEDIA_TYPE GetInputType(media_t media)
 
 int DumpIMGFromISO(media_t media, const char *path)
 {
-	int retVal = PROCESS_FAILED;
+	int retVal = FAILED;
 
 	const char *imgPath = GetOutPath(path, ".img");
 
@@ -166,7 +167,7 @@ int DumpIMGFromISO(media_t media, const char *path)
 		do
 		{
 			/* 跳转到IMG头部 */
-			if(JumpToISOBootEntry(media) == PROCESS_SUCCESS)
+			if(JumpToISOBootEntry(media) == SUCCESS)
 			{
 				ColorPrintf(LIME, "成功\n");
 				ColorPrintf(WHITE, "%s正在写入IMG文件\t\t\t\t", leftMargin);
@@ -178,7 +179,7 @@ int DumpIMGFromISO(media_t media, const char *path)
 			}
 
 			/* 把IMG写入文件 */
-			if(WriteIMGToFile(media, imgPath) == PROCESS_SUCCESS)
+			if(WriteIMGToFile(media, imgPath) == SUCCESS)
 			{
 				ColorPrintf(LIME, "成功\n");
 				ColorPrintf(WHITE, "\n处理完毕\n");
@@ -189,7 +190,7 @@ int DumpIMGFromISO(media_t media, const char *path)
 				break;
 			}
 
-			retVal = PROCESS_SUCCESS;//写入成功！
+			retVal = SUCCESS;//写入成功！
 		}while(0);
 	}
 
@@ -198,7 +199,7 @@ int DumpIMGFromISO(media_t media, const char *path)
 
 int DisplayISOInfo(media_t media)
 {
-	int retVal = PROCESS_FAILED;
+	int retVal = FAILED;
 
 	if(media)
 	{
@@ -207,9 +208,9 @@ int DisplayISOInfo(media_t media)
 		ColorPrintf(WHITE, "检测到ISO文件信息如下：\n\n");
 
 		/*! 输出PrimVolDesc中信息 */
-		if(JumpToISOPrimVolDesc(media) == ISO_PROCESS_SUCCESS)
+		if(JumpToISOPrimVolDesc(media) == SUCCESS)
 		{
-			if(GetMediaAccess(media, &access, sizeof(PrimVolDesc)) == MAP_SUCCESS)
+			if(GetMediaAccess(media, &access, sizeof(PrimVolDesc)) == SUCCESS)
 			{
 				const PrimVolDesc *pcPVD = (const PrimVolDesc *)access.begin;
 				const ISO9660TimeStr *createDate = (const ISO9660TimeStr *)(pcPVD->VolCreationDate);
@@ -244,20 +245,20 @@ int DisplayISOInfo(media_t media)
 		}
 
 		/*! 输出BootRecordVolDesc中信息 */
-		if(JumpToISOBootRecordVolDesc(media) == ISO_PROCESS_SUCCESS)
+		if(JumpToISOBootRecordVolDesc(media) == SUCCESS)
 		{
 			ColorPrintf(YELLOW, "%s启动规范：\t\t\t\t", leftMargin);
 			ColorPrintf(AQUA, "EL TORITO\n");
 
 			/*! 输出ValidationEntry中信息 */
-			if(JumpToISOValidationEntry(media) == ISO_PROCESS_SUCCESS)
+			if(JumpToISOValidationEntry(media) == SUCCESS)
 			{
 				ColorPrintf(WHITE, "%s支持平台：\t\t\t\t", leftMargin);
 				ColorPrintf(LIME, "%s\n", GetISOPlatformID(media));
 			}
 
 			/*! 输出InitialEntry中信息 */
-			if(JumpToISOInitialEntry(media) == ISO_PROCESS_SUCCESS)
+			if(JumpToISOInitialEntry(media) == SUCCESS)
 			{
 				ColorPrintf(WHITE, "%s光盘类型：\t\t\t\t", leftMargin);
 				ColorPrintf(LIME, "可启动光盘\n");
@@ -269,7 +270,7 @@ int DisplayISOInfo(media_t media)
 
 		printf("\n");
 
-		retVal = PROCESS_SUCCESS;
+		retVal = SUCCESS;
 	}
 	return retVal;
 }
@@ -283,11 +284,11 @@ int DisplayIMGInfo(media_t media)
 		"FAT32"
 	};
 
-	int retVal = PROCESS_FAILED;
+	int retVal = FAILED;
 
 	media_access access;
 	
-	if(GetMediaAccess(media, &access, sizeof(BPB)) == MAP_SUCCESS)
+	if(GetMediaAccess(media, &access, sizeof(BPB)) == SUCCESS)
 	{
 		const BPB *pcBPB = (const BPB *)access.begin;
 		const char *fsType = NULL;

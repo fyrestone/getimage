@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <io.h>			/*!< _access，检测文件存在 */
 #include <assert.h>
+#include "ProjDef.h"
 #include "MapFile.h"
 #include "SafeMemory.h"
 
@@ -57,7 +58,7 @@ static int SplitMapView(T media, int64_t offset)
 {
 #define ALIGN_COST (offset & (media->allocGran - 1)) /*!< 对齐消耗的大小 */
 
-	int retVal = MAP_FAILED;
+	int retVal = FAILED;
 
 	LARGE_INTEGER alignedOffset;
 
@@ -71,7 +72,7 @@ static int SplitMapView(T media, int64_t offset)
 		media->currPos.QuadPart = offset;
 		media->accessSize = media->actualViewSize - ALIGN_COST;
 
-		return MAP_SUCCESS;
+		return SUCCESS;
 	}
 	else//如果对齐后偏移量与当前视图位置不同，或者还未映射
 	{
@@ -113,7 +114,7 @@ static int SplitMapView(T media, int64_t offset)
 				media->currPos.QuadPart = offset;
 				media->accessSize = actualViewSize - ALIGN_COST;
 
-				retVal = MAP_SUCCESS;
+				retVal = SUCCESS;
 			}
 		}
 	}
@@ -125,7 +126,7 @@ static int SplitMapView(T media, int64_t offset)
 
 static int FullMapView(T media, uint32_t offset)
 {
-	int retVal = MAP_FAILED;
+	int retVal = FAILED;
 
 	if(media->pView)//如果已经映射成功
 	{
@@ -136,7 +137,7 @@ static int FullMapView(T media, uint32_t offset)
 		media->currPos.QuadPart = offset;
 		media->accessSize = media->actualViewSize - offset;
 
-		retVal = MAP_SUCCESS;
+		retVal = SUCCESS;
 	}
 	else//如果还未映射，则进行完全映射
 	{
@@ -155,7 +156,7 @@ static int FullMapView(T media, uint32_t offset)
 			media->accessSize = media->size.LowPart;
 			media->actualViewSize = media->size.LowPart;
 
-			retVal = MAP_SUCCESS;
+			retVal = SUCCESS;
 		}
 	}	
 
@@ -164,7 +165,7 @@ static int FullMapView(T media, uint32_t offset)
 
 static int SeekMapMedia(T media, int64_t offset, int base)
 {
-	int retVal = MAP_FAILED;
+	int retVal = FAILED;
 
 	if(media)
 	{
@@ -196,7 +197,7 @@ static int SeekMapMedia(T media, int64_t offset, int base)
 
 static int SeekRawMedia(T media, int64_t offset, int base)
 {
-	int retVal = MAP_FAILED;
+	int retVal = FAILED;
 
 	if(media && offset)
 	{
@@ -251,7 +252,7 @@ static T OpenMapMedia(T media, const char *path, uint32_t viewSize)
 					media->pFile = NULL;
 					media->pView = NULL;
 
-					if(RewindMedia(media) == MAP_SUCCESS)
+					if(RewindMedia(media) == SUCCESS)
 						retVal = media;
 				}
 			}
@@ -268,7 +269,7 @@ int RewindMedia(T media)
 
 int SeekMedia(T media, int64_t offset, int base)
 {
-	int retVal = MAP_FAILED;
+	int retVal = FAILED;
 
 	if(media && (base == MEDIA_SET || base == MEDIA_CUR))
 	{
@@ -320,7 +321,7 @@ void CloseMedia(T *media)
 
 int GetMediaAccess(T media, media_access *access, uint32_t len)
 {
-	int retVal = MAP_FAILED;
+	int retVal = FAILED;
 
 	if(media && access && len)
 	{
@@ -330,7 +331,7 @@ int GetMediaAccess(T media, media_access *access, uint32_t len)
 			{
 				access->begin = (unsigned char *)media->pView + media->viewSize - media->accessSize;
 				access->len = len;
-				retVal = MAP_SUCCESS;
+				retVal = SUCCESS;
 			}
 			else
 			{
@@ -349,7 +350,7 @@ int GetMediaAccess(T media, media_access *access, uint32_t len)
 
 int DumpMedia(T media, FILE *fp, int64_t size)
 {
-	int retVal = MAP_FAILED;
+	int retVal = FAILED;
 
 	if(media && fp && size)
 	{
@@ -367,7 +368,8 @@ int DumpMedia(T media, FILE *fp, int64_t size)
 
 			while(size > media->accessSize)
 			{
-				const unsigned char *writePtr = (const unsigned char *)media->pView + media->viewSize - media->accessSize;
+				const unsigned char *writePtr = 
+					(const unsigned char *)media->pView + media->viewSize - media->accessSize;
 				uint32_t writeLen;//写入长度
 
 				if(fwrite(writePtr, media->accessSize, 1, fp) != 1)
@@ -379,7 +381,7 @@ int DumpMedia(T media, FILE *fp, int64_t size)
 				writeLen = media->accessSize;//保存写入的长度
 				
 				/* 向后跳转，会修改media->accessSize */
-				if(SeekMedia(media, media->accessSize, MEDIA_CUR) != MAP_SUCCESS)
+				if(SeekMedia(media, media->accessSize, MEDIA_CUR) != SUCCESS)
 				{
 					hasError = 1;
 					break;
@@ -391,7 +393,7 @@ int DumpMedia(T media, FILE *fp, int64_t size)
 			if(!hasError)
 			{
 				if(size && fwrite(media->pView, (size_t)size, 1, fp) == 1)
-					retVal = MAP_SUCCESS;
+					retVal = SUCCESS;
 			}
 		}
 		else if(media->pFile)
@@ -400,8 +402,8 @@ int DumpMedia(T media, FILE *fp, int64_t size)
 			//TODO:
 		}
 
-		if(SeekMedia(media, currPos.QuadPart, MEDIA_SET) != MAP_SUCCESS)
-			retVal = MAP_FAILED;
+		if(SeekMedia(media, currPos.QuadPart, MEDIA_SET) != SUCCESS)
+			retVal = FAILED;
 
 #ifdef _DEBUG
 		assert(!memcmp(media_bak, media, sizeof(*media)));
@@ -494,18 +496,18 @@ void MapTestUnit(const char *path)
 				ColorPrintf(WHITE, "正在测试跳转\t\t\t\t");
 				assert(NEW(backupMedia));																				/*!< 创建backupMedia */
 				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< 备份media到backupMedia */
-				assert(SeekMedia(testMedia, testMedia->accessSize, MEDIA_SET) != MAP_SUCCESS);							/*!< 测试跳转到可访问范围边界，应当失败 */
+				assert(SeekMedia(testMedia, testMedia->accessSize, MEDIA_SET) != SUCCESS);							/*!< 测试跳转到可访问范围边界，应当失败 */
 				assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));											/*!< 跳转失败时，media值应当不变 */
-				assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == MAP_SUCCESS);						/*!< 测试跳转到可访问范围边界-1，应当成功 */
-				assert(RewindMedia(testMedia) == MAP_SUCCESS);															/*!< 重置media */
+				assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);						/*!< 测试跳转到可访问范围边界-1，应当成功 */
+				assert(RewindMedia(testMedia) == SUCCESS);															/*!< 重置media */
 				assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));											/*!< 检查重置后media应当与原始media相同 */
-				assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == MAP_SUCCESS);						/*!< 测试跳转到可访问范围边界-1，应当成功 */
-				assert(SeekMedia(testMedia, -(int64_t)(testMedia->actualViewSize - 1), MEDIA_CUR) == MAP_SUCCESS);		/*!< 从当前向后跳回同样长度 */
+				assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);						/*!< 测试跳转到可访问范围边界-1，应当成功 */
+				assert(SeekMedia(testMedia, -(int64_t)(testMedia->actualViewSize - 1), MEDIA_CUR) == SUCCESS);		/*!< 从当前向后跳回同样长度 */
 				assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));											/*!< 检查重置后media应当与原始media相同 */
-				assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == MAP_SUCCESS);						/*!< 测试跳转到可访问范围边界-1，应当成功 */
+				assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);						/*!< 测试跳转到可访问范围边界-1，应当成功 */
 				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< 备份当前media到backupMedia */
-				assert(SeekMedia(testMedia, -(int64_t)(testMedia->actualViewSize - 1)/2, MEDIA_CUR) == MAP_SUCCESS);	/*!< 向后跳回（可访问范围边界-1）/2 */
-				assert(SeekMedia(testMedia, (int64_t)(testMedia->actualViewSize - 1)/2, MEDIA_CUR) == MAP_SUCCESS);		/*!< 向前跳回（可访问范围边界-1）/2 */
+				assert(SeekMedia(testMedia, -(int64_t)(testMedia->actualViewSize - 1)/2, MEDIA_CUR) == SUCCESS);	/*!< 向后跳回（可访问范围边界-1）/2 */
+				assert(SeekMedia(testMedia, (int64_t)(testMedia->actualViewSize - 1)/2, MEDIA_CUR) == SUCCESS);		/*!< 向前跳回（可访问范围边界-1）/2 */
 				assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));											/*!< 检查跳回后media应当与上次备份的backupMedia相同 */
 				ColorPrintf(GREEN, "通过\n");
 
@@ -550,27 +552,27 @@ void MapTestUnit(const char *path)
 				ColorPrintf(WHITE, "正在测试跳转\t\t\t\t");
 				assert(NEW(backupMedia));																				/*!< 创建backupMedia */
 				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< 备份media到backupMedia */
-				assert(SeekMedia(testMedia, testMedia->allocGran - 1, MEDIA_SET) == MAP_SUCCESS);						/*!< 局部跳转，应该不会切换映射视图 */
+				assert(SeekMedia(testMedia, testMedia->allocGran - 1, MEDIA_SET) == SUCCESS);						/*!< 局部跳转，应该不会切换映射视图 */
 				assert(testMedia->pView == backupMedia->pView);															/*!< 检查局部跳转后视图仍然是原来视图 */
 				assert(testMedia->viewPos.QuadPart == backupMedia->viewPos.QuadPart);									/*!< 检查局部跳转后视图位置仍然是原来位置 */
 				assert(testMedia->currPos.QuadPart != testMedia->viewPos.QuadPart);										/*!< 检查局部跳转后当前位置应当与视图位置不同 */
-				assert(RewindMedia(testMedia) == MAP_SUCCESS);															/*!< 重置media */
+				assert(RewindMedia(testMedia) == SUCCESS);															/*!< 重置media */
 				assert(!memcmp(testMedia, backupMedia, sizeof(*testMedia)));											/*!< 检查重置后的media与以前备份的相同 */
-				assert(SeekMedia(testMedia, testMedia->allocGran, MEDIA_SET) == MAP_SUCCESS);							/*!< 跳转一个内存粒度，应该刚好切换视图 */
+				assert(SeekMedia(testMedia, testMedia->allocGran, MEDIA_SET) == SUCCESS);							/*!< 跳转一个内存粒度，应该刚好切换视图 */
 				assert(testMedia->pView != backupMedia->pView);															/*!< 检查跳转后视图是否已切换 */
 				assert(testMedia->currPos.QuadPart == testMedia->viewPos.QuadPart);										/*!< 由于跳转位置刚好切换视图，跳转后当前位置应当与视图位置相同 */
 				assert(testMedia->accessSize == testMedia->actualViewSize);												/*!< 由于跳转位置刚好切换视图，跳转后可访问大小正好是实际视图大小 */
 				assert(testMedia->viewSize == backupMedia->viewSize);													/*!< 跳转后视图大小应当不变 */
 				assert(testMedia->actualViewSize < backupMedia->actualViewSize);										/*!< 由于跳转位置距离文件末尾长度小于视图大小，跳转后实际视图大小应当小于视图大小 */
 				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< 保存跳转后的media到backupMedia */
-				assert(SeekMedia(testMedia, -1, MEDIA_CUR) == MAP_SUCCESS);												/*!< 向后跳转1，应该切换视图 */
+				assert(SeekMedia(testMedia, -1, MEDIA_CUR) == SUCCESS);												/*!< 向后跳转1，应该切换视图 */
 				assert(testMedia->pView != backupMedia->pView);															/*!< 检查跳转后视图是否已切换 */
 				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< 保存跳转后的media到backupMedia */
-				assert(SeekMedia(testMedia, -(int64_t)(testMedia->allocGran - 1), MEDIA_CUR) == MAP_SUCCESS);			/*!< 这时从当前位置向后跳转一个内存粒度 */
+				assert(SeekMedia(testMedia, -(int64_t)(testMedia->allocGran - 1), MEDIA_CUR) == SUCCESS);			/*!< 这时从当前位置向后跳转一个内存粒度 */
 				assert(testMedia->viewPos.QuadPart == 0);																/*!< 这时相当于RewindMedia后，视图位置应当为0 */
 				assert(testMedia->currPos.QuadPart == 0);																/*!< 这时相当于RewindMedia后，当前位置应当为0 */
 				assert(testMedia->actualViewSize == testMedia->viewSize);												/*!< 实际视图大小应当与视图大小相同 */
-				assert(SeekMedia(testMedia, testMedia->allocGran - 1, MEDIA_SET) == MAP_SUCCESS);						/*!< 再向前跳回一个内存粒度 */
+				assert(SeekMedia(testMedia, testMedia->allocGran - 1, MEDIA_SET) == SUCCESS);						/*!< 再向前跳回一个内存粒度 */
 				assert(!memcmp(testMedia, backupMedia, sizeof(*testMedia)));											/*!< 检查media与上次备份的backupMeida相同 */
 				ColorPrintf(GREEN, "通过\n");
 

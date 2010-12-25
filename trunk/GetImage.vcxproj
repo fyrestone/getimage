@@ -112,6 +112,7 @@
     <ClInclude Include="ISOProcess.h" />
     <ClInclude Include="MapFile.h" />
     <ClInclude Include="Process.h" />
+    <ClInclude Include="ProjDef.h" />
     <ClInclude Include="SafeMemory.h" />
   </ItemGroup>
   <ItemGroup>

@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>					/*!< _getch */
+#include "ProjDef.h"
 #include "ArgParser\carg_parser.h"
 #include "SafeMemory.h"
 #include "ColorPrint.h"
 #include "Process.h"
-
-#define FAIL -1
-#define SUCCESS 0
 
 #define PROGRAM_NAME "GETIMAGE"
 #define PROGRAM_YEAR "2010"
@@ -40,15 +38,15 @@ void ShowTitle()
 
 void ShowHelp()
 {
-	printf("用法：\tgetimage [选项] 文件或设备\n");
+	printf("用法：\tgetimage [-f|-d] <文件或设备>\n");
 	printf("选项：\n");
 	printf("\t-h, --help\t\t显示本帮助\n");
 	printf("\t-v, --version\t\t显示本程序名及版本号\n");
 	printf("\t-f, --file\t\t打开一个文件\n");
 	printf("\t-d, --device\t\t打开一个设备\n");
-	printf("特殊：\n\t当无选项时，默认将输入的第一个参数作为文件处理："
-		"若为ISO，则自动提取其中的启动磁盘映像到ISO文件所在目录，生成的IMG与ISO同名；"
-		"若为IMG，则显示其规格信息；否则显示错误信息。\n");
+	printf("默认：\n当无选项时将输入的第一个参数作为文件处理：\n"
+		"若为ISO，则自动提取其中的启动磁盘映像到ISO文件所在目录，生成的IMG与ISO同名；\n"
+		"若为IMG，则显示其规格信息\n");
 }
 
 void ShowError(const char *msg, const char *selfPath)
@@ -67,7 +65,7 @@ void ShowVersion()
 
 int DefaultOption(int argc, char **argv)
 {
-	int retVal = FAIL;
+	int retVal = FAILED;
 
 	media_t media;
 
@@ -84,13 +82,11 @@ int DefaultOption(int argc, char **argv)
 			ColorPrintf(WHITE, "，默认作为Acronis启动ISO处理：\n\n");
 			DisplayISOInfo(media);
 			retVal = DumpIMGFromISO(media, argv[1]);
-			//TestISO(&mapFile);//ISOProcess测试用例
 			break;
 		case IMG:
 			ColorPrintf(LIME, "%s", "IMG");
 			ColorPrintf(WHITE, "，默认显示IMG磁盘映像规格：\n\n");
 			retVal = DisplayIMGInfo(media);
-			//TestIMG(&mapFile);
 			break;
 		default:
 			ColorPrintf(RED, "%s\n", "未知类型");
