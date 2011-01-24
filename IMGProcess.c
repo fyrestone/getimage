@@ -52,19 +52,19 @@ FS_TYPE GetIMGType(const BPB *pcBPB)
 {
 	FS_TYPE retVal = FAT_ERR;
 
-	/*!
+	/*
 		FAT的总扇区数（TotalSec）由卷保留扇区数（RsvdSecCnt）、FAT表所占扇区数（NumFats * FatSz）、
 		根目录项所占扇区数（RootDirSec，由于FAT32的根目录项等同于普通文件，FAT32的RootDirSectors为0）、
-		数据所占扇区数（DataSec）四部分依次构成。其中保留扇区数包含了FAT头部（BPB）
+		数据所占扇区数（DataSec）四部分依次构成。其中保留扇区数包含了FAT头部（BPB）。
 	*/
 	if(pcBPB)
 	{
-		uint32_t totalSec;		/*!< 总扇区数 */
-		uint32_t rsvdSec;		/*!< 保留扇区数（包含FAT头的512字节） */
-		uint32_t fatSec;		/*!< FAT文件分配表所占扇区数 */
-		uint32_t rootDirSec;	/*!< 根目录所占扇区数 */
-		uint32_t dataSec;		/*!< 数据所占扇区数（包括不足一簇的扇区） */
-		uint32_t dataClusters;	/*!< 数据所占簇数 */
+		uint32_t totalSec;		/* 总扇区数 */
+		uint32_t rsvdSec;		/* 保留扇区数（包含FAT头的512字节） */
+		uint32_t fatSec;		/* FAT文件分配表所占扇区数 */
+		uint32_t rootDirSec;	/* 根目录所占扇区数 */
+		uint32_t dataSec;		/* 数据所占扇区数（包括不足一簇的扇区） */
+		uint32_t dataClusters;	/* 数据所占簇数 */
 
 		/* 计算totalSec */
 		if(LD_UINT16(pcBPB->Common.BPB_TotSec16))

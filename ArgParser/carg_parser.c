@@ -175,7 +175,8 @@ static char parse_short_option( struct Arg_parser * const ap,
 
 				if( index < 0 )
 				{
-					add_error( ap, "无效选项 -- " ); add_error( ap, code_str );
+					add_error( ap, "选项 “-" ); add_error( ap, code_str );
+					add_error( ap, "” 无效" );
 					return 1;
 				}
 
@@ -190,8 +191,9 @@ static char parse_short_option( struct Arg_parser * const ap,
 				{
 					if( !arg || !arg[0] )
 					{
-						add_error( ap, "选项需要参数 -- " );
+						add_error( ap, "选项 “-" );
 						add_error( ap, code_str );
+						add_error( ap, "” 需要参数" );
 						return 1;
 					}
 					++*argindp; cind = 0;

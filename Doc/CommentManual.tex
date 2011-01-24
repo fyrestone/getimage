@@ -1,0 +1,209 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{xeCJK}
+\usepackage[pdfstartview=FitH, CJKbookmarks=true, bookmarksnumbered=true, bookmarksopen=true]{hyperref}
+\usepackage[top=1.2in,bottom=1.2in,left=1.2in,right=1in]{geometry}
+\usepackage{titlesec}
+\usepackage{listings}
+\usepackage{xcolor} % 使用颜色宏包
+
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt minus 0.1pt
+
+\punctstyle{quanjiao}
+
+\setmainfont{Times New Roman}	% 缺省英文字体
+\setsansfont{Arial}				% 缺省英文非衬线字体
+\setmonofont{DejaVu Sans Mono}	% 缺省英文等宽字体
+
+\setCJKmainfont[BoldFont=黑体,ItalicFont=华文新魏]{华文中宋}	% 缺省中文字体
+\setCJKsansfont[BoldFont=黑体]{华文细黑}		% 缺省中文非衬线字体
+\setCJKmonofont{微软雅黑}									% 缺省中文等宽字体，中文字体均等宽。
+
+\lstset{
+basicstyle=\small\ttfamily,						%基础风格
+tabsize=4,										%TAB键宽度
+keywordstyle=\color{blue!50!black}\bfseries,	%关键词风格
+commentstyle=\color{green!50!black},			%注释风格
+frame=shadowbox,								%外框风格
+rulesepcolor=\color{white!50!black},			%阴影颜色
+xleftmargin=2em,								%左间距
+xrightmargin=2em,								%右间距
+escapeinside=``
+}
+
+\hypersetup{  
+  pdfinfo={  
+    Title={C语言注释规范},  
+    Subject={编写符合doxygen标准的C语言注释},  
+    Author={刘宝},  
+  }  
+}
+
+\begin{document}
+\title{\bf C语言注释规范\\[10pt]\normalsize 版本 1.0}
+\author{刘宝}
+\date{\today}
+\maketitle
+本规范旨在对使用C语言编写的Doxygen注释统一注释风格。
+\section{准备工作}
+\subsection{中文支持}
+\begin{center}
+\begin{tabular}{l @{ = } l}
+\textbf{DOXYFILE\_ENCODING} & \textbf{GB2312}\\
+\textbf{INPUT\_ENCODING} & \textbf{GB2312}\\
+\textbf{OUTPUT\_LANGUAGE} & \textbf{Chinese}
+\end{tabular}
+\end{center}
+\subsection{C语言支持}
+\begin{center}
+\begin{tabular}{l @{ = } l l}
+\textbf{OPTIMIZE\_OUTPUT\_FOR\_C} & \textbf{TRUE} & \#对C语言优化\\
+\textbf{TYPEDEF\_HIDES\_STRUCT} & \textbf{TRUE} & \# struct/union/enum 使用typedef的名字\\
+\textbf{HIDE\_SCOPE\_NAMES} & \textbf{TRUE} & \#隐藏class和namespace作用域名\\
+\textbf{TAB\_SIZE} & \textbf{4} & \#制表符占4个空格
+\end{tabular}
+\end{center}
+\subsection{额外设置}
+根据需要选择相应设置：\par
+\begin{center}
+\begin{tabular}{l @{ = } l l}
+\textbf{SOURCE\_BROWSER} & \textbf{YES} & \#自动加入源码\\
+\textbf{INLINE\_SOURCES} & \textbf{YES} & \#在函数文档中嵌入对应源码\\
+\textbf{REFERENCES\_LINK\_SOURCE} & \textbf{NO} & \#把符号链接到文档\\
+\textbf{REFERENCES\_LINK\_SOURCE} & \textbf{YES} & \#把符号链接到源码
+\end{tabular}
+\end{center}
+\section{文件注释}
+\subsection{样例}
+\begin{lstlisting}[language={[ANSI]C}]
+/*!
+\file IMGProcess.h
+\author LiuBao
+\version 1.0
+\date 2010/12/25
+\brief The brief file comment
+\details More details about this file, may be multi-line.
+*/
+\end{lstlisting}
+\subsection{说明}
+\begin{itemize}
+\item “{$\backslash$file}”后的文件名需与当前文件名一致
+\end{itemize}
+\section{结构体注释}
+\subsection{简洁样例}
+\begin{lstlisting}[language={[ANSI]C}, morekeywords={uint8_t}]
+typedef struct _PrimVolDesc			///  The brief struct comment
+{
+	uint8_t PrimaryIndicator;		///< The brief member comment
+	uint8_t ISO9660Identifier[5];	///< The brief member comment
+}PrimVolDesc;
+\end{lstlisting}
+\subsection{详细样例}
+\begin{lstlisting}[language={[ANSI]C}, morekeywords={uint8_t}]
+/*! More details about this struct, may be multi-line. */
+typedef struct _PrimVolDesc			///  The brief struct comment
+{
+	uint8_t PrimaryIndicator;		///< The brief member comment
+	
+	/*! More details about this member, may be multi-line. */
+	uint8_t ISO9660Identifier[5];	///< The brief member comment
+}PrimVolDesc;
+\end{lstlisting}
+\subsection{说明}
+\begin{itemize}
+\item “{///}”与注释间留有2个空格
+\item “{///<}”与注释间留有1个空格
+\item 结构体成员的详细注释写在该成员上面
+\item 结构体成员的详细注释与上一成员间留1个空行
+\item 推荐结构体使用typedef类型定义
+\item 推荐使用简洁的结构体注释
+\end{itemize}
+\section{枚举注释}
+\subsection{样例}
+\begin{lstlisting}[language={[ANSI]C}]
+typedef enum _COLOR	///  The brief enum comment
+{
+	BLACK,			///< The brief member comment
+	NAVY,			///< The brief member comment
+}COLOR;
+\end{lstlisting}
+\subsection{说明}
+\begin{itemize}
+\item 与结构体的简洁注释相同
+\end{itemize}
+\section{宏注释}
+\subsection{简洁样例}
+\begin{lstlisting}[language={[ANSI]C}]
+#define GarbageByte 0xCC	///< The brief macro comment
+#define EndByte 0xE1		///< The brief macro comment
+
+/// This macro is too long, so comment here briefly!
+#define MALLOC(size) Mem_alloc(size, __FILE__, __LINE__)
+\end{lstlisting}
+\subsection{详细样例}
+\begin{lstlisting}[language={[ANSI]C}]
+/*!
+The detail macro comment, may be multi-line.
+\param a The brief parameter comment
+\param b The brief parameter comment
+\return The brief return value comment
+*/
+#define MAX(a, b) ((a) > (b)) ? (a) : (b)
+\end{lstlisting}
+\subsection{说明}
+\begin{itemize}
+\item 尽量少写宏函数，可以使用内联函数代替
+\item 推荐使用简洁的宏注释
+\end{itemize}
+\section{函数注释}
+\subsection{简洁样例}
+\begin{lstlisting}[language={[ANSI]C}]
+/*! The detail function comment, may be multi-line. */
+void PrintAllColor();
+\end{lstlisting}
+\subsection{详细样例}
+\begin{lstlisting}[language={[ANSI]C}, morekeywords={media_t}]
+/*!
+The detail function comment, may be multi-line.
+\param media The brief parameter comment
+\return The brief return value comment
+*/
+int CheckIMGFileSystem(media_t media);
+\end{lstlisting}
+\subsection{说明}
+\begin{itemize}
+\item 参数简述和返回值简述不写句号
+\item 无参无返回值的简单函数使用简洁注释
+\item 头文件有声明的函数注释在头文件中；否则注释在代码文件中
+\end{itemize}
+\section{其它注释}
+代码中其余注释一律使用普通的单行注释“{//}”和多行注释“{/*}”“{*/}”。
+\section{附录}
+\subsection{注释换行}
+Doxygen会忽略你注释中的换行符，将多行注释连接成一个连续行并使用空格隔开。如果你希望保留两行注释之间的换行，需要在该行末加入“{$\backslash$n}”。
+\subsection{常用命令}
+\begin{center}
+\begin{tabular}{l c l}
+\centering\textbf{命令} & \textbf{生成字段名} & \multicolumn{1}{c}{\textbf{说明}}\\
+\hline
+$\backslash$attention & 注意 &\\
+$\backslash$author & 作者 &\\
+$\backslash$bug & 缺陷 & 链接到所有缺陷汇总的缺陷列表\\
+$\backslash$brief & & 简要注释\\
+$\backslash$code & & 代码块开始，与“{$\backslash$endcode}”成对使用\\
+$\backslash$details & & 详细注释\\
+$\backslash$date & 日期 &\\
+$\backslash$endcode & & 代码块结束，与“{$\backslash$code}”成对使用\\
+$\backslash$file & <文件名>文件参考 & 用在文件注释中\\
+$\backslash$param & 参数 & 用在函数注释中\\
+$\backslash$return & 返回 & 用在函数注释中\\
+$\backslash$todo & TODO & 链接到所有TODO汇总的TODO列表\\
+$\backslash$version & 版本 &\\
+$\backslash$warning & 警告 &
+\end{tabular}
+\end{center}
+\end{document}
