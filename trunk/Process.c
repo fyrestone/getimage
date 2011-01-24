@@ -1,5 +1,12 @@
-#include <Windows.h>	/*!< 使用MAX_PATH宏 */
-#include <stdio.h>		/*!< 使用FILE */
+/*!
+\file Process.c
+\author LiuBao
+\version 1.0
+\date 2011/1/23
+\brief 处理函数实现
+*/
+#include <Windows.h>	/* 使用MAX_PATH宏 */
+#include <stdio.h>		/* 使用FILE */
 #include <assert.h>
 #include "ProjDef.h"
 #include "ColorPrint.h"
@@ -7,8 +14,7 @@
 #include "IMGProcess.h"
 #include "ISOProcess.h"
 
-static char PATH[MAX_PATH];						/*!< GetOutPath输出缓冲区，每次调用都会覆盖 */
-static const char * const leftMargin = "    ";
+static char PATH[MAX_PATH];						/* GetOutPath输出缓冲区，每次调用都会覆盖 */
 
 /*!
 获得输出路径，由iso路径获得提取出的img的写入路径（不可重入）
@@ -20,8 +26,9 @@ static const char *GetOutPath(const char *path, const char *extention)
 {
 	const char *retVal = NULL;
 
-	const char *endOfSelfPath = path + strlen(path);
+	const char *endOfSelfPath = path + strlen(path);//初始化指向路径字串结尾符
 
+	/* 找到扩展名左边的“.” */
 	while(*endOfSelfPath != '.' && endOfSelfPath != path)
 		--endOfSelfPath;
 
@@ -29,9 +36,11 @@ static const char *GetOutPath(const char *path, const char *extention)
 	{
 		char *target = PATH;
 
+		/* 拷贝ISO路径的扩展名前部分 */
 		while(path != endOfSelfPath)
 			*target++ = *path++;
 	
+		/* 写入扩展名 */
 		while((*target++  = *extention++));
 		
 		retVal = PATH;//获取输出路径
@@ -61,7 +70,7 @@ static int WriteIMGToFile(media_t imageEntry, const char *path)
 
 			/* 获得整个IMG大小 */
 			{
-				size_t totalSec = 0;
+				size_t totalSec = 0;//总扇区数
 
 				if(LD_UINT16(pcBPB->Common.BPB_TotSec16))//如果是FAT12/16
 					totalSec = LD_UINT16(pcBPB->Common.BPB_TotSec16);
@@ -155,9 +164,11 @@ MEDIA_TYPE GetInputType(media_t media)
 
 int DumpIMGFromISO(media_t media, const char *path)
 {
+	static const char * const leftMargin = "    ";//左间距
+
 	int retVal = FAILED;
 
-	const char *imgPath = GetOutPath(path, ".img");
+	const char *imgPath = GetOutPath(path, ".img");//img文件输出路径
 
 	if(media && imgPath)
 	{
@@ -199,6 +210,8 @@ int DumpIMGFromISO(media_t media, const char *path)
 
 int DisplayISOInfo(media_t media)
 {
+	static const char * const leftMargin = "    ";//左间距
+
 	int retVal = FAILED;
 
 	if(media)
@@ -207,7 +220,7 @@ int DisplayISOInfo(media_t media)
 
 		ColorPrintf(WHITE, "检测到ISO文件信息如下：\n\n");
 
-		/*! 输出PrimVolDesc中信息 */
+		/* 输出PrimVolDesc中信息 */
 		if(JumpToISOPrimVolDesc(media) == SUCCESS)
 		{
 			if(GetMediaAccess(media, &access, sizeof(PrimVolDesc)) == SUCCESS)
@@ -244,20 +257,20 @@ int DisplayISOInfo(media_t media)
 			}
 		}
 
-		/*! 输出BootRecordVolDesc中信息 */
+		/* 输出BootRecordVolDesc中信息 */
 		if(JumpToISOBootRecordVolDesc(media) == SUCCESS)
 		{
 			ColorPrintf(YELLOW, "%s启动规范：\t\t\t\t", leftMargin);
 			ColorPrintf(AQUA, "EL TORITO\n");
 
-			/*! 输出ValidationEntry中信息 */
+			/* 输出ValidationEntry中信息 */
 			if(JumpToISOValidationEntry(media) == SUCCESS)
 			{
 				ColorPrintf(WHITE, "%s支持平台：\t\t\t\t", leftMargin);
 				ColorPrintf(LIME, "%s\n", GetISOPlatformID(media));
 			}
 
-			/*! 输出InitialEntry中信息 */
+			/* 输出InitialEntry中信息 */
 			if(JumpToISOInitialEntry(media) == SUCCESS)
 			{
 				ColorPrintf(WHITE, "%s光盘类型：\t\t\t\t", leftMargin);
@@ -277,13 +290,6 @@ int DisplayISOInfo(media_t media)
 
 int DisplayIMGInfo(media_t media)
 {
-	static const char *FileSysType[] = 
-	{
-		"FAT12",
-		"FAT16",
-		"FAT32"
-	};
-
 	int retVal = FAILED;
 
 	media_access access;
@@ -291,86 +297,92 @@ int DisplayIMGInfo(media_t media)
 	if(GetMediaAccess(media, &access, sizeof(BPB)) == SUCCESS)
 	{
 		const BPB *pcBPB = (const BPB *)access.begin;
-		const char *fsType = NULL;
-		uint32_t totalSec, numTrks, volID = 0, secPerFat = 0;
-		uint8_t drvNum = 0;
+		const char *fsType = NULL;	//文件系统类型（FAT12/16/32）
+		uint32_t totalSec;			//总扇区数
+		uint32_t numTrks;			//磁道数
+		uint32_t volID = 0;			//卷标
+		uint32_t secPerFat = 0;		//每个FAT表所占扇区数
+		uint8_t drvNum = 0;			//驱动器号
 
+		/* 计算总扇区数 */
 		if(LD_UINT16(pcBPB->Common.BPB_TotSec16))
 			totalSec = LD_UINT16(pcBPB->Common.BPB_TotSec16);
 		else
 			totalSec = LD_UINT32(pcBPB->Common.BPB_TotSec32);
 
+		/* 计算磁道数 */
 		numTrks = totalSec / 
 			(LD_UINT16(pcBPB->Common.BPB_NumHeads) * LD_UINT16(pcBPB->Common.BPB_SecPerTrk));
 
+		/* 获取卷标、驱动器号、每FAT表扇区数以及文件系统类型 */
 		switch(GetIMGType(pcBPB))
 		{
 		case FAT12:
 			volID = LD_UINT32(pcBPB->Special.Fat16.BS_VolID);
 			drvNum = LD_UINT8(pcBPB->Special.Fat16.BS_DrvNum);
 			secPerFat = LD_UINT16(pcBPB->Common.BPB_FATSz16);
-			fsType = FileSysType[0];
+			fsType = "FAT12";
 			break;
 		case FAT16:
 			volID = LD_UINT32(pcBPB->Special.Fat16.BS_VolID);
 			drvNum = LD_UINT8(pcBPB->Special.Fat16.BS_DrvNum);
 			secPerFat = LD_UINT16(pcBPB->Common.BPB_FATSz16);
-			fsType = FileSysType[1];
+			fsType = "FAT16";
 			break;
 		case FAT32:
 			volID = LD_UINT32(pcBPB->Special.Fat32.BS_VolID);
 			drvNum = LD_UINT8(pcBPB->Special.Fat32.BS_DrvNum);
 			secPerFat = LD_UINT32(pcBPB->Special.Fat32.BPB_FATSz32);
-			fsType = FileSysType[2];
+			fsType = "FAT32";
 			break;
 		}
 
-		ColorPrintf(WHITE, "%s系统标名称：\t\t\t", leftMargin);
-		ColorPrintf(LIME, "%.8s\n", pcBPB->Common.BS_OEMName);
+		ColorPrintf(WHITE, "\t系统标名称：");
+		ColorPrintf(LIME, "%.8s", pcBPB->Common.BS_OEMName);
 
-		ColorPrintf(WHITE, "%s卷序列号：\t\t\t\t", leftMargin);
-		ColorPrintf(LIME, "0x%.4X\n", volID);
-
-		ColorPrintf(WHITE, "%s介质类型：\t\t\t\t", leftMargin);
-		ColorPrintf(LIME, "0x%.1X\n", LD_UINT8(pcBPB->Common.BPB_Media));
-
-		ColorPrintf(WHITE, "%s物理驱动器号：\t\t\t", leftMargin);
-		ColorPrintf(LIME, "0x%.2X\n", drvNum);
-
-		ColorPrintf(WHITE, "%s文件系统：\t\t\t\t", leftMargin);
+		ColorPrintf(WHITE, "\t\t文件系统：");
 		ColorPrintf(LIME, "%s\n", fsType);
 
-		ColorPrintf(WHITE, "%s每扇区字节数：\t\t\t", leftMargin);
+		ColorPrintf(WHITE, "\t卷序列号：");
+		ColorPrintf(LIME, "0x%.4X", volID);
+
+		ColorPrintf(WHITE, "\t\t介质类型：");
+		ColorPrintf(LIME, "0x%.1X\n", LD_UINT8(pcBPB->Common.BPB_Media));
+
+		ColorPrintf(WHITE, "\t物理驱动器号：");
+		ColorPrintf(LIME, "0x%.2X", drvNum);
+
+		ColorPrintf(WHITE, "\t\t每扇区字节数：");
 		ColorPrintf(LIME, "%u\n", LD_UINT16(pcBPB->Common.BPB_BytsPerSec));
 
-		ColorPrintf(WHITE, "%sFAT表数：\t\t\t\t", leftMargin);
-		ColorPrintf(LIME, "%u\n", LD_UINT8(pcBPB->Common.BPB_NumFATs));
+		ColorPrintf(WHITE, "\t隐藏扇区数：");
+		ColorPrintf(LIME, "%u", LD_UINT32(pcBPB->Common.BPB_HiddSec));
 
-		ColorPrintf(WHITE, "%s每FAT表扇区数：\t\t\t", leftMargin);
-		ColorPrintf(LIME, "%u\n", secPerFat);
-
-		ColorPrintf(WHITE, "%s隐藏扇区数：\t\t\t", leftMargin);
-		ColorPrintf(LIME, "%u\n", LD_UINT32(pcBPB->Common.BPB_HiddSec));
-		
-		ColorPrintf(WHITE, "%s每簇扇区数：\t\t\t", leftMargin);
-		ColorPrintf(LIME, "%u\n", LD_UINT8(pcBPB->Common.BPB_SecPerClus));
-
-		ColorPrintf(WHITE, "%s保留扇区数：\t\t\t", leftMargin);
-		ColorPrintf(LIME, "%u\n", LD_UINT16(pcBPB->Common.BPB_RsvdSecCnt));
-
-		ColorPrintf(WHITE, "%s根目录项数：\t\t\t", leftMargin);
-		ColorPrintf(LIME, "%u\n", LD_UINT16(pcBPB->Common.BPB_RootEntCnt));
-
-		ColorPrintf(YELLOW, "%s磁道数（C）：\t\t\t", leftMargin);
+		ColorPrintf(YELLOW, "\t\t\t磁道数（C）：");
 		ColorPrintf(AQUA, "%u\n", numTrks);
 
-		ColorPrintf(YELLOW, "%s磁头数（H）：\t\t\t", leftMargin);
+		ColorPrintf(WHITE, "\t每簇扇区数：");
+		ColorPrintf(LIME, "%u", LD_UINT8(pcBPB->Common.BPB_SecPerClus));
+
+		ColorPrintf(YELLOW, "\t\t\t磁头数（H）：");
 		ColorPrintf(AQUA, "%u\n", LD_UINT16(pcBPB->Common.BPB_NumHeads));
 
-		ColorPrintf(YELLOW, "%s每磁道扇区数（S）：\t\t\t", leftMargin);
+		ColorPrintf(WHITE, "\t保留扇区数：");
+		ColorPrintf(LIME, "%u", LD_UINT16(pcBPB->Common.BPB_RsvdSecCnt));
+
+		ColorPrintf(YELLOW, "\t\t\t每磁道扇区数（S）：");
 		ColorPrintf(AQUA, "%u\n", LD_UINT16(pcBPB->Common.BPB_SecPerTrk));
 
-		ColorPrintf(FUCHSIA, "%s扇区总数：\t\t\t\t", leftMargin);
+		ColorPrintf(WHITE, "\tFAT表数：");
+		ColorPrintf(LIME, "%u", LD_UINT8(pcBPB->Common.BPB_NumFATs));
+
+		ColorPrintf(WHITE, "\t\t\t每FAT表扇区数：");
+		ColorPrintf(LIME, "%u\n", secPerFat);
+
+		ColorPrintf(WHITE, "\t根目录项数：");
+		ColorPrintf(LIME, "%u", LD_UINT16(pcBPB->Common.BPB_RootEntCnt));
+
+		ColorPrintf(FUCHSIA, "\t\t\t扇区总数：");
 		ColorPrintf(AQUA, "%u\n", totalSec);
 	}
 

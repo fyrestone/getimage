@@ -1,6 +1,13 @@
-#include <stdio.h>		/*< vprintf */
-#include <stdarg.h>		/*< 变参处理 */
-#include <Windows.h>	/*< 控制台操作 */
+/*!
+\file ColorPrint.c
+\author LiuBao
+\version 1.0
+\date 2010/12/28
+\brief Windows控制台彩色输出函数实现
+*/
+#include <stdio.h>		/* vprintf */
+#include <stdarg.h>		/* 变参处理 */
+#include <Windows.h>	/* 控制台操作 */
 #include "ColorPrint.h"
 
 int ColorPrintf(COLOR color, const char *format, ...)

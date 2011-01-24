@@ -1,27 +1,35 @@
-#define WINVER 0x0500	/*!< 为了使用GetFileSizeEx */
+/*!
+\file MapFile.c
+\author LiuBao
+\version 1.0
+\date 2010/12/28
+\brief 介质操作函数实现
+*/
 
-#include <Windows.h>
-#include <io.h>			/*!< _access，检测文件存在 */
+#define WINVER 0x0500	///< 为了使用GetFileSizeEx
+
+#include <Windows.h>	/* 使用文件映射 */
+#include <io.h>			/* _access，检测文件存在 */
 #include <assert.h>
 #include "ProjDef.h"
 #include "MapFile.h"
 #include "SafeMemory.h"
 
-#define T media_t
+#define T media_t				///< 为抽象数据类型T定义实际名
 
-struct T
+struct T						///  抽象数据类型media_t定义
 {
-	const char *name;			/*!< 打开的介质名（路径） */
-	HANDLE hFile;				/*!< 映射介质时使用的句柄 */
-	FILE *pFile;				/*!< 直接IO时使用的结构体 */
-	PVOID pView;				/*!< 映射介质时，视图指针 */
-	uint32_t allocGran;			/*!< 内存分配粒度 */
-	uint32_t viewSize;			/*!< 视图大小，映射时使用VIEW，直接IO时使用重定向缓冲区大小 */
-	uint32_t actualViewSize;	/*!< 实际视图大小，实际视图大小根据不同情况可能小于等于viewSize */
-	uint32_t accessSize;		/*!< 可访问视图大小，即从currPos到视图末尾的大小 */
-	LARGE_INTEGER size;			/*!< 介质大小 */
-	LARGE_INTEGER viewPos;		/*!< 当前视图所在位置，相对介质起始位置偏移量 */
-	LARGE_INTEGER currPos;		/*!< 当前所在位置，相对介质起始位置偏移量 */
+	const char *name;			///< 打开的介质名（路径）
+	HANDLE hFile;				///< 映射介质时使用的句柄
+	FILE *pFile;				///< 直接IO时使用的结构体
+	PVOID pView;				///< 映射介质时，视图指针
+	uint32_t allocGran;			///< 内存分配粒度
+	uint32_t viewSize;			///< 视图大小，映射时使用VIEW，直接IO时使用重定向缓冲区大小
+	uint32_t actualViewSize;	///< 实际视图大小，实际视图大小根据不同情况可能小于等于viewSize
+	uint32_t accessSize;		///< 可访问视图大小，即从currPos到视图末尾的大小
+	LARGE_INTEGER size;			///< 介质大小
+	LARGE_INTEGER viewPos;		///< 当前视图所在位置，相对介质起始位置偏移量
+	LARGE_INTEGER currPos;		///< 当前所在位置，相对介质起始位置偏移量
 };
 
 static HANDLE MapMedia(const char *path, PLARGE_INTEGER lpFileSize);
@@ -56,7 +64,7 @@ static HANDLE MapMedia(const char *path, PLARGE_INTEGER lpFileSize)
 
 static int SplitMapView(T media, int64_t offset)
 {
-#define ALIGN_COST (offset & (media->allocGran - 1)) /*!< 对齐消耗的大小 */
+#define ALIGN_COST (offset & (media->allocGran - 1)) //对齐消耗的大小
 
 	int retVal = FAILED;
 
@@ -64,7 +72,7 @@ static int SplitMapView(T media, int64_t offset)
 
 	assert((offset & ~(media->allocGran - 1)) == (offset / media->allocGran) * media->allocGran);
 
-	/*! 偏移量与内存粒度对齐 */
+	/* 偏移量与内存粒度对齐 */
 	alignedOffset.QuadPart = offset & ~(media->allocGran - 1);
 
 	if(media->pView && alignedOffset.QuadPart == media->viewPos.QuadPart)
@@ -76,7 +84,7 @@ static int SplitMapView(T media, int64_t offset)
 	}
 	else//如果对齐后偏移量与当前视图位置不同，或者还未映射
 	{
-		/*!
+		/*
 			每当跳转位置offset超过当前视图位置viewPos后
 			一个内存分配粒度allocGran时，offset对齐位置
 			alignedOffset将与跳转前的视图位置viewPos不同，
@@ -88,7 +96,7 @@ static int SplitMapView(T media, int64_t offset)
 		uint32_t actualViewSize;
 		PVOID pNewView;
 
-		/*! 计算实际视图大小actualViewSize */
+		/* 计算实际视图大小actualViewSize */
 		if(alignedOffset.QuadPart + media->viewSize > media->size.QuadPart)
 			actualViewSize = (uint32_t)(media->size.QuadPart - alignedOffset.QuadPart);
 		else
@@ -99,14 +107,14 @@ static int SplitMapView(T media, int64_t offset)
 
 		if(pNewView)
 		{
-			/*! 若media存在旧映射视图,并且销毁成功,或者media不存在旧映射视图 */
+			/* 若media存在旧映射视图,并且销毁成功,或者media不存在旧映射视图 */
 			if((media->pView && UnmapViewOfFile(media->pView)) || !media->pView)
 			{
 				media->pView = pNewView;
 				media->viewPos = alignedOffset;
 				media->actualViewSize = actualViewSize;
 
-				/*!
+				/*
 					可访问视图大小应当等于实际的视图大小actualViewSize减去
 					对齐offset时消耗的大小，即offset-alignedOffset，
 					这里优化一下使用位运算提高速度。
@@ -130,7 +138,7 @@ static int FullMapView(T media, uint32_t offset)
 
 	if(media->pView)//如果已经映射成功
 	{
-		/*! 
+		/*
 			offset已经是绝对偏移量，这里可访问视图大小accessSize
 			直接是实际视图大小（同样也是介质大小）减去offset即可
 		*/
@@ -148,7 +156,7 @@ static int FullMapView(T media, uint32_t offset)
 		{
 			media->pView = pNewView;
 
-			/*! 
+			/*
 				首次（也是唯一一次）进行完全映射后，
 				可访问视图大小和实际视图大小应当与介质
 				大小相同
@@ -171,7 +179,7 @@ static int SeekMapMedia(T media, int64_t offset, int base)
 	{
 		LARGE_INTEGER mendedOffset;
 
-		/*! 修正offset为绝对偏移量 */
+		/* 修正offset为绝对偏移量 */
 		switch(base)
 		{
 		case MEDIA_SET:
@@ -182,7 +190,7 @@ static int SeekMapMedia(T media, int64_t offset, int base)
 			break;
 		}
 
-		/*! 如果修正后偏移量mendedOffset没有超出文件范围 */
+		/* 如果修正后偏移量mendedOffset没有超出文件范围 */
 		if(mendedOffset.QuadPart >= 0 && mendedOffset.QuadPart < media->size.QuadPart)
 		{
 			if(media->viewSize)//如果分块映射
@@ -201,8 +209,7 @@ static int SeekRawMedia(T media, int64_t offset, int base)
 
 	if(media && offset)
 	{
-		assert(0);
-		//TODO:使用fopen打开
+		assert(0);/// \todo SeekRawMedia中加入使用fopen打开介质
 	}
 
 	return retVal;
@@ -221,12 +228,12 @@ static T OpenMapMedia(T media, const char *path, uint32_t viewSize)
 		{
 			SYSTEM_INFO sysInfo;
 			
-			/*! 获取内存分配粒度 */
+			/* 获取内存分配粒度 */
 			GetSystemInfo(&sysInfo);
 
 			if(sysInfo.dwAllocationGranularity)
 			{
-				uint32_t roundViewSize = /*! 上对齐与内存粒度 */
+				uint32_t roundViewSize = /* 上对齐与内存粒度 */
 					(viewSize & ~(sysInfo.dwAllocationGranularity - 1)) + sysInfo.dwAllocationGranularity;
 					
 				assert(((viewSize / sysInfo.dwAllocationGranularity) + 1) * sysInfo.dwAllocationGranularity
@@ -239,7 +246,7 @@ static T OpenMapMedia(T media, const char *path, uint32_t viewSize)
 					if(!fileSize.HighPart && viewSize >= fileSize.LowPart)//viewSize大于fileSize
 						viewSize = 0;
 
-					/*! 初始化media结构体 */
+					/* 初始化media结构体 */
 					media->name = path;
 					media->hFile = hFileMapping;
 					media->allocGran = sysInfo.dwAllocationGranularity;
@@ -290,7 +297,7 @@ T OpenMedia(const char *path, uint32_t viewSize)
 	{
 		if(_access(path, 0/* 检测存在 */))//如果文件不存在
 		{
-			assert(0);
+			assert(0);/// \todo 添加文件不存在的处理
 		}
 		else//如果文件存在
 			retVal = OpenMapMedia(media, path, viewSize);
@@ -307,10 +314,10 @@ void CloseMedia(T *media)
 	{
 		if(mediaCopy->hFile)//如果是映射文件
 		{
-			UnmapViewOfFile(mediaCopy->pView);	/*!< 卸载视图 */
-			CloseHandle(mediaCopy->hFile);		/*!< 关闭文件句柄 */
-			FREE(mediaCopy);					/*!< 释放media_t结构 */
-			*media = NULL;						/*!< 参数指向的media_t置NULL */
+			UnmapViewOfFile(mediaCopy->pView);	/* 卸载视图 */
+			CloseHandle(mediaCopy->hFile);		/* 关闭文件句柄 */
+			FREE(mediaCopy);					/* 释放media_t结构 */
+			*media = NULL;						/* 参数指向的media_t置NULL */
 		}
 		else if(mediaCopy->pFile)//如果是fopen打开介质
 		{
@@ -335,8 +342,7 @@ int GetMediaAccess(T media, media_access *access, uint32_t len)
 			}
 			else
 			{
-				assert(0);
-				//TODO:动态分配内存空间
+				assert(0);/// \todo 添加动态分配内存空间
 			}
 		}
 		else if(media->pFile)
@@ -398,8 +404,7 @@ int DumpMedia(T media, FILE *fp, int64_t size)
 		}
 		else if(media->pFile)
 		{
-			assert(0);
-			//TODO:
+			assert(0);/// \todo 添加fopen打开的介质处理
 		}
 
 		if(SeekMedia(media, currPos.QuadPart, MEDIA_SET) != SUCCESS)
@@ -430,7 +435,7 @@ void MapTestUnit(const char *path)
 	fileSize.QuadPart = 0;//初始设0
 	allocGran = 0;
 
-	/*! 获得文件大小fileSize */
+	/* 获得文件大小fileSize */
 	{
 		HANDLE hFile = CreateFileA(
 			path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -441,11 +446,11 @@ void MapTestUnit(const char *path)
 		CloseHandle(hFile);
 	}
 
-	/*! 获得内存分配粒度大小allocGran */
+	/* 获得内存分配粒度大小allocGran */
 	{
 		SYSTEM_INFO sysInfo;
 
-		/*! 获取内存分配粒度 */
+		/* 获取内存分配粒度 */
 		GetSystemInfo(&sysInfo);
 		allocGran = sysInfo.dwAllocationGranularity;
 	}
@@ -480,17 +485,17 @@ void MapTestUnit(const char *path)
 
 				ColorPrintf(WHITE, "正在测试映射文件\t\t\t");
 				testMedia = OpenMedia(path, viewSize);
-				assert(testMedia->allocGran == allocGran);					/*!< 检查粒度正确 */
-				assert(!testMedia->currPos.QuadPart);						/*!< 检查当前位置为0 */
-				assert(testMedia->hFile);									/*!< 检查文件句柄存在 */
-				assert(!memcmp(testMedia->name, path, strlen(path) + 1));	/*!< 检查名称正确 */
-				assert(testMedia->pView);									/*!< 检查视图指针应当不为空 */
-				assert(!testMedia->pFile);									/*!< 检查文件指针应当为空 */
-				assert(testMedia->size.QuadPart == fileSize.QuadPart);		/*!< 检查文件大小正确 */
-				assert(testMedia->accessSize);								/*!< 检查可访问视图大小应当不为0 */
-				assert(!testMedia->viewPos.QuadPart);						/*!< 检查视图起始位置为0 */
-				assert(!testMedia->viewSize);								/*!< 检查视图大小应当为0 */
-				assert(!(testMedia->viewPos.QuadPart % allocGran));			/*!< 检查视图起始位置对齐内存粒度 */
+				assert(testMedia->allocGran == allocGran);					/* 检查粒度正确 */
+				assert(!testMedia->currPos.QuadPart);						/* 检查当前位置为0 */
+				assert(testMedia->hFile);									/* 检查文件句柄存在 */
+				assert(!memcmp(testMedia->name, path, strlen(path) + 1));	/* 检查名称正确 */
+				assert(testMedia->pView);									/* 检查视图指针应当不为空 */
+				assert(!testMedia->pFile);									/* 检查文件指针应当为空 */
+				assert(testMedia->size.QuadPart == fileSize.QuadPart);		/* 检查文件大小正确 */
+				assert(testMedia->accessSize);								/* 检查可访问视图大小应当不为0 */
+				assert(!testMedia->viewPos.QuadPart);						/* 检查视图起始位置为0 */
+				assert(!testMedia->viewSize);								/* 检查视图大小应当为0 */
+				assert(!(testMedia->viewPos.QuadPart % allocGran));			/* 检查视图起始位置对齐内存粒度 */
 				ColorPrintf(GREEN, "通过\n");
 
 				ColorPrintf(WHITE, "正在测试跳转\t\t\t\t");
@@ -535,18 +540,18 @@ void MapTestUnit(const char *path)
 
 				ColorPrintf(WHITE, "正在测试映射文件\t\t\t");
 				testMedia = OpenMedia(path, viewSize);
-				assert(testMedia->allocGran == allocGran);					/*!< 检查粒度正确 */
-				assert(!testMedia->currPos.QuadPart);						/*!< 检查当前位置为0 */
-				assert(testMedia->hFile);									/*!< 检查文件句柄存在 */
-				assert(!memcmp(testMedia->name, path, strlen(path) + 1));	/*!< 检查名称正确 */
-				assert(testMedia->pView);									/*!< 检查视图指针应当不为空 */
-				assert(!testMedia->pFile);									/*!< 检查文件指针应当为空 */
-				assert(testMedia->size.QuadPart == fileSize.QuadPart);		/*!< 检查文件大小正确 */
-				assert(testMedia->accessSize);								/*!< 检查可访问视图大小应当不为0 */
-				assert(!testMedia->viewPos.QuadPart);						/*!< 检查视图起始位置为0 */
-				assert(testMedia->viewSize);								/*!< 检查视图大小应当不为0 */
-				assert(!(testMedia->viewPos.QuadPart % allocGran));			/*!< 检查视图起始位置对齐内存粒度 */
-				assert(testMedia->viewSize >= viewSize);					/*!< 与粒度上对齐后，实际的viewSize应当大于等于传入viewSize */
+				assert(testMedia->allocGran == allocGran);					/* 检查粒度正确 */
+				assert(!testMedia->currPos.QuadPart);						/* 检查当前位置为0 */
+				assert(testMedia->hFile);									/* 检查文件句柄存在 */
+				assert(!memcmp(testMedia->name, path, strlen(path) + 1));	/* 检查名称正确 */
+				assert(testMedia->pView);									/* 检查视图指针应当不为空 */
+				assert(!testMedia->pFile);									/* 检查文件指针应当为空 */
+				assert(testMedia->size.QuadPart == fileSize.QuadPart);		/* 检查文件大小正确 */
+				assert(testMedia->accessSize);								/* 检查可访问视图大小应当不为0 */
+				assert(!testMedia->viewPos.QuadPart);						/* 检查视图起始位置为0 */
+				assert(testMedia->viewSize);								/* 检查视图大小应当不为0 */
+				assert(!(testMedia->viewPos.QuadPart % allocGran));			/* 检查视图起始位置对齐内存粒度 */
+				assert(testMedia->viewSize >= viewSize);					/* 与粒度上对齐后，实际的viewSize应当大于等于传入viewSize */
 				ColorPrintf(GREEN, "通过\n");
 
 				ColorPrintf(WHITE, "正在测试跳转\t\t\t\t");
@@ -580,7 +585,7 @@ void MapTestUnit(const char *path)
 			}
 		}
 
-		/*! 测试完毕 */
+		/* 测试完毕 */
 		ColorPrintf(GREEN, "全部测试通过！\n");
 	}
 

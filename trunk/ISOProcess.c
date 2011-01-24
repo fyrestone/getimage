@@ -1,6 +1,6 @@
 /*!
 \file ISOProcess.c
-\authon LiuBao
+\author LiuBao
 \version 1.0
 \date 2010/12/24
 \brief ISO´¦Àíº¯Êý
