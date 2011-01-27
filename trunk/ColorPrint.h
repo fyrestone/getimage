@@ -8,26 +8,26 @@
 #ifndef COLOR_PRINT
 #define COLOR_PRINT
 
-#include <tchar.h>	/* 使用_TCHAR */
+#include <tchar.h>    /* 使用_TCHAR */
 
-typedef enum _COLOR	///  色彩定义
+typedef enum _COLOR   ///  色彩定义
 {
-	BLACK,			///< 黑色
-	NAVY,			///< 深蓝色
-	GREEN,			///< 绿色
-	TEAL,			///< 青色
-	MAROON,			///< 褐红色
-	PURPLE,			///< 紫色
-	OLIVE,			///< 橄榄绿
-	SILVER,			///< 银色
-	GRAY,			///< 灰色
-	BLUE,			///< 蓝色
-	LIME,			///< 黄绿色
-	AQUA,			///< 浅绿色
-	RED,			///< 红色
-	FUCHSIA,		///< 紫红色
-	YELLOW,			///< 黄色
-	WHITE			///< 白色
+    BLACK,            ///< 黑色
+    NAVY,             ///< 深蓝色
+    GREEN,            ///< 绿色
+    TEAL,             ///< 青色
+    MAROON,           ///< 褐红色
+    PURPLE,           ///< 紫色
+    OLIVE,            ///< 橄榄绿
+    SILVER,           ///< 银色
+    GRAY,             ///< 灰色
+    BLUE,             ///< 蓝色
+    LIME,             ///< 黄绿色
+    AQUA,             ///< 浅绿色
+    RED,              ///< 红色
+    FUCHSIA,          ///< 紫红色
+    YELLOW,           ///< 黄色
+    WHITE             ///< 白色
 }COLOR;
 
 #ifdef _UNICODE

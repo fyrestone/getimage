@@ -8,14 +8,14 @@
 #ifndef PROCESS
 #define PROCESS
 
-#include <tchar.h>		/* 使用_TCHAR */
+#include <tchar.h>         /* 使用_TCHAR */
 #include "MapFile.h"
 
-typedef int MEDIA_TYPE;	///< 介质格式定义
+typedef int MEDIA_TYPE;    ///< 介质格式定义
 
-#define UNKNOWN 0x0		///< 任何未知类型
-#define IMG 0x1			///< IMG格式
-#define ISO 0x2			///< ISO格式	
+#define UNKNOWN 0x0        ///< 任何未知类型
+#define IMG 0x1            ///< IMG格式
+#define ISO 0x2            ///< ISO格式    
 
 /*!
 获得介质类型，可能是UNKNOWN、IMG、ISO

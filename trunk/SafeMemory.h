@@ -8,14 +8,14 @@
 #ifndef SAFE_MEMORY
 #define SAFE_MEMORY
 
-#include <tchar.h>		/* 使用_TCHAR */
-#include <stddef.h>		/* 使用size_t */
+#include <tchar.h>        /* 使用_TCHAR */
+#include <stddef.h>       /* 使用size_t */
 
 /// 内存分配销毁信息跟踪宏，置0关闭输出，置1开启输出（仅debug下有效）
-#define MEM_DETAIL 1	
+#define MEM_DETAIL 1    
 
-#define malloc 不要直接调用malloc!	///< 禁用malloc	
-#define free 不要直接调用free!		///< 禁用free
+#define malloc 不要直接调用malloc!    ///< 禁用malloc    
+#define free 不要直接调用free!        ///< 禁用free
 
 /// 动态申请size大小的的空间，相当于malloc
 #define MALLOC(size) Mem_alloc(size, _T(__FILE__), __LINE__)

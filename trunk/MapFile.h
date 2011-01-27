@@ -8,21 +8,21 @@
 #ifndef MAP_FILE
 #define MAP_FILE
 
-#include <stdio.h>		/* FILE */
-#include <tchar.h>		/* 使用_TCHAR */
+#include <stdio.h>        /* FILE */
+#include <tchar.h>        /* 使用_TCHAR */
 #include "IntTypes.h"
 
-#define MEDIA_CUR 0		///< 当前位置
-#define MEDIA_SET 1		///< 起始位置
+#define MEDIA_CUR 0       ///< 当前位置
+#define MEDIA_SET 1       ///< 起始位置
 
-#define T media_t		///< 抽象数据类型（ADT）media_t
+#define T media_t         ///< 抽象数据类型（ADT）media_t
 
 typedef struct T *T;
 
-typedef struct media_access		///  介质访问结构体，由GetMediaAccess获得
+typedef struct media_access      ///  介质访问结构体，由GetMediaAccess获得
 {
-	const unsigned char *begin;	///< 介质访问指针
-	uint32_t len;				///< 可访问介质大小
+    const unsigned char *begin;  ///< 介质访问指针
+    uint32_t len;                ///< 可访问介质大小
 }media_access;
 
 /*!
@@ -74,11 +74,11 @@ int GetMediaAccess(T media, media_access *access, uint32_t len);
 int DumpMedia(T media, FILE *fp, int64_t size);
 
 #ifdef _DEBUG
-	/*!
-	单元测试用例
-	\param path 打开文件路径
-	*/
-	void MapTestUnit(const _TCHAR *path);
+    /*!
+    单元测试用例
+    \param path 打开文件路径
+    */
+    void MapTestUnit(const _TCHAR *path);
 #endif
 
 #undef T
