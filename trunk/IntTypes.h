@@ -1,26 +1,26 @@
-/*!
+ï»¿/*!
 \file IntTypes.h
 \author LiuBao
 \version 1.0
 \date 2011/1/23
-\brief »ù´¡Êı¾İÀàĞÍÖ§³Ö
+\brief åŸºç¡€æ•°æ®ç±»å‹æ”¯æŒ
 */
 #ifndef INT_TYPES
 #define INT_TYPES
 
-typedef char int8_t;					///< 8Î»ÓĞ·ûºÅÕûĞÍ
-typedef short int int16_t;				///< 16Î»ÓĞ·ûºÅÕûĞÍ
-typedef int int32_t;					///< 32Î»ÓĞ·ûºÅÕûĞÍ
-typedef long long int64_t;				///< 64Î»ÓĞ·ûºÅÕûĞÍ
+typedef char int8_t;					///< 8ä½æœ‰ç¬¦å·æ•´å‹
+typedef short int int16_t;				///< 16ä½æœ‰ç¬¦å·æ•´å‹
+typedef int int32_t;					///< 32ä½æœ‰ç¬¦å·æ•´å‹
+typedef long long int64_t;				///< 64ä½æœ‰ç¬¦å·æ•´å‹
 
-typedef unsigned char uint8_t;			///< 8Î»ÎŞ·ûºÅÕûĞÍ
-typedef unsigned short int uint16_t;	///< 16Î»ÎŞ·ûºÅÕûĞÍ
-typedef unsigned int uint32_t;			///< 32Î»ÎŞ·ûºÅÕûĞÍ
-typedef unsigned long long uint64_t;	///< 64Î»ÎŞ·ûºÅÕûĞÍ
+typedef unsigned char uint8_t;			///< 8ä½æ— ç¬¦å·æ•´å‹
+typedef unsigned short int uint16_t;	///< 16ä½æ— ç¬¦å·æ•´å‹
+typedef unsigned int uint32_t;			///< 32ä½æ— ç¬¦å·æ•´å‹
+typedef unsigned long long uint64_t;	///< 64ä½æ— ç¬¦å·æ•´å‹
 
-#define LD_UINT8(ptr) ((uint8_t)(*(uint8_t *)(ptr)))	///< °ÑÖ¸ÕëÎ»ÖÃ8Î»³¤¶ÈÊı¾İÔØÈëÎªuint8_t
-#define LD_UINT16(ptr) ((uint16_t)(*(uint16_t *)(ptr)))	///< °ÑÖ¸ÕëÎ»ÖÃ16Î»³¤¶ÈÊı¾İÔØÈëÎªuint16_t
-#define LD_UINT32(ptr) ((uint32_t)(*(uint32_t *)(ptr)))	///< °ÑÖ¸ÕëÎ»ÖÃ32Î»³¤¶ÈÊı¾İÔØÈëÎªuint32_t
-#define LD_UINT64(ptr) ((uint64_t)(*(uint64_t *)(ptr)))	///< °ÑÖ¸ÕëÎ»ÖÃ64Î»³¤¶ÈÊı¾İÔØÈëÎªuint64_t
+#define LD_UINT8(ptr) ((uint8_t)(*(uint8_t *)(ptr)))	///< æŠŠæŒ‡é’ˆä½ç½®8ä½é•¿åº¦æ•°æ®è½½å…¥ä¸ºuint8_t
+#define LD_UINT16(ptr) ((uint16_t)(*(uint16_t *)(ptr)))	///< æŠŠæŒ‡é’ˆä½ç½®16ä½é•¿åº¦æ•°æ®è½½å…¥ä¸ºuint16_t
+#define LD_UINT32(ptr) ((uint32_t)(*(uint32_t *)(ptr)))	///< æŠŠæŒ‡é’ˆä½ç½®32ä½é•¿åº¦æ•°æ®è½½å…¥ä¸ºuint32_t
+#define LD_UINT64(ptr) ((uint64_t)(*(uint64_t *)(ptr)))	///< æŠŠæŒ‡é’ˆä½ç½®64ä½é•¿åº¦æ•°æ®è½½å…¥ä¸ºuint64_t
 
 #endif

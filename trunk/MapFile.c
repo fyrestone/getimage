@@ -1,56 +1,56 @@
-/*!
+ï»¿/*!
 \file MapFile.c
 \author LiuBao
 \version 1.0
 \date 2010/12/28
-\brief ½éÖÊ²Ù×÷º¯ÊıÊµÏÖ
+\brief ä»‹è´¨æ“ä½œå‡½æ•°å®ç°
 */
 
-#define WINVER 0x0500	///< ÎªÁËÊ¹ÓÃGetFileSizeEx
+#define WINVER 0x0500	///< ä¸ºäº†ä½¿ç”¨GetFileSizeEx
 
-#include <Windows.h>	/* Ê¹ÓÃÎÄ¼şÓ³Éä */
-#include <io.h>			/* _access£¬¼ì²âÎÄ¼ş´æÔÚ */
+#include <Windows.h>	/* ä½¿ç”¨æ–‡ä»¶æ˜ å°„ */
+#include <io.h>			/* _accessï¼Œæ£€æµ‹æ–‡ä»¶å­˜åœ¨ */
 #include <assert.h>
 #include "ProjDef.h"
 #include "MapFile.h"
 #include "SafeMemory.h"
 
-#define T media_t				///< Îª³éÏóÊı¾İÀàĞÍT¶¨ÒåÊµ¼ÊÃû
+#define T media_t				///< ä¸ºæŠ½è±¡æ•°æ®ç±»å‹Tå®šä¹‰å®é™…å
 
-struct T						///  ³éÏóÊı¾İÀàĞÍmedia_t¶¨Òå
+struct T						///  æŠ½è±¡æ•°æ®ç±»å‹media_tå®šä¹‰
 {
-	const char *name;			///< ´ò¿ªµÄ½éÖÊÃû£¨Â·¾¶£©
-	HANDLE hFile;				///< Ó³Éä½éÖÊÊ±Ê¹ÓÃµÄ¾ä±ú
-	FILE *pFile;				///< Ö±½ÓIOÊ±Ê¹ÓÃµÄ½á¹¹Ìå
-	PVOID pView;				///< Ó³Éä½éÖÊÊ±£¬ÊÓÍ¼Ö¸Õë
-	uint32_t allocGran;			///< ÄÚ´æ·ÖÅäÁ£¶È
-	uint32_t viewSize;			///< ÊÓÍ¼´óĞ¡£¬Ó³ÉäÊ±Ê¹ÓÃVIEW£¬Ö±½ÓIOÊ±Ê¹ÓÃÖØ¶¨Ïò»º³åÇø´óĞ¡
-	uint32_t actualViewSize;	///< Êµ¼ÊÊÓÍ¼´óĞ¡£¬Êµ¼ÊÊÓÍ¼´óĞ¡¸ù¾İ²»Í¬Çé¿ö¿ÉÄÜĞ¡ÓÚµÈÓÚviewSize
-	uint32_t accessSize;		///< ¿É·ÃÎÊÊÓÍ¼´óĞ¡£¬¼´´ÓcurrPosµ½ÊÓÍ¼Ä©Î²µÄ´óĞ¡
-	LARGE_INTEGER size;			///< ½éÖÊ´óĞ¡
-	LARGE_INTEGER viewPos;		///< µ±Ç°ÊÓÍ¼ËùÔÚÎ»ÖÃ£¬Ïà¶Ô½éÖÊÆğÊ¼Î»ÖÃÆ«ÒÆÁ¿
-	LARGE_INTEGER currPos;		///< µ±Ç°ËùÔÚÎ»ÖÃ£¬Ïà¶Ô½éÖÊÆğÊ¼Î»ÖÃÆ«ÒÆÁ¿
+	const _TCHAR *name;			///< æ‰“å¼€çš„ä»‹è´¨åï¼ˆè·¯å¾„ï¼‰
+	HANDLE hFile;				///< æ˜ å°„ä»‹è´¨æ—¶ä½¿ç”¨çš„å¥æŸ„
+	FILE *pFile;				///< ç›´æ¥IOæ—¶ä½¿ç”¨çš„ç»“æ„ä½“
+	PVOID pView;				///< æ˜ å°„ä»‹è´¨æ—¶ï¼Œè§†å›¾æŒ‡é’ˆ
+	uint32_t allocGran;			///< å†…å­˜åˆ†é…ç²’åº¦
+	uint32_t viewSize;			///< è§†å›¾å¤§å°ï¼Œæ˜ å°„æ—¶ä½¿ç”¨VIEWï¼Œç›´æ¥IOæ—¶ä½¿ç”¨é‡å®šå‘ç¼“å†²åŒºå¤§å°
+	uint32_t actualViewSize;	///< å®é™…è§†å›¾å¤§å°ï¼Œå®é™…è§†å›¾å¤§å°æ ¹æ®ä¸åŒæƒ…å†µå¯èƒ½å°äºç­‰äºviewSize
+	uint32_t accessSize;		///< å¯è®¿é—®è§†å›¾å¤§å°ï¼Œå³ä»currPosåˆ°è§†å›¾æœ«å°¾çš„å¤§å°
+	LARGE_INTEGER size;			///< ä»‹è´¨å¤§å°
+	LARGE_INTEGER viewPos;		///< å½“å‰è§†å›¾æ‰€åœ¨ä½ç½®ï¼Œç›¸å¯¹ä»‹è´¨èµ·å§‹ä½ç½®åç§»é‡
+	LARGE_INTEGER currPos;		///< å½“å‰æ‰€åœ¨ä½ç½®ï¼Œç›¸å¯¹ä»‹è´¨èµ·å§‹ä½ç½®åç§»é‡
 };
 
-static HANDLE MapMedia(const char *path, PLARGE_INTEGER lpFileSize);
+static HANDLE MapMedia(const _TCHAR *path, PLARGE_INTEGER lpFileSize);
 static int SplitMapView(T media, int64_t offset);
 static int FullMapView(T media, uint32_t offset);
 static int SeekMapMedia(T media, int64_t offset, int base);
 static int SeekRawMedia(T media, int64_t offset, int base);
-static T OpenMapMedia(T media, const char *path, uint32_t viewSize);
+static T OpenMapMedia(T media, const _TCHAR *path, uint32_t viewSize);
 
-static HANDLE MapMedia(const char *path, PLARGE_INTEGER lpFileSize)
+static HANDLE MapMedia(const _TCHAR *path, PLARGE_INTEGER lpFileSize)
 {
 	HANDLE hFileMapping = NULL;
 
 	if(path && lpFileSize)
 	{
-		HANDLE hFile = CreateFileA(
+		HANDLE hFile = CreateFile(
 			path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
 		if(hFile != INVALID_HANDLE_VALUE)
 		{
-			if(GetFileSizeEx(hFile, lpFileSize))//»ñµÃÎÄ¼ş´óĞ¡
+			if(GetFileSizeEx(hFile, lpFileSize))//è·å¾—æ–‡ä»¶å¤§å°
 			{
 				hFileMapping = CreateFileMapping(
 					hFile, NULL, PAGE_READONLY, lpFileSize->HighPart, lpFileSize->LowPart, NULL);
@@ -64,7 +64,7 @@ static HANDLE MapMedia(const char *path, PLARGE_INTEGER lpFileSize)
 
 static int SplitMapView(T media, int64_t offset)
 {
-#define ALIGN_COST (offset & (media->allocGran - 1)) //¶ÔÆëÏûºÄµÄ´óĞ¡
+#define ALIGN_COST (offset & (media->allocGran - 1)) //å¯¹é½æ¶ˆè€—çš„å¤§å°
 
 	int retVal = FAILED;
 
@@ -72,7 +72,7 @@ static int SplitMapView(T media, int64_t offset)
 
 	assert((offset & ~(media->allocGran - 1)) == (offset / media->allocGran) * media->allocGran);
 
-	/* Æ«ÒÆÁ¿ÓëÄÚ´æÁ£¶È¶ÔÆë */
+	/* åç§»é‡ä¸å†…å­˜ç²’åº¦å¯¹é½ */
 	alignedOffset.QuadPart = offset & ~(media->allocGran - 1);
 
 	if(media->pView && alignedOffset.QuadPart == media->viewPos.QuadPart)
@@ -82,21 +82,21 @@ static int SplitMapView(T media, int64_t offset)
 
 		return SUCCESS;
 	}
-	else//Èç¹û¶ÔÆëºóÆ«ÒÆÁ¿Óëµ±Ç°ÊÓÍ¼Î»ÖÃ²»Í¬£¬»òÕß»¹Î´Ó³Éä
+	else//å¦‚æœå¯¹é½ååç§»é‡ä¸å½“å‰è§†å›¾ä½ç½®ä¸åŒï¼Œæˆ–è€…è¿˜æœªæ˜ å°„
 	{
 		/*
-			Ã¿µ±Ìø×ªÎ»ÖÃoffset³¬¹ıµ±Ç°ÊÓÍ¼Î»ÖÃviewPosºó
-			Ò»¸öÄÚ´æ·ÖÅäÁ£¶ÈallocGranÊ±£¬offset¶ÔÆëÎ»ÖÃ
-			alignedOffset½«ÓëÌø×ªÇ°µÄÊÓÍ¼Î»ÖÃviewPos²»Í¬£¬
-			¼´»áÖ´ĞĞ´Ë¶Îelse´úÂë¡£
+			æ¯å½“è·³è½¬ä½ç½®offsetè¶…è¿‡å½“å‰è§†å›¾ä½ç½®viewPoså
+			ä¸€ä¸ªå†…å­˜åˆ†é…ç²’åº¦allocGranæ—¶ï¼Œoffsetå¯¹é½ä½ç½®
+			alignedOffsetå°†ä¸è·³è½¬å‰çš„è§†å›¾ä½ç½®viewPosä¸åŒï¼Œ
+			å³ä¼šæ‰§è¡Œæ­¤æ®µelseä»£ç ã€‚
 
-			´Ë¶Îelse´úÂëÔÚĞÂÎ»ÖÃalignedOffsetÓ³ÉäĞÂÊÓÍ¼£¬
-			³É¹¦ºóÏú»ÙÔ­À´ÊÓÍ¼²¢¸üĞÂmedia½á¹¹Öµ¡£
+			æ­¤æ®µelseä»£ç åœ¨æ–°ä½ç½®alignedOffsetæ˜ å°„æ–°è§†å›¾ï¼Œ
+			æˆåŠŸåé”€æ¯åŸæ¥è§†å›¾å¹¶æ›´æ–°mediaç»“æ„å€¼ã€‚
 		*/
 		uint32_t actualViewSize;
 		PVOID pNewView;
 
-		/* ¼ÆËãÊµ¼ÊÊÓÍ¼´óĞ¡actualViewSize */
+		/* è®¡ç®—å®é™…è§†å›¾å¤§å°actualViewSize */
 		if(alignedOffset.QuadPart + media->viewSize > media->size.QuadPart)
 			actualViewSize = (uint32_t)(media->size.QuadPart - alignedOffset.QuadPart);
 		else
@@ -107,7 +107,7 @@ static int SplitMapView(T media, int64_t offset)
 
 		if(pNewView)
 		{
-			/* Èômedia´æÔÚ¾ÉÓ³ÉäÊÓÍ¼,²¢ÇÒÏú»Ù³É¹¦,»òÕßmedia²»´æÔÚ¾ÉÓ³ÉäÊÓÍ¼ */
+			/* è‹¥mediaå­˜åœ¨æ—§æ˜ å°„è§†å›¾,å¹¶ä¸”é”€æ¯æˆåŠŸ,æˆ–è€…mediaä¸å­˜åœ¨æ—§æ˜ å°„è§†å›¾ */
 			if((media->pView && UnmapViewOfFile(media->pView)) || !media->pView)
 			{
 				media->pView = pNewView;
@@ -115,9 +115,9 @@ static int SplitMapView(T media, int64_t offset)
 				media->actualViewSize = actualViewSize;
 
 				/*
-					¿É·ÃÎÊÊÓÍ¼´óĞ¡Ó¦µ±µÈÓÚÊµ¼ÊµÄÊÓÍ¼´óĞ¡actualViewSize¼õÈ¥
-					¶ÔÆëoffsetÊ±ÏûºÄµÄ´óĞ¡£¬¼´offset-alignedOffset£¬
-					ÕâÀïÓÅ»¯Ò»ÏÂÊ¹ÓÃÎ»ÔËËãÌá¸ßËÙ¶È¡£
+					å¯è®¿é—®è§†å›¾å¤§å°åº”å½“ç­‰äºå®é™…çš„è§†å›¾å¤§å°actualViewSizeå‡å»
+					å¯¹é½offsetæ—¶æ¶ˆè€—çš„å¤§å°ï¼Œå³offset-alignedOffsetï¼Œ
+					è¿™é‡Œä¼˜åŒ–ä¸€ä¸‹ä½¿ç”¨ä½è¿ç®—æé«˜é€Ÿåº¦ã€‚
 				*/
 				media->currPos.QuadPart = offset;
 				media->accessSize = actualViewSize - ALIGN_COST;
@@ -136,18 +136,18 @@ static int FullMapView(T media, uint32_t offset)
 {
 	int retVal = FAILED;
 
-	if(media->pView)//Èç¹ûÒÑ¾­Ó³Éä³É¹¦
+	if(media->pView)//å¦‚æœå·²ç»æ˜ å°„æˆåŠŸ
 	{
 		/*
-			offsetÒÑ¾­ÊÇ¾ø¶ÔÆ«ÒÆÁ¿£¬ÕâÀï¿É·ÃÎÊÊÓÍ¼´óĞ¡accessSize
-			Ö±½ÓÊÇÊµ¼ÊÊÓÍ¼´óĞ¡£¨Í¬ÑùÒ²ÊÇ½éÖÊ´óĞ¡£©¼õÈ¥offset¼´¿É
+			offsetå·²ç»æ˜¯ç»å¯¹åç§»é‡ï¼Œè¿™é‡Œå¯è®¿é—®è§†å›¾å¤§å°accessSize
+			ç›´æ¥æ˜¯å®é™…è§†å›¾å¤§å°ï¼ˆåŒæ ·ä¹Ÿæ˜¯ä»‹è´¨å¤§å°ï¼‰å‡å»offsetå³å¯
 		*/
 		media->currPos.QuadPart = offset;
 		media->accessSize = media->actualViewSize - offset;
 
 		retVal = SUCCESS;
 	}
-	else//Èç¹û»¹Î´Ó³Éä£¬Ôò½øĞĞÍêÈ«Ó³Éä
+	else//å¦‚æœè¿˜æœªæ˜ å°„ï¼Œåˆ™è¿›è¡Œå®Œå…¨æ˜ å°„
 	{
 		PVOID pNewView = MapViewOfFile(
 			media->hFile, FILE_MAP_READ, 0, 0, 0);
@@ -157,9 +157,9 @@ static int FullMapView(T media, uint32_t offset)
 			media->pView = pNewView;
 
 			/*
-				Ê×´Î£¨Ò²ÊÇÎ¨Ò»Ò»´Î£©½øĞĞÍêÈ«Ó³Éäºó£¬
-				¿É·ÃÎÊÊÓÍ¼´óĞ¡ºÍÊµ¼ÊÊÓÍ¼´óĞ¡Ó¦µ±Óë½éÖÊ
-				´óĞ¡ÏàÍ¬
+				é¦–æ¬¡ï¼ˆä¹Ÿæ˜¯å”¯ä¸€ä¸€æ¬¡ï¼‰è¿›è¡Œå®Œå…¨æ˜ å°„åï¼Œ
+				å¯è®¿é—®è§†å›¾å¤§å°å’Œå®é™…è§†å›¾å¤§å°åº”å½“ä¸ä»‹è´¨
+				å¤§å°ç›¸åŒ
 			*/
 			media->accessSize = media->size.LowPart;
 			media->actualViewSize = media->size.LowPart;
@@ -179,7 +179,7 @@ static int SeekMapMedia(T media, int64_t offset, int base)
 	{
 		LARGE_INTEGER mendedOffset;
 
-		/* ĞŞÕıoffsetÎª¾ø¶ÔÆ«ÒÆÁ¿ */
+		/* ä¿®æ­£offsetä¸ºç»å¯¹åç§»é‡ */
 		switch(base)
 		{
 		case MEDIA_SET:
@@ -190,12 +190,12 @@ static int SeekMapMedia(T media, int64_t offset, int base)
 			break;
 		}
 
-		/* Èç¹ûĞŞÕıºóÆ«ÒÆÁ¿mendedOffsetÃ»ÓĞ³¬³öÎÄ¼ş·¶Î§ */
+		/* å¦‚æœä¿®æ­£ååç§»é‡mendedOffsetæ²¡æœ‰è¶…å‡ºæ–‡ä»¶èŒƒå›´ */
 		if(mendedOffset.QuadPart >= 0 && mendedOffset.QuadPart < media->size.QuadPart)
 		{
-			if(media->viewSize)//Èç¹û·Ö¿éÓ³Éä
+			if(media->viewSize)//å¦‚æœåˆ†å—æ˜ å°„
 				retVal = SplitMapView(media, mendedOffset.QuadPart);
-			else//Èç¹ûÍêÈ«Ó³Éä
+			else//å¦‚æœå®Œå…¨æ˜ å°„
 				retVal = FullMapView(media, mendedOffset.LowPart);
 		}
 	}
@@ -209,13 +209,13 @@ static int SeekRawMedia(T media, int64_t offset, int base)
 
 	if(media && offset)
 	{
-		assert(0);/// \todo SeekRawMediaÖĞ¼ÓÈëÊ¹ÓÃfopen´ò¿ª½éÖÊ
+		assert(0);/// \todo SeekRawMediaä¸­åŠ å…¥ä½¿ç”¨fopenæ‰“å¼€ä»‹è´¨
 	}
 
 	return retVal;
 }
 
-static T OpenMapMedia(T media, const char *path, uint32_t viewSize)
+static T OpenMapMedia(T media, const _TCHAR *path, uint32_t viewSize)
 {
 	T retVal = NULL;
 
@@ -228,25 +228,25 @@ static T OpenMapMedia(T media, const char *path, uint32_t viewSize)
 		{
 			SYSTEM_INFO sysInfo;
 			
-			/* »ñÈ¡ÄÚ´æ·ÖÅäÁ£¶È */
+			/* è·å–å†…å­˜åˆ†é…ç²’åº¦ */
 			GetSystemInfo(&sysInfo);
 
 			if(sysInfo.dwAllocationGranularity)
 			{
-				uint32_t roundViewSize = /* ÉÏ¶ÔÆëÓëÄÚ´æÁ£¶È */
+				uint32_t roundViewSize = /* ä¸Šå¯¹é½ä¸å†…å­˜ç²’åº¦ */
 					(viewSize & ~(sysInfo.dwAllocationGranularity - 1)) + sysInfo.dwAllocationGranularity;
 					
 				assert(((viewSize / sysInfo.dwAllocationGranularity) + 1) * sysInfo.dwAllocationGranularity
 					== roundViewSize);
 
-				if(roundViewSize >= viewSize)//·ÀÖ¹ÉÏ¶ÔÆëÕûÒç³ö
+				if(roundViewSize >= viewSize)//é˜²æ­¢ä¸Šå¯¹é½æ•´æº¢å‡º
 				{
 					viewSize = roundViewSize;
 
-					if(!fileSize.HighPart && viewSize >= fileSize.LowPart)//viewSize´óÓÚfileSize
+					if(!fileSize.HighPart && viewSize >= fileSize.LowPart)//viewSizeå¤§äºfileSize
 						viewSize = 0;
 
-					/* ³õÊ¼»¯media½á¹¹Ìå */
+					/* åˆå§‹åŒ–mediaç»“æ„ä½“ */
 					media->name = path;
 					media->hFile = hFileMapping;
 					media->allocGran = sysInfo.dwAllocationGranularity;
@@ -280,26 +280,26 @@ int SeekMedia(T media, int64_t offset, int base)
 
 	if(media && (base == MEDIA_SET || base == MEDIA_CUR))
 	{
-		if(media->hFile)//Èç¹ûÊÇÓ³ÉäÎÄ¼ş
+		if(media->hFile)//å¦‚æœæ˜¯æ˜ å°„æ–‡ä»¶
 			retVal = SeekMapMedia(media, offset, base);
-		else if(media->pFile)//Èç¹ûÊÇfopen´ò¿ª½éÖÊ
+		else if(media->pFile)//å¦‚æœæ˜¯fopenæ‰“å¼€ä»‹è´¨
 			retVal = SeekRawMedia(media, offset, base);
 	}
 
 	return retVal;
 }
 
-T OpenMedia(const char *path, uint32_t viewSize)
+T OpenMedia(const _TCHAR *path, uint32_t viewSize)
 {
 	T media, retVal = NULL;
 
 	if(path && NEW(media))
 	{
-		if(_access(path, 0/* ¼ì²â´æÔÚ */))//Èç¹ûÎÄ¼ş²»´æÔÚ
+		if(_taccess(path, 0/* æ£€æµ‹å­˜åœ¨ */))//å¦‚æœæ–‡ä»¶ä¸å­˜åœ¨
 		{
-			assert(0);/// \todo Ìí¼ÓÎÄ¼ş²»´æÔÚµÄ´¦Àí
+			assert(0);/// \todo æ·»åŠ æ–‡ä»¶ä¸å­˜åœ¨çš„å¤„ç†
 		}
-		else//Èç¹ûÎÄ¼ş´æÔÚ
+		else//å¦‚æœæ–‡ä»¶å­˜åœ¨
 			retVal = OpenMapMedia(media, path, viewSize);
 	}
 
@@ -312,14 +312,14 @@ void CloseMedia(T *media)
 
 	if(media && mediaCopy)
 	{
-		if(mediaCopy->hFile)//Èç¹ûÊÇÓ³ÉäÎÄ¼ş
+		if(mediaCopy->hFile)//å¦‚æœæ˜¯æ˜ å°„æ–‡ä»¶
 		{
-			UnmapViewOfFile(mediaCopy->pView);	/* Ğ¶ÔØÊÓÍ¼ */
-			CloseHandle(mediaCopy->hFile);		/* ¹Ø±ÕÎÄ¼ş¾ä±ú */
-			FREE(mediaCopy);					/* ÊÍ·Åmedia_t½á¹¹ */
-			*media = NULL;						/* ²ÎÊıÖ¸ÏòµÄmedia_tÖÃNULL */
+			UnmapViewOfFile(mediaCopy->pView);	/* å¸è½½è§†å›¾ */
+			CloseHandle(mediaCopy->hFile);		/* å…³é—­æ–‡ä»¶å¥æŸ„ */
+			FREE(mediaCopy);					/* é‡Šæ”¾media_tç»“æ„ */
+			*media = NULL;						/* å‚æ•°æŒ‡å‘çš„media_tç½®NULL */
 		}
-		else if(mediaCopy->pFile)//Èç¹ûÊÇfopen´ò¿ª½éÖÊ
+		else if(mediaCopy->pFile)//å¦‚æœæ˜¯fopenæ‰“å¼€ä»‹è´¨
 		{
 			assert(0);
 		}
@@ -342,7 +342,7 @@ int GetMediaAccess(T media, media_access *access, uint32_t len)
 			}
 			else
 			{
-				assert(0);/// \todo Ìí¼Ó¶¯Ì¬·ÖÅäÄÚ´æ¿Õ¼ä
+				assert(0);/// \todo æ·»åŠ åŠ¨æ€åˆ†é…å†…å­˜ç©ºé—´
 			}
 		}
 		else if(media->pFile)
@@ -368,7 +368,7 @@ int DumpMedia(T media, FILE *fp, int64_t size)
 		memcpy(media_bak, media, sizeof(*media));
 #endif
 
-		if(media->hFile)//Èç¹ûÊÇÎÄ¼şÓ³Éä
+		if(media->hFile)//å¦‚æœæ˜¯æ–‡ä»¶æ˜ å°„
 		{
 			int hasError = 0;
 
@@ -376,7 +376,7 @@ int DumpMedia(T media, FILE *fp, int64_t size)
 			{
 				const unsigned char *writePtr = 
 					(const unsigned char *)media->pView + media->viewSize - media->accessSize;
-				uint32_t writeLen;//Ğ´Èë³¤¶È
+				uint32_t writeLen;//å†™å…¥é•¿åº¦
 
 				if(fwrite(writePtr, media->accessSize, 1, fp) != 1)
 				{
@@ -384,9 +384,9 @@ int DumpMedia(T media, FILE *fp, int64_t size)
 					break;
 				}
 
-				writeLen = media->accessSize;//±£´æĞ´ÈëµÄ³¤¶È
+				writeLen = media->accessSize;//ä¿å­˜å†™å…¥çš„é•¿åº¦
 				
-				/* ÏòºóÌø×ª£¬»áĞŞ¸Ämedia->accessSize */
+				/* å‘åè·³è½¬ï¼Œä¼šä¿®æ”¹media->accessSize */
 				if(SeekMedia(media, media->accessSize, MEDIA_CUR) != SUCCESS)
 				{
 					hasError = 1;
@@ -404,7 +404,7 @@ int DumpMedia(T media, FILE *fp, int64_t size)
 		}
 		else if(media->pFile)
 		{
-			assert(0);/// \todo Ìí¼Ófopen´ò¿ªµÄ½éÖÊ´¦Àí
+			assert(0);/// \todo æ·»åŠ fopenæ‰“å¼€çš„ä»‹è´¨å¤„ç†
 		}
 
 		if(SeekMedia(media, currPos.QuadPart, MEDIA_SET) != SUCCESS)
@@ -418,13 +418,19 @@ int DumpMedia(T media, FILE *fp, int64_t size)
 	return retVal;
 }
 
-//========================²âÊÔ´úÂë¿ªÊ¼=============================
+//========================æµ‹è¯•ä»£ç å¼€å§‹=============================
 
 #ifdef _DEBUG
 
-#include "ColorPrint.h"	/*!< ²âÊÔÓÃÀıÊ¹ÓÃ */
+#include "ColorPrint.h"	/*!< æµ‹è¯•ç”¨ä¾‹ä½¿ç”¨ */
 
-void MapTestUnit(const char *path)
+#ifdef _UNICODE
+#define _tmemcmp wmemcmp
+#else
+#define _tmemcmp memcmp
+#endif
+
+void MapTestUnit(const _TCHAR *path)
 {
 #define MAX(x,y) ((x) > (y) ? (x) : (y))
 #define MIN(x,y) ((x) < (y) ? (x) : (y))
@@ -432,25 +438,25 @@ void MapTestUnit(const char *path)
 	LARGE_INTEGER fileSize;
 	uint32_t allocGran;
 
-	fileSize.QuadPart = 0;//³õÊ¼Éè0
+	fileSize.QuadPart = 0;//åˆå§‹è®¾0
 	allocGran = 0;
 
-	/* »ñµÃÎÄ¼ş´óĞ¡fileSize */
+	/* è·å¾—æ–‡ä»¶å¤§å°fileSize */
 	{
-		HANDLE hFile = CreateFileA(
+		HANDLE hFile = CreateFile(
 			path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
 		if(hFile != INVALID_HANDLE_VALUE)
-			GetFileSizeEx(hFile, &fileSize);//»ñµÃÎÄ¼ş´óĞ¡
+			GetFileSizeEx(hFile, &fileSize);//è·å¾—æ–‡ä»¶å¤§å°
 
 		CloseHandle(hFile);
 	}
 
-	/* »ñµÃÄÚ´æ·ÖÅäÁ£¶È´óĞ¡allocGran */
+	/* è·å¾—å†…å­˜åˆ†é…ç²’åº¦å¤§å°allocGran */
 	{
 		SYSTEM_INFO sysInfo;
 
-		/* »ñÈ¡ÄÚ´æ·ÖÅäÁ£¶È */
+		/* è·å–å†…å­˜åˆ†é…ç²’åº¦ */
 		GetSystemInfo(&sysInfo);
 		allocGran = sysInfo.dwAllocationGranularity;
 	}
@@ -459,134 +465,134 @@ void MapTestUnit(const char *path)
 	{
 		uint32_t viewSize;
 
-		ColorPrintf(WHITE, "ÕıÔÚ²âÊÔÎÄ¼ş´ò¿ª\t\t\t");
+		ColorPrintf(WHITE, _T("æ­£åœ¨æµ‹è¯•æ–‡ä»¶æ‰“å¼€\t\t\t"));
 		assert(fileSize.QuadPart);
-		ColorPrintf(GREEN, "Í¨¹ı\n");
+		ColorPrintf(GREEN, _T("é€šè¿‡\n"));
 
-		ColorPrintf(WHITE, "ÕıÔÚ²âÊÔ»ñÈ¡ÄÚ´æ·ÖÅäÁ£¶È\t\t");
+		ColorPrintf(WHITE, _T("æ­£åœ¨æµ‹è¯•è·å–å†…å­˜åˆ†é…ç²’åº¦\t\t"));
 		assert(allocGran);
-		ColorPrintf(GREEN, "Í¨¹ı\n");
+		ColorPrintf(GREEN, _T("é€šè¿‡\n"));
 
-		ColorPrintf(YELLOW, "=>ÎÄ¼ş´óĞ¡£º%I64d\tÄÚ´æ·ÖÅäÁ£¶È£º\%u\n", fileSize.QuadPart, allocGran);
+		ColorPrintf(YELLOW, _T("=>æ–‡ä»¶å¤§å°ï¼š%I64d\tå†…å­˜åˆ†é…ç²’åº¦ï¼š\%u\n"), fileSize.QuadPart, allocGran);
 
-		ColorPrintf(SILVER, "->È¡ÊÓÍ¼ >= ÎÄ¼ş£¬½«½øĞĞÍêÈ«Ó³Éä£º\n");
+		ColorPrintf(SILVER, _T("->å–è§†å›¾ >= æ–‡ä»¶ï¼Œå°†è¿›è¡Œå®Œå…¨æ˜ å°„ï¼š\n"));
 		{
 			LARGE_INTEGER tempViewSize;
 
 			tempViewSize.QuadPart = MAX(fileSize.QuadPart, allocGran) + 10;
 
 			if(tempViewSize.HighPart)
-				ColorPrintf(RED, "ÎÄ¼ş´óĞ¡³¬¹ıÊÓÍ¼ÉÏÏŞ£¬Ìø¹ı¼ì²â£¡\n");
+				ColorPrintf(RED, _T("æ–‡ä»¶å¤§å°è¶…è¿‡è§†å›¾ä¸Šé™ï¼Œè·³è¿‡æ£€æµ‹ï¼\n"));
 			else
 			{
 				T testMedia, backupMedia = NULL;
 
 				viewSize = tempViewSize.LowPart;
 
-				ColorPrintf(WHITE, "ÕıÔÚ²âÊÔÓ³ÉäÎÄ¼ş\t\t\t");
+				ColorPrintf(WHITE, _T("æ­£åœ¨æµ‹è¯•æ˜ å°„æ–‡ä»¶\t\t\t"));
 				testMedia = OpenMedia(path, viewSize);
-				assert(testMedia->allocGran == allocGran);					/* ¼ì²éÁ£¶ÈÕıÈ· */
-				assert(!testMedia->currPos.QuadPart);						/* ¼ì²éµ±Ç°Î»ÖÃÎª0 */
-				assert(testMedia->hFile);									/* ¼ì²éÎÄ¼ş¾ä±ú´æÔÚ */
-				assert(!memcmp(testMedia->name, path, strlen(path) + 1));	/* ¼ì²éÃû³ÆÕıÈ· */
-				assert(testMedia->pView);									/* ¼ì²éÊÓÍ¼Ö¸ÕëÓ¦µ±²»Îª¿Õ */
-				assert(!testMedia->pFile);									/* ¼ì²éÎÄ¼şÖ¸ÕëÓ¦µ±Îª¿Õ */
-				assert(testMedia->size.QuadPart == fileSize.QuadPart);		/* ¼ì²éÎÄ¼ş´óĞ¡ÕıÈ· */
-				assert(testMedia->accessSize);								/* ¼ì²é¿É·ÃÎÊÊÓÍ¼´óĞ¡Ó¦µ±²»Îª0 */
-				assert(!testMedia->viewPos.QuadPart);						/* ¼ì²éÊÓÍ¼ÆğÊ¼Î»ÖÃÎª0 */
-				assert(!testMedia->viewSize);								/* ¼ì²éÊÓÍ¼´óĞ¡Ó¦µ±Îª0 */
-				assert(!(testMedia->viewPos.QuadPart % allocGran));			/* ¼ì²éÊÓÍ¼ÆğÊ¼Î»ÖÃ¶ÔÆëÄÚ´æÁ£¶È */
-				ColorPrintf(GREEN, "Í¨¹ı\n");
+				assert(testMedia->allocGran == allocGran);					/* æ£€æŸ¥ç²’åº¦æ­£ç¡® */
+				assert(!testMedia->currPos.QuadPart);						/* æ£€æŸ¥å½“å‰ä½ç½®ä¸º0 */
+				assert(testMedia->hFile);									/* æ£€æŸ¥æ–‡ä»¶å¥æŸ„å­˜åœ¨ */
+				assert(!_tmemcmp(testMedia->name, path, _tcslen(path) + 1));	/* æ£€æŸ¥åç§°æ­£ç¡® */
+				assert(testMedia->pView);									/* æ£€æŸ¥è§†å›¾æŒ‡é’ˆåº”å½“ä¸ä¸ºç©º */
+				assert(!testMedia->pFile);									/* æ£€æŸ¥æ–‡ä»¶æŒ‡é’ˆåº”å½“ä¸ºç©º */
+				assert(testMedia->size.QuadPart == fileSize.QuadPart);		/* æ£€æŸ¥æ–‡ä»¶å¤§å°æ­£ç¡® */
+				assert(testMedia->accessSize);								/* æ£€æŸ¥å¯è®¿é—®è§†å›¾å¤§å°åº”å½“ä¸ä¸º0 */
+				assert(!testMedia->viewPos.QuadPart);						/* æ£€æŸ¥è§†å›¾èµ·å§‹ä½ç½®ä¸º0 */
+				assert(!testMedia->viewSize);								/* æ£€æŸ¥è§†å›¾å¤§å°åº”å½“ä¸º0 */
+				assert(!(testMedia->viewPos.QuadPart % allocGran));			/* æ£€æŸ¥è§†å›¾èµ·å§‹ä½ç½®å¯¹é½å†…å­˜ç²’åº¦ */
+				ColorPrintf(GREEN, _T("é€šè¿‡\n"));
 
-				ColorPrintf(WHITE, "ÕıÔÚ²âÊÔÌø×ª\t\t\t\t");
-				assert(NEW(backupMedia));																				/*!< ´´½¨backupMedia */
-				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< ±¸·İmediaµ½backupMedia */
-				assert(SeekMedia(testMedia, testMedia->accessSize, MEDIA_SET) != SUCCESS);							/*!< ²âÊÔÌø×ªµ½¿É·ÃÎÊ·¶Î§±ß½ç£¬Ó¦µ±Ê§°Ü */
-				assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));											/*!< Ìø×ªÊ§°ÜÊ±£¬mediaÖµÓ¦µ±²»±ä */
-				assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);						/*!< ²âÊÔÌø×ªµ½¿É·ÃÎÊ·¶Î§±ß½ç-1£¬Ó¦µ±³É¹¦ */
-				assert(RewindMedia(testMedia) == SUCCESS);															/*!< ÖØÖÃmedia */
-				assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));											/*!< ¼ì²éÖØÖÃºómediaÓ¦µ±ÓëÔ­Ê¼mediaÏàÍ¬ */
-				assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);						/*!< ²âÊÔÌø×ªµ½¿É·ÃÎÊ·¶Î§±ß½ç-1£¬Ó¦µ±³É¹¦ */
-				assert(SeekMedia(testMedia, -(int64_t)(testMedia->actualViewSize - 1), MEDIA_CUR) == SUCCESS);		/*!< ´Óµ±Ç°ÏòºóÌø»ØÍ¬Ñù³¤¶È */
-				assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));											/*!< ¼ì²éÖØÖÃºómediaÓ¦µ±ÓëÔ­Ê¼mediaÏàÍ¬ */
-				assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);						/*!< ²âÊÔÌø×ªµ½¿É·ÃÎÊ·¶Î§±ß½ç-1£¬Ó¦µ±³É¹¦ */
-				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< ±¸·İµ±Ç°mediaµ½backupMedia */
-				assert(SeekMedia(testMedia, -(int64_t)(testMedia->actualViewSize - 1)/2, MEDIA_CUR) == SUCCESS);	/*!< ÏòºóÌø»Ø£¨¿É·ÃÎÊ·¶Î§±ß½ç-1£©/2 */
-				assert(SeekMedia(testMedia, (int64_t)(testMedia->actualViewSize - 1)/2, MEDIA_CUR) == SUCCESS);		/*!< ÏòÇ°Ìø»Ø£¨¿É·ÃÎÊ·¶Î§±ß½ç-1£©/2 */
-				assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));											/*!< ¼ì²éÌø»ØºómediaÓ¦µ±ÓëÉÏ´Î±¸·İµÄbackupMediaÏàÍ¬ */
-				ColorPrintf(GREEN, "Í¨¹ı\n");
+				ColorPrintf(WHITE, _T("æ­£åœ¨æµ‹è¯•è·³è½¬\t\t\t\t"));
+				assert(NEW(backupMedia));																				/*!< åˆ›å»ºbackupMedia */
+				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< å¤‡ä»½mediaåˆ°backupMedia */
+				assert(SeekMedia(testMedia, testMedia->accessSize, MEDIA_SET) != SUCCESS);							/*!< æµ‹è¯•è·³è½¬åˆ°å¯è®¿é—®èŒƒå›´è¾¹ç•Œï¼Œåº”å½“å¤±è´¥ */
+				assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));											/*!< è·³è½¬å¤±è´¥æ—¶ï¼Œmediaå€¼åº”å½“ä¸å˜ */
+				assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);						/*!< æµ‹è¯•è·³è½¬åˆ°å¯è®¿é—®èŒƒå›´è¾¹ç•Œ-1ï¼Œåº”å½“æˆåŠŸ */
+				assert(RewindMedia(testMedia) == SUCCESS);															/*!< é‡ç½®media */
+				assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));											/*!< æ£€æŸ¥é‡ç½®åmediaåº”å½“ä¸åŸå§‹mediaç›¸åŒ */
+				assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);						/*!< æµ‹è¯•è·³è½¬åˆ°å¯è®¿é—®èŒƒå›´è¾¹ç•Œ-1ï¼Œåº”å½“æˆåŠŸ */
+				assert(SeekMedia(testMedia, -(int64_t)(testMedia->actualViewSize - 1), MEDIA_CUR) == SUCCESS);		/*!< ä»å½“å‰å‘åè·³å›åŒæ ·é•¿åº¦ */
+				assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));											/*!< æ£€æŸ¥é‡ç½®åmediaåº”å½“ä¸åŸå§‹mediaç›¸åŒ */
+				assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);						/*!< æµ‹è¯•è·³è½¬åˆ°å¯è®¿é—®èŒƒå›´è¾¹ç•Œ-1ï¼Œåº”å½“æˆåŠŸ */
+				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< å¤‡ä»½å½“å‰mediaåˆ°backupMedia */
+				assert(SeekMedia(testMedia, -(int64_t)(testMedia->actualViewSize - 1)/2, MEDIA_CUR) == SUCCESS);	/*!< å‘åè·³å›ï¼ˆå¯è®¿é—®èŒƒå›´è¾¹ç•Œ-1ï¼‰/2 */
+				assert(SeekMedia(testMedia, (int64_t)(testMedia->actualViewSize - 1)/2, MEDIA_CUR) == SUCCESS);		/*!< å‘å‰è·³å›ï¼ˆå¯è®¿é—®èŒƒå›´è¾¹ç•Œ-1ï¼‰/2 */
+				assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));											/*!< æ£€æŸ¥è·³å›åmediaåº”å½“ä¸ä¸Šæ¬¡å¤‡ä»½çš„backupMediaç›¸åŒ */
+				ColorPrintf(GREEN, _T("é€šè¿‡\n"));
 
 				CloseMedia(&testMedia);
 			}
 		}
 
-		ColorPrintf(SILVER, "->È¡ÊÓÍ¼ < ÎÄ¼ş£¬½«½øĞĞ·Ö¿éÓ³Éä£º\n");
+		ColorPrintf(SILVER, _T("->å–è§†å›¾ < æ–‡ä»¶ï¼Œå°†è¿›è¡Œåˆ†å—æ˜ å°„ï¼š\n"));
 		{
 			LARGE_INTEGER tempViewSize;
 
 			tempViewSize.QuadPart = fileSize.QuadPart - allocGran - 1;
 
 			if(tempViewSize.HighPart)
-				ColorPrintf(RED, "ÎÄ¼ş´óĞ¡³¬¹ıÊÓÍ¼ÉÏÏŞ£¬Ìø¹ı¼ì²â£¡\n");
+				ColorPrintf(RED, _T("æ–‡ä»¶å¤§å°è¶…è¿‡è§†å›¾ä¸Šé™ï¼Œè·³è¿‡æ£€æµ‹ï¼\n"));
 			else if(tempViewSize.QuadPart <= allocGran)
-				ColorPrintf(RED, "ÎÄ¼ş´óĞ¡½Ó½üÄÚ´æ·ÖÅäÁ£¶È£¬Ìø¹ı¼ì²â£¡\n");
+				ColorPrintf(RED, _T("æ–‡ä»¶å¤§å°æ¥è¿‘å†…å­˜åˆ†é…ç²’åº¦ï¼Œè·³è¿‡æ£€æµ‹ï¼\n"));
 			else if((tempViewSize.LowPart & ~(allocGran - 1)) + allocGran >= fileSize.QuadPart)
-				ColorPrintf(RED, "ÊÓÍ¼´óĞ¡ÉÏ¶ÔÆëÄÚ´æ·ÖÅäÁ£¶Èºó >= ÎÄ¼ş´óĞ¡£¬Ìø¹ı¼ì²â£¡\n");
+				ColorPrintf(RED, _T("è§†å›¾å¤§å°ä¸Šå¯¹é½å†…å­˜åˆ†é…ç²’åº¦å >= æ–‡ä»¶å¤§å°ï¼Œè·³è¿‡æ£€æµ‹ï¼\n"));
 			else
 			{
 				T testMedia, backupMedia = NULL;
 
 				viewSize = tempViewSize.LowPart;
 
-				ColorPrintf(WHITE, "ÕıÔÚ²âÊÔÓ³ÉäÎÄ¼ş\t\t\t");
+				ColorPrintf(WHITE, _T("æ­£åœ¨æµ‹è¯•æ˜ å°„æ–‡ä»¶\t\t\t"));
 				testMedia = OpenMedia(path, viewSize);
-				assert(testMedia->allocGran == allocGran);					/* ¼ì²éÁ£¶ÈÕıÈ· */
-				assert(!testMedia->currPos.QuadPart);						/* ¼ì²éµ±Ç°Î»ÖÃÎª0 */
-				assert(testMedia->hFile);									/* ¼ì²éÎÄ¼ş¾ä±ú´æÔÚ */
-				assert(!memcmp(testMedia->name, path, strlen(path) + 1));	/* ¼ì²éÃû³ÆÕıÈ· */
-				assert(testMedia->pView);									/* ¼ì²éÊÓÍ¼Ö¸ÕëÓ¦µ±²»Îª¿Õ */
-				assert(!testMedia->pFile);									/* ¼ì²éÎÄ¼şÖ¸ÕëÓ¦µ±Îª¿Õ */
-				assert(testMedia->size.QuadPart == fileSize.QuadPart);		/* ¼ì²éÎÄ¼ş´óĞ¡ÕıÈ· */
-				assert(testMedia->accessSize);								/* ¼ì²é¿É·ÃÎÊÊÓÍ¼´óĞ¡Ó¦µ±²»Îª0 */
-				assert(!testMedia->viewPos.QuadPart);						/* ¼ì²éÊÓÍ¼ÆğÊ¼Î»ÖÃÎª0 */
-				assert(testMedia->viewSize);								/* ¼ì²éÊÓÍ¼´óĞ¡Ó¦µ±²»Îª0 */
-				assert(!(testMedia->viewPos.QuadPart % allocGran));			/* ¼ì²éÊÓÍ¼ÆğÊ¼Î»ÖÃ¶ÔÆëÄÚ´æÁ£¶È */
-				assert(testMedia->viewSize >= viewSize);					/* ÓëÁ£¶ÈÉÏ¶ÔÆëºó£¬Êµ¼ÊµÄviewSizeÓ¦µ±´óÓÚµÈÓÚ´«ÈëviewSize */
-				ColorPrintf(GREEN, "Í¨¹ı\n");
+				assert(testMedia->allocGran == allocGran);					/* æ£€æŸ¥ç²’åº¦æ­£ç¡® */
+				assert(!testMedia->currPos.QuadPart);						/* æ£€æŸ¥å½“å‰ä½ç½®ä¸º0 */
+				assert(testMedia->hFile);									/* æ£€æŸ¥æ–‡ä»¶å¥æŸ„å­˜åœ¨ */
+				assert(!_tmemcmp(testMedia->name, path, _tcslen(path) + 1));	/* æ£€æŸ¥åç§°æ­£ç¡® */
+				assert(testMedia->pView);									/* æ£€æŸ¥è§†å›¾æŒ‡é’ˆåº”å½“ä¸ä¸ºç©º */
+				assert(!testMedia->pFile);									/* æ£€æŸ¥æ–‡ä»¶æŒ‡é’ˆåº”å½“ä¸ºç©º */
+				assert(testMedia->size.QuadPart == fileSize.QuadPart);		/* æ£€æŸ¥æ–‡ä»¶å¤§å°æ­£ç¡® */
+				assert(testMedia->accessSize);								/* æ£€æŸ¥å¯è®¿é—®è§†å›¾å¤§å°åº”å½“ä¸ä¸º0 */
+				assert(!testMedia->viewPos.QuadPart);						/* æ£€æŸ¥è§†å›¾èµ·å§‹ä½ç½®ä¸º0 */
+				assert(testMedia->viewSize);								/* æ£€æŸ¥è§†å›¾å¤§å°åº”å½“ä¸ä¸º0 */
+				assert(!(testMedia->viewPos.QuadPart % allocGran));			/* æ£€æŸ¥è§†å›¾èµ·å§‹ä½ç½®å¯¹é½å†…å­˜ç²’åº¦ */
+				assert(testMedia->viewSize >= viewSize);					/* ä¸ç²’åº¦ä¸Šå¯¹é½åï¼Œå®é™…çš„viewSizeåº”å½“å¤§äºç­‰äºä¼ å…¥viewSize */
+				ColorPrintf(GREEN, _T("é€šè¿‡\n"));
 
-				ColorPrintf(WHITE, "ÕıÔÚ²âÊÔÌø×ª\t\t\t\t");
-				assert(NEW(backupMedia));																				/*!< ´´½¨backupMedia */
-				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< ±¸·İmediaµ½backupMedia */
-				assert(SeekMedia(testMedia, testMedia->allocGran - 1, MEDIA_SET) == SUCCESS);						/*!< ¾Ö²¿Ìø×ª£¬Ó¦¸Ã²»»áÇĞ»»Ó³ÉäÊÓÍ¼ */
-				assert(testMedia->pView == backupMedia->pView);															/*!< ¼ì²é¾Ö²¿Ìø×ªºóÊÓÍ¼ÈÔÈ»ÊÇÔ­À´ÊÓÍ¼ */
-				assert(testMedia->viewPos.QuadPart == backupMedia->viewPos.QuadPart);									/*!< ¼ì²é¾Ö²¿Ìø×ªºóÊÓÍ¼Î»ÖÃÈÔÈ»ÊÇÔ­À´Î»ÖÃ */
-				assert(testMedia->currPos.QuadPart != testMedia->viewPos.QuadPart);										/*!< ¼ì²é¾Ö²¿Ìø×ªºóµ±Ç°Î»ÖÃÓ¦µ±ÓëÊÓÍ¼Î»ÖÃ²»Í¬ */
-				assert(RewindMedia(testMedia) == SUCCESS);															/*!< ÖØÖÃmedia */
-				assert(!memcmp(testMedia, backupMedia, sizeof(*testMedia)));											/*!< ¼ì²éÖØÖÃºóµÄmediaÓëÒÔÇ°±¸·İµÄÏàÍ¬ */
-				assert(SeekMedia(testMedia, testMedia->allocGran, MEDIA_SET) == SUCCESS);							/*!< Ìø×ªÒ»¸öÄÚ´æÁ£¶È£¬Ó¦¸Ã¸ÕºÃÇĞ»»ÊÓÍ¼ */
-				assert(testMedia->pView != backupMedia->pView);															/*!< ¼ì²éÌø×ªºóÊÓÍ¼ÊÇ·ñÒÑÇĞ»» */
-				assert(testMedia->currPos.QuadPart == testMedia->viewPos.QuadPart);										/*!< ÓÉÓÚÌø×ªÎ»ÖÃ¸ÕºÃÇĞ»»ÊÓÍ¼£¬Ìø×ªºóµ±Ç°Î»ÖÃÓ¦µ±ÓëÊÓÍ¼Î»ÖÃÏàÍ¬ */
-				assert(testMedia->accessSize == testMedia->actualViewSize);												/*!< ÓÉÓÚÌø×ªÎ»ÖÃ¸ÕºÃÇĞ»»ÊÓÍ¼£¬Ìø×ªºó¿É·ÃÎÊ´óĞ¡ÕıºÃÊÇÊµ¼ÊÊÓÍ¼´óĞ¡ */
-				assert(testMedia->viewSize == backupMedia->viewSize);													/*!< Ìø×ªºóÊÓÍ¼´óĞ¡Ó¦µ±²»±ä */
-				assert(testMedia->actualViewSize < backupMedia->actualViewSize);										/*!< ÓÉÓÚÌø×ªÎ»ÖÃ¾àÀëÎÄ¼şÄ©Î²³¤¶ÈĞ¡ÓÚÊÓÍ¼´óĞ¡£¬Ìø×ªºóÊµ¼ÊÊÓÍ¼´óĞ¡Ó¦µ±Ğ¡ÓÚÊÓÍ¼´óĞ¡ */
-				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< ±£´æÌø×ªºóµÄmediaµ½backupMedia */
-				assert(SeekMedia(testMedia, -1, MEDIA_CUR) == SUCCESS);												/*!< ÏòºóÌø×ª1£¬Ó¦¸ÃÇĞ»»ÊÓÍ¼ */
-				assert(testMedia->pView != backupMedia->pView);															/*!< ¼ì²éÌø×ªºóÊÓÍ¼ÊÇ·ñÒÑÇĞ»» */
-				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< ±£´æÌø×ªºóµÄmediaµ½backupMedia */
-				assert(SeekMedia(testMedia, -(int64_t)(testMedia->allocGran - 1), MEDIA_CUR) == SUCCESS);			/*!< ÕâÊ±´Óµ±Ç°Î»ÖÃÏòºóÌø×ªÒ»¸öÄÚ´æÁ£¶È */
-				assert(testMedia->viewPos.QuadPart == 0);																/*!< ÕâÊ±Ïàµ±ÓÚRewindMediaºó£¬ÊÓÍ¼Î»ÖÃÓ¦µ±Îª0 */
-				assert(testMedia->currPos.QuadPart == 0);																/*!< ÕâÊ±Ïàµ±ÓÚRewindMediaºó£¬µ±Ç°Î»ÖÃÓ¦µ±Îª0 */
-				assert(testMedia->actualViewSize == testMedia->viewSize);												/*!< Êµ¼ÊÊÓÍ¼´óĞ¡Ó¦µ±ÓëÊÓÍ¼´óĞ¡ÏàÍ¬ */
-				assert(SeekMedia(testMedia, testMedia->allocGran - 1, MEDIA_SET) == SUCCESS);						/*!< ÔÙÏòÇ°Ìø»ØÒ»¸öÄÚ´æÁ£¶È */
-				assert(!memcmp(testMedia, backupMedia, sizeof(*testMedia)));											/*!< ¼ì²émediaÓëÉÏ´Î±¸·İµÄbackupMeidaÏàÍ¬ */
-				ColorPrintf(GREEN, "Í¨¹ı\n");
+				ColorPrintf(WHITE, _T("æ­£åœ¨æµ‹è¯•è·³è½¬\t\t\t\t"));
+				assert(NEW(backupMedia));																				/*!< åˆ›å»ºbackupMedia */
+				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< å¤‡ä»½mediaåˆ°backupMedia */
+				assert(SeekMedia(testMedia, testMedia->allocGran - 1, MEDIA_SET) == SUCCESS);						/*!< å±€éƒ¨è·³è½¬ï¼Œåº”è¯¥ä¸ä¼šåˆ‡æ¢æ˜ å°„è§†å›¾ */
+				assert(testMedia->pView == backupMedia->pView);															/*!< æ£€æŸ¥å±€éƒ¨è·³è½¬åè§†å›¾ä»ç„¶æ˜¯åŸæ¥è§†å›¾ */
+				assert(testMedia->viewPos.QuadPart == backupMedia->viewPos.QuadPart);									/*!< æ£€æŸ¥å±€éƒ¨è·³è½¬åè§†å›¾ä½ç½®ä»ç„¶æ˜¯åŸæ¥ä½ç½® */
+				assert(testMedia->currPos.QuadPart != testMedia->viewPos.QuadPart);										/*!< æ£€æŸ¥å±€éƒ¨è·³è½¬åå½“å‰ä½ç½®åº”å½“ä¸è§†å›¾ä½ç½®ä¸åŒ */
+				assert(RewindMedia(testMedia) == SUCCESS);															/*!< é‡ç½®media */
+				assert(!memcmp(testMedia, backupMedia, sizeof(*testMedia)));											/*!< æ£€æŸ¥é‡ç½®åçš„mediaä¸ä»¥å‰å¤‡ä»½çš„ç›¸åŒ */
+				assert(SeekMedia(testMedia, testMedia->allocGran, MEDIA_SET) == SUCCESS);							/*!< è·³è½¬ä¸€ä¸ªå†…å­˜ç²’åº¦ï¼Œåº”è¯¥åˆšå¥½åˆ‡æ¢è§†å›¾ */
+				assert(testMedia->pView != backupMedia->pView);															/*!< æ£€æŸ¥è·³è½¬åè§†å›¾æ˜¯å¦å·²åˆ‡æ¢ */
+				assert(testMedia->currPos.QuadPart == testMedia->viewPos.QuadPart);										/*!< ç”±äºè·³è½¬ä½ç½®åˆšå¥½åˆ‡æ¢è§†å›¾ï¼Œè·³è½¬åå½“å‰ä½ç½®åº”å½“ä¸è§†å›¾ä½ç½®ç›¸åŒ */
+				assert(testMedia->accessSize == testMedia->actualViewSize);												/*!< ç”±äºè·³è½¬ä½ç½®åˆšå¥½åˆ‡æ¢è§†å›¾ï¼Œè·³è½¬åå¯è®¿é—®å¤§å°æ­£å¥½æ˜¯å®é™…è§†å›¾å¤§å° */
+				assert(testMedia->viewSize == backupMedia->viewSize);													/*!< è·³è½¬åè§†å›¾å¤§å°åº”å½“ä¸å˜ */
+				assert(testMedia->actualViewSize < backupMedia->actualViewSize);										/*!< ç”±äºè·³è½¬ä½ç½®è·ç¦»æ–‡ä»¶æœ«å°¾é•¿åº¦å°äºè§†å›¾å¤§å°ï¼Œè·³è½¬åå®é™…è§†å›¾å¤§å°åº”å½“å°äºè§†å›¾å¤§å° */
+				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< ä¿å­˜è·³è½¬åçš„mediaåˆ°backupMedia */
+				assert(SeekMedia(testMedia, -1, MEDIA_CUR) == SUCCESS);												/*!< å‘åè·³è½¬1ï¼Œåº”è¯¥åˆ‡æ¢è§†å›¾ */
+				assert(testMedia->pView != backupMedia->pView);															/*!< æ£€æŸ¥è·³è½¬åè§†å›¾æ˜¯å¦å·²åˆ‡æ¢ */
+				assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));												/*!< ä¿å­˜è·³è½¬åçš„mediaåˆ°backupMedia */
+				assert(SeekMedia(testMedia, -(int64_t)(testMedia->allocGran - 1), MEDIA_CUR) == SUCCESS);			/*!< è¿™æ—¶ä»å½“å‰ä½ç½®å‘åè·³è½¬ä¸€ä¸ªå†…å­˜ç²’åº¦ */
+				assert(testMedia->viewPos.QuadPart == 0);																/*!< è¿™æ—¶ç›¸å½“äºRewindMediaåï¼Œè§†å›¾ä½ç½®åº”å½“ä¸º0 */
+				assert(testMedia->currPos.QuadPart == 0);																/*!< è¿™æ—¶ç›¸å½“äºRewindMediaåï¼Œå½“å‰ä½ç½®åº”å½“ä¸º0 */
+				assert(testMedia->actualViewSize == testMedia->viewSize);												/*!< å®é™…è§†å›¾å¤§å°åº”å½“ä¸è§†å›¾å¤§å°ç›¸åŒ */
+				assert(SeekMedia(testMedia, testMedia->allocGran - 1, MEDIA_SET) == SUCCESS);						/*!< å†å‘å‰è·³å›ä¸€ä¸ªå†…å­˜ç²’åº¦ */
+				assert(!memcmp(testMedia, backupMedia, sizeof(*testMedia)));											/*!< æ£€æŸ¥mediaä¸ä¸Šæ¬¡å¤‡ä»½çš„backupMeidaç›¸åŒ */
+				ColorPrintf(GREEN, _T("é€šè¿‡\n"));
 
 				CloseMedia(&testMedia);
 			}
 		}
 
-		/* ²âÊÔÍê±Ï */
-		ColorPrintf(GREEN, "È«²¿²âÊÔÍ¨¹ı£¡\n");
+		/* æµ‹è¯•å®Œæ¯• */
+		ColorPrintf(GREEN, _T("å…¨éƒ¨æµ‹è¯•é€šè¿‡ï¼\n"));
 	}
 
 #undef MIN
@@ -595,4 +601,4 @@ void MapTestUnit(const char *path)
 
 #endif
 
-//========================²âÊÔ´úÂë½áÊø=============================
+//========================æµ‹è¯•ä»£ç ç»“æŸ=============================

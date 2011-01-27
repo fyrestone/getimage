@@ -1,4 +1,4 @@
-/*  Arg_parser - A POSIX/GNU command line argument parser. (C version)
+ï»¿/*  Arg_parser - A POSIX/GNU command line argument parser. (C version)
 Copyright (C) 2006, 2007, 2008, 2009, 2010 Antonio Diaz Diaz.
 
 This library is free software: you can redistribute it and/or modify
@@ -27,6 +27,7 @@ Public License.
 
 #include <stdlib.h>
 #include <string.h>
+#include "../SafeMemory.h"
 
 #include "carg_parser.h"
 
@@ -35,15 +36,15 @@ Public License.
 static void * ap_resize_buffer( void * buf, const int min_size )
 {
 	if( buf ) buf = realloc( buf, min_size );
-	else buf = malloc( min_size );
+	else buf = MALLOC( min_size );
 	return buf;
 }
 
 
 static char push_back_record( struct Arg_parser * const ap,
-	const int code, const char * const argument )
+	const int code, const _TCHAR * const argument )
 {
-	const int len = strlen( argument );
+	const int len = _tcslen( argument );
 	struct ap_Record *p;
 	void * tmp = ap_resize_buffer( ap->data, ( ap->data_size + 1 ) * sizeof (struct ap_Record) );
 	if( !tmp ) return 0;
@@ -51,22 +52,22 @@ static char push_back_record( struct Arg_parser * const ap,
 	p = &(ap->data[ap->data_size]);
 	p->code = code;
 	p->argument = 0;
-	tmp = ap_resize_buffer( p->argument, len + 1 );
+	tmp = ap_resize_buffer( p->argument, sizeof(_TCHAR) * (len + 1) );
 	if( !tmp ) return 0;
-	p->argument = (char *)tmp;
-	strncpy( p->argument, argument, len + 1 );
+	p->argument = (_TCHAR *)tmp;
+	_tcsncpy( p->argument, argument, len + 1 );
 	++ap->data_size;
 	return 1;
 }
 
 
-static char add_error( struct Arg_parser * const ap, const char * const msg )
+static char add_error( struct Arg_parser * const ap, const _TCHAR * const msg )
 {
-	const int len = strlen( msg );
-	void * tmp = ap_resize_buffer( ap->error, ap->error_size + len + 1 );
+	const int len = _tcslen( msg );
+	void * tmp = ap_resize_buffer( ap->error, sizeof(_TCHAR) * (ap->error_size + len + 1) );
 	if( !tmp ) return 0;
-	ap->error = (char *)tmp;
-	strncpy( ap->error + ap->error_size, msg, len + 1 );
+	ap->error = (_TCHAR *)tmp;
+	_tcsncpy( ap->error + ap->error_size, msg, len + 1 );
 	ap->error_size += len;
 	return 1;
 }
@@ -75,14 +76,14 @@ static char add_error( struct Arg_parser * const ap, const char * const msg )
 static void free_data( struct Arg_parser * const ap )
 {
 	int i;
-	for( i = 0; i < ap->data_size; ++i ) free( ap->data[i].argument );
-	if( ap->data ) { free( ap->data ); ap->data = 0; }
+	for( i = 0; i < ap->data_size; ++i ) FREE( ap->data[i].argument );
+	if( ap->data ) { FREE( ap->data ); ap->data = 0; }
 	ap->data_size = 0;
 }
 
 
 static char parse_long_option( struct Arg_parser * const ap,
-	const char * const opt, const char * const arg,
+	const _TCHAR * const opt, const _TCHAR * const arg,
 	const struct ap_Option options[],
 	int * const argindp )
 {
@@ -95,9 +96,9 @@ static char parse_long_option( struct Arg_parser * const ap,
 
 	// Test all long options for either exact match or abbreviated matches.
 	for( i = 0; options[i].code != 0; ++i )
-		if( options[i].name && !strncmp( options[i].name, &opt[2], len ) )
+		if( options[i].name && !_tcsncmp( options[i].name, &opt[2], len ) )
 		{
-			if( strlen( options[i].name ) == len )	// Exact match found
+			if( _tcslen( options[i].name ) == len )	// Exact match found
 			{ index = i; exact = 1; break; }
 			else if( index < 0 ) index = i;		// First nonexact match found
 			else if( options[index].code != options[i].code ||
@@ -107,15 +108,15 @@ static char parse_long_option( struct Arg_parser * const ap,
 
 		if( ambig && !exact )
 		{
-			add_error( ap, "Ñ¡Ïî ¡°" ); add_error( ap, opt );
-			add_error( ap, "¡± ÓÐÆçÒå" );
+			add_error( ap, _T("é€‰é¡¹ â€œ") ); add_error( ap, opt );
+			add_error( ap, _T("â€ æœ‰æ­§ä¹‰") );
 			return 1;
 		}
 
 		if( index < 0 )		// nothing found
 		{
-			add_error( ap, "ÎÞ·¨Ê¶±ðÑ¡Ïî ¡°" ); add_error( ap, opt );
-			add_error( ap, "¡±" );
+			add_error( ap, _T("æ— æ³•è¯†åˆ«é€‰é¡¹ â€œ") ); add_error( ap, opt );
+			add_error( ap, _T("â€") );
 			return 1;
 		}
 
@@ -125,14 +126,14 @@ static char parse_long_option( struct Arg_parser * const ap,
 		{
 			if( options[index].has_arg == ap_no )
 			{
-				add_error( ap, "Ñ¡Ïî ¡°--" ); add_error( ap, options[index].name );
-				add_error( ap, "¡± ²»ÔÊÐí´æÔÚ²ÎÊý" );
+				add_error( ap, _T("é€‰é¡¹ â€œ--") ); add_error( ap, options[index].name );
+				add_error( ap, _T("â€ ä¸å…è®¸å­˜åœ¨å‚æ•°") );
 				return 1;
 			}
 			if( options[index].has_arg == ap_yes && !opt[len+3] )
 			{
-				add_error( ap, "Ñ¡Ïî ¡°--" ); add_error( ap, options[index].name );
-				add_error( ap, "¡± ÐèÒª²ÎÊý" );
+				add_error( ap, _T("é€‰é¡¹ â€œ--") ); add_error( ap, options[index].name );
+				add_error( ap, _T("â€ éœ€è¦å‚æ•°") );
 				return 1;
 			}
 			return push_back_record( ap, options[index].code, &opt[len+3] );
@@ -142,20 +143,20 @@ static char parse_long_option( struct Arg_parser * const ap,
 		{
 			if( !arg || !arg[0] )
 			{
-				add_error( ap, "Ñ¡Ïî ¡°--" ); add_error( ap, options[index].name );
-				add_error( ap, "¡± ÐèÒª²ÎÊý" );
+				add_error( ap, _T("é€‰é¡¹ â€œ--") ); add_error( ap, options[index].name );
+				add_error( ap, _T("â€ éœ€è¦å‚æ•°") );
 				return 1;
 			}
 			++*argindp;
 			return push_back_record( ap, options[index].code, arg );
 		}
 
-		return push_back_record( ap, options[index].code, "" );
+		return push_back_record( ap, options[index].code, _T("") );
 }
 
 
 static char parse_short_option( struct Arg_parser * const ap,
-	const char * const opt, const char * const arg,
+	const _TCHAR * const opt, const _TCHAR * const arg,
 	const struct ap_Option options[],
 	int * const argindp )
 {
@@ -165,8 +166,8 @@ static char parse_short_option( struct Arg_parser * const ap,
 	{
 		int index = -1;
 		int i;
-		const unsigned char code = opt[cind];
-		const char code_str[2] = { code, 0 };
+		const _TCHAR code = opt[cind];
+		const _TCHAR code_str[2] = { code, 0 };
 
 		if( code != 0 )
 			for( i = 0; options[i].code; ++i )
@@ -175,8 +176,8 @@ static char parse_short_option( struct Arg_parser * const ap,
 
 				if( index < 0 )
 				{
-					add_error( ap, "Ñ¡Ïî ¡°-" ); add_error( ap, code_str );
-					add_error( ap, "¡± ÎÞÐ§" );
+					add_error( ap, _T("é€‰é¡¹ â€œ-") ); add_error( ap, code_str );
+					add_error( ap, _T("â€ æ— æ•ˆ") );
 					return 1;
 				}
 
@@ -191,25 +192,25 @@ static char parse_short_option( struct Arg_parser * const ap,
 				{
 					if( !arg || !arg[0] )
 					{
-						add_error( ap, "Ñ¡Ïî ¡°-" );
+						add_error( ap, _T("é€‰é¡¹ â€œ-") );
 						add_error( ap, code_str );
-						add_error( ap, "¡± ÐèÒª²ÎÊý" );
+						add_error( ap, _T("â€ éœ€è¦å‚æ•°") );
 						return 1;
 					}
 					++*argindp; cind = 0;
 					if( !push_back_record( ap, code, arg ) ) return 0;
 				}
-				else if( !push_back_record( ap, code, "" ) ) return 0;
+				else if( !push_back_record( ap, code, _T("") ) ) return 0;
 	}
 	return 1;
 }
 
 
 char ap_init( struct Arg_parser * const ap,
-	const int argc, const char * const argv[],
+	const int argc, const _TCHAR * const argv[],
 	const struct ap_Option options[], const char in_order )
 {
-	const char ** non_options = 0;	// skipped non-options
+	const _TCHAR ** non_options = 0;	// skipped non-options
 	int non_options_size = 0;		// number of skipped non-options
 	int argind = 1;			// index in argv
 	int i;
@@ -222,13 +223,13 @@ char ap_init( struct Arg_parser * const ap,
 
 	while( argind < argc )
 	{
-		const unsigned char ch1 = argv[argind][0];
-		const unsigned char ch2 = ( ch1 ? argv[argind][1] : 0 );
+		const _TCHAR ch1 = argv[argind][0];
+		const _TCHAR ch2 = ( ch1 ? argv[argind][1] : 0 );
 
 		if( ch1 == '-' && ch2 )		// we found an option
 		{
-			const char * const opt = argv[argind];
-			const char * const arg = (argind + 1 < argc) ? argv[argind+1] : 0;
+			const _TCHAR * const opt = argv[argind];
+			const _TCHAR * const arg = (argind + 1 < argc) ? argv[argind+1] : 0;
 			if( ch2 == '-' )
 			{
 				if( !argv[argind][2] ) { ++argind; break; }	// we found "--"
@@ -241,10 +242,10 @@ char ap_init( struct Arg_parser * const ap,
 		{
 			if( !in_order )
 			{
-				void * tmp = ap_resize_buffer( non_options,
+				void * tmp = ap_resize_buffer( (void *)non_options,
 					( non_options_size + 1 ) * sizeof *non_options );
 				if( !tmp ) return 0;
-				non_options = (const char **)tmp;
+				non_options = (const TCHAR **)tmp;
 				non_options[non_options_size++] = argv[argind++];
 			}
 			else if( !push_back_record( ap, 0, argv[argind++] ) ) return 0;
@@ -258,7 +259,7 @@ char ap_init( struct Arg_parser * const ap,
 		while( argind < argc )
 			if( !push_back_record( ap, 0, argv[argind++] ) ) return 0;
 	}
-	if( non_options ) free( non_options );
+	if( non_options ) FREE( (void *)non_options );
 	return 1;
 }
 
@@ -266,12 +267,12 @@ char ap_init( struct Arg_parser * const ap,
 void ap_free( struct Arg_parser * const ap )
 {
 	free_data( ap );
-	if( ap->error ) { free( ap->error ); ap->error = 0; }
+	if( ap->error ) { FREE( ap->error ); ap->error = 0; }
 	ap->error_size = 0;
 }
 
 
-const char * ap_error( const struct Arg_parser * const ap )
+const _TCHAR * ap_error( const struct Arg_parser * const ap )
 { return ap->error; }
 
 
@@ -286,8 +287,8 @@ int ap_code( const struct Arg_parser * const ap, const int i )
 }
 
 
-const char * ap_argument( const struct Arg_parser * const ap, const int i )
+const _TCHAR * ap_argument( const struct Arg_parser * const ap, const int i )
 {
 	if( i >= 0 && i < ap_arguments( ap ) ) return ap->data[i].argument;
-	else return "";
+	else return _T("");
 }

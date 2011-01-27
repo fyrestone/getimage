@@ -1,83 +1,84 @@
-/*!
+ï»¿/*!
 \file MapFile.h
 \author LiuBao
 \version 1.0
 \date 2010/12/28
-\brief Í¨ÓÃ½éÖÊ²Ù×÷½Ó¿Ú£¬Ö§³ÖÎÄ¼şÓ³Éä²Ù×÷
+\brief é€šç”¨ä»‹è´¨æ“ä½œæ¥å£ï¼Œæ”¯æŒæ–‡ä»¶æ˜ å°„æ“ä½œ
 */
 #ifndef MAP_FILE
 #define MAP_FILE
 
 #include <stdio.h>		/* FILE */
+#include <tchar.h>		/* ä½¿ç”¨_TCHAR */
 #include "IntTypes.h"
 
-#define MEDIA_CUR 0		///< µ±Ç°Î»ÖÃ
-#define MEDIA_SET 1		///< ÆğÊ¼Î»ÖÃ
+#define MEDIA_CUR 0		///< å½“å‰ä½ç½®
+#define MEDIA_SET 1		///< èµ·å§‹ä½ç½®
 
-#define T media_t		///< ³éÏóÊı¾İÀàĞÍ£¨ADT£©media_t
+#define T media_t		///< æŠ½è±¡æ•°æ®ç±»å‹ï¼ˆADTï¼‰media_t
 
 typedef struct T *T;
 
-typedef struct media_access		///  ½éÖÊ·ÃÎÊ½á¹¹Ìå£¬ÓÉGetMediaAccess»ñµÃ
+typedef struct media_access		///  ä»‹è´¨è®¿é—®ç»“æ„ä½“ï¼Œç”±GetMediaAccessè·å¾—
 {
-	const unsigned char *begin;	///< ½éÖÊ·ÃÎÊÖ¸Õë
-	uint32_t len;				///< ¿É·ÃÎÊ½éÖÊ´óĞ¡
+	const unsigned char *begin;	///< ä»‹è´¨è®¿é—®æŒ‡é’ˆ
+	uint32_t len;				///< å¯è®¿é—®ä»‹è´¨å¤§å°
 }media_access;
 
 /*!
-´ò¿ª½éÖÊ£¬ÓÅÏÈÊ¹ÓÃÄÚ´æÓ³Éä
-\param path ½éÖÊÂ·¾¶
-\param viewSize ÊÓÍ¼´óĞ¡
-\return Èô³É¹¦£¬·µ»ØÓĞĞ§media_t£»·ñÔò·µ»ØNULL
+æ‰“å¼€ä»‹è´¨ï¼Œä¼˜å…ˆä½¿ç”¨å†…å­˜æ˜ å°„
+\param path ä»‹è´¨è·¯å¾„
+\param viewSize è§†å›¾å¤§å°
+\return è‹¥æˆåŠŸï¼Œè¿”å›æœ‰æ•ˆmedia_tï¼›å¦åˆ™è¿”å›NULL
 */
-T OpenMedia(const char *path, uint32_t viewSize);
+T OpenMedia(const _TCHAR *path, uint32_t viewSize);
 
 /*!
-½éÖÊ´ò¿ªÎ»ÖÃ¸´Î»
-\param media ĞèÒª¸´Î»µÄmedia_t
-\return ³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+ä»‹è´¨æ‰“å¼€ä½ç½®å¤ä½
+\param media éœ€è¦å¤ä½çš„media_t
+\return æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int RewindMedia(T media);
 
 /*!
-Ìø×ª½éÖÊ´ò¿ªÎ»ÖÃ
-\param media ĞèÒªÌø×ªµÄmedia_t
-\param offset Ìø×ªÆ«ÒÆÁ¿£¬¿ÉÒÔÎªÕı£¨ÏòÇ°Ìø×ª£©»ò¸º£¨ÏòºóÌø×ª£©
-\param base ¿ÉÄÜÈ¡ÖµÎªMEDIA_CUR£¨Ïà¶ÔÓÚµ±Ç°Î»ÖÃ£©ºÍMEDIA_SET£¨Ïà¶ÔÓÚÆğÊ¼Î»ÖÃ£©
-\return ³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+è·³è½¬ä»‹è´¨æ‰“å¼€ä½ç½®
+\param media éœ€è¦è·³è½¬çš„media_t
+\param offset è·³è½¬åç§»é‡ï¼Œå¯ä»¥ä¸ºæ­£ï¼ˆå‘å‰è·³è½¬ï¼‰æˆ–è´Ÿï¼ˆå‘åè·³è½¬ï¼‰
+\param base å¯èƒ½å–å€¼ä¸ºMEDIA_CURï¼ˆç›¸å¯¹äºå½“å‰ä½ç½®ï¼‰å’ŒMEDIA_SETï¼ˆç›¸å¯¹äºèµ·å§‹ä½ç½®ï¼‰
+\return æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int SeekMedia(T media, int64_t offset, int base);
 
 /*!
-¹Ø±Õ½éÖÊ
-\param media ĞèÒª¹Ø±ÕµÄmedia_tµÄÖ¸Õë
+å…³é—­ä»‹è´¨
+\param media éœ€è¦å…³é—­çš„media_tçš„æŒ‡é’ˆ
 */
 void CloseMedia(T *media);
 
 /*!
-´Óµ±Ç°media_tÎ»ÖÃ»ñµÃÖ¸¶¨³¤¶ÈµÄÄÚ´æ¿éÖ»¶ÁÖ¸Õë
-\param media ĞèÒª»ñÈ¡·ÃÎÊ½á¹¹µÄmedia_t
-\param access ·ÃÎÊ½á¹¹ÌåÖ¸Õë
-\param len ´Óµ±Ç°Î»ÖÃÏòºó¿É·ÃÎÊ³¤¶È
-\return ³É¹¦»ñÈ¡·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+ä»å½“å‰media_tä½ç½®è·å¾—æŒ‡å®šé•¿åº¦çš„å†…å­˜å—åªè¯»æŒ‡é’ˆ
+\param media éœ€è¦è·å–è®¿é—®ç»“æ„çš„media_t
+\param access è®¿é—®ç»“æ„ä½“æŒ‡é’ˆ
+\param len ä»å½“å‰ä½ç½®å‘åå¯è®¿é—®é•¿åº¦
+\return æˆåŠŸè·å–è¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int GetMediaAccess(T media, media_access *access, uint32_t len);
 
 /*!
-´Óµ±Ç°media_tÎ»ÖÃ³éÈ¡size´óĞ¡Êä³öµ½fpÉÏ
-\param media ĞèÒª³éÈ¡Êı¾İµÄmedia_t
-\param fp Êä³öÖ¸Õë£¬¿ÉÒÔstdout»òÕß¿ÉĞ´µÄÎÄ¼şÖ¸Õë
-\param size ³éÈ¡´óĞ¡
-\return ³éÈ¡³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+ä»å½“å‰media_tä½ç½®æŠ½å–sizeå¤§å°è¾“å‡ºåˆ°fpä¸Š
+\param media éœ€è¦æŠ½å–æ•°æ®çš„media_t
+\param fp è¾“å‡ºæŒ‡é’ˆï¼Œå¯ä»¥stdoutæˆ–è€…å¯å†™çš„æ–‡ä»¶æŒ‡é’ˆ
+\param size æŠ½å–å¤§å°
+\return æŠ½å–æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int DumpMedia(T media, FILE *fp, int64_t size);
 
 #ifdef _DEBUG
 	/*!
-	µ¥Ôª²âÊÔÓÃÀı
-	\param path ´ò¿ªÎÄ¼şÂ·¾¶
+	å•å…ƒæµ‹è¯•ç”¨ä¾‹
+	\param path æ‰“å¼€æ–‡ä»¶è·¯å¾„
 	*/
-	void MapTestUnit(const char *path);
+	void MapTestUnit(const _TCHAR *path);
 #endif
 
 #undef T

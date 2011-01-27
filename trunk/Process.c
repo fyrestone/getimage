@@ -1,12 +1,12 @@
-/*!
+ï»¿/*!
 \file Process.c
 \author LiuBao
 \version 1.0
 \date 2011/1/23
-\brief ´¦Àíº¯ÊıÊµÏÖ
+\brief å¤„ç†å‡½æ•°å®ç°
 */
-#include <Windows.h>	/* Ê¹ÓÃMAX_PATHºê */
-#include <stdio.h>		/* Ê¹ÓÃFILE */
+#include <Windows.h>	/* ä½¿ç”¨MAX_PATHå® */
+#include <stdio.h>		/* ä½¿ç”¨FILE */
 #include <assert.h>
 #include "ProjDef.h"
 #include "ColorPrint.h"
@@ -14,48 +14,48 @@
 #include "IMGProcess.h"
 #include "ISOProcess.h"
 
-static char PATH[MAX_PATH];						/* GetOutPathÊä³ö»º³åÇø£¬Ã¿´Îµ÷ÓÃ¶¼»á¸²¸Ç */
+static _TCHAR PATH[MAX_PATH];						/* GetOutPathè¾“å‡ºç¼“å†²åŒºï¼Œæ¯æ¬¡è°ƒç”¨éƒ½ä¼šè¦†ç›– */
 
 /*!
-»ñµÃÊä³öÂ·¾¶£¬ÓÉisoÂ·¾¶»ñµÃÌáÈ¡³öµÄimgµÄĞ´ÈëÂ·¾¶£¨²»¿ÉÖØÈë£©
-/param selfPath isoÂ·¾¶
-/param extention °ÑisoÀ©Õ¹ÃûĞŞ¸ÄÎªµÄÀ©Õ¹Ãû£¬Èç'.img'
-/return Êä³öÂ·¾¶
+è·å¾—è¾“å‡ºè·¯å¾„ï¼Œç”±isoè·¯å¾„è·å¾—æå–å‡ºçš„imgçš„å†™å…¥è·¯å¾„ï¼ˆä¸å¯é‡å…¥ï¼‰
+/param selfPath isoè·¯å¾„
+/param extention æŠŠisoæ‰©å±•åä¿®æ”¹ä¸ºçš„æ‰©å±•åï¼Œå¦‚'.img'
+/return è¾“å‡ºè·¯å¾„
 */
-static const char *GetOutPath(const char *path, const char *extention)
+static const _TCHAR *GetOutPath(const _TCHAR *path, const _TCHAR *extention)
 {
-	const char *retVal = NULL;
+	const _TCHAR *retVal = NULL;
 
-	const char *endOfSelfPath = path + strlen(path);//³õÊ¼»¯Ö¸ÏòÂ·¾¶×Ö´®½áÎ²·û
+	const _TCHAR *endOfSelfPath = path + _tcslen(path);//åˆå§‹åŒ–æŒ‡å‘è·¯å¾„å­—ä¸²ç»“å°¾ç¬¦
 
-	/* ÕÒµ½À©Õ¹Ãû×ó±ßµÄ¡°.¡± */
+	/* æ‰¾åˆ°æ‰©å±•åå·¦è¾¹çš„â€œ.â€ */
 	while(*endOfSelfPath != '.' && endOfSelfPath != path)
 		--endOfSelfPath;
 
 	if(endOfSelfPath != path)
 	{
-		char *target = PATH;
+		_TCHAR *target = PATH;
 
-		/* ¿½±´ISOÂ·¾¶µÄÀ©Õ¹ÃûÇ°²¿·Ö */
+		/* æ‹·è´ISOè·¯å¾„çš„æ‰©å±•åå‰éƒ¨åˆ† */
 		while(path != endOfSelfPath)
 			*target++ = *path++;
 	
-		/* Ğ´ÈëÀ©Õ¹Ãû */
+		/* å†™å…¥æ‰©å±•å */
 		while((*target++  = *extention++));
 		
-		retVal = PATH;//»ñÈ¡Êä³öÂ·¾¶
+		retVal = PATH;//è·å–è¾“å‡ºè·¯å¾„
 	}
 
 	return retVal;
 }
 
 /*!
-´ÓimgÆğÊ¼Î»ÖÃÌáÈ¡³öimgĞ´Èëµ½selfPathÂ·¾¶
-\param imageEntry Î»ÖÃÔÚimgÆğÊ¼µÄmedia_t
-\param selfPath imgĞ´ÈëÂ·¾¶
-\return ³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+ä»imgèµ·å§‹ä½ç½®æå–å‡ºimgå†™å…¥åˆ°selfPathè·¯å¾„
+\param imageEntry ä½ç½®åœ¨imgèµ·å§‹çš„media_t
+\param selfPath imgå†™å…¥è·¯å¾„
+\return æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
-static int WriteIMGToFile(media_t imageEntry, const char *path)
+static int WriteIMGToFile(media_t imageEntry, const _TCHAR *path)
 {
 	int retVal = FAILED;
 	
@@ -66,23 +66,23 @@ static int WriteIMGToFile(media_t imageEntry, const char *path)
 		if(GetMediaAccess(imageEntry, &access, sizeof(BPB)) == SUCCESS)
 		{
 			const BPB *pcBPB = (const BPB *)access.begin;
-			size_t totalSize = 0;//IMG´óĞ¡
+			size_t totalSize = 0;//IMGå¤§å°
 
-			/* »ñµÃÕû¸öIMG´óĞ¡ */
+			/* è·å¾—æ•´ä¸ªIMGå¤§å° */
 			{
-				size_t totalSec = 0;//×ÜÉÈÇøÊı
+				size_t totalSec = 0;//æ€»æ‰‡åŒºæ•°
 
-				if(LD_UINT16(pcBPB->Common.BPB_TotSec16))//Èç¹ûÊÇFAT12/16
+				if(LD_UINT16(pcBPB->Common.BPB_TotSec16))//å¦‚æœæ˜¯FAT12/16
 					totalSec = LD_UINT16(pcBPB->Common.BPB_TotSec16);
-				else//Èç¹ûÊÇFAT32
+				else//å¦‚æœæ˜¯FAT32
 					totalSec = LD_UINT32(pcBPB->Common.BPB_TotSec32);
 
 				totalSize = totalSec * LD_UINT16(pcBPB->Common.BPB_BytsPerSec);
 			}
 
-			/* °ÑIMGĞ´ÈëÎÄ¼ş */
+			/* æŠŠIMGå†™å…¥æ–‡ä»¶ */
 			{
-				FILE *outfp = fopen(path, "wb");
+				FILE *outfp = _tfopen(path, _T("wb"));
 
 				if(DumpMedia(imageEntry, outfp, totalSize) == SUCCESS)
 					retVal = SUCCESS;
@@ -96,9 +96,9 @@ static int WriteIMGToFile(media_t imageEntry, const char *path)
 }
 
 /*!
-´ÓISOÎÄ¼şÍ·²¿Ìø×ªµ½Æô¶¯IMGÍ·²¿£¬ÄÚ²¿×Ô¶¯´¦ÀíAcronisÆô¶¯¹âÅÌ
-\param media ISOÎÄ¼şµÄmedia_t
-\return ³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+ä»ISOæ–‡ä»¶å¤´éƒ¨è·³è½¬åˆ°å¯åŠ¨IMGå¤´éƒ¨ï¼Œå†…éƒ¨è‡ªåŠ¨å¤„ç†Acroniså¯åŠ¨å…‰ç›˜
+\param media ISOæ–‡ä»¶çš„media_t
+\return æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 static int JumpToISOBootEntry(media_t media)
 {
@@ -106,7 +106,7 @@ static int JumpToISOBootEntry(media_t media)
 
 	if(media)
 	{
-		/*Á¬ĞøÌø×ªÖ¸Õë*/
+		/*è¿ç»­è·³è½¬æŒ‡é’ˆ*/
 		if(JumpToISOPrimVolDesc(media) == SUCCESS &&
 			JumpToISOBootRecordVolDesc(media) == SUCCESS &&
 			JumpToISOValidationEntry(media) == SUCCESS &&
@@ -114,13 +114,13 @@ static int JumpToISOBootEntry(media_t media)
 			JumpToISOBootableImage(media) == SUCCESS)
 		{
 
-			/*³¢ÊÔ´ÓISOµÄBootImageÈë¿ÚÌø×ªµ½IMGÈë¿Ú*/
+			/*å°è¯•ä»ISOçš„BootImageå…¥å£è·³è½¬åˆ°IMGå…¥å£*/
 			if(CheckIMGIdentifier(media) != SUCCESS)
 			{
 				media_access access;
 				if(GetMediaAccess(media, &access, 512) == SUCCESS)
 				{
-					/* Acronis¹âÅÌÌØÊâÌø×ª */
+					/* Acroniså…‰ç›˜ç‰¹æ®Šè·³è½¬ */
 					uint32_t offsetValue = LD_UINT8(access.begin + 244);
 					uint32_t relativeOffset = offsetValue * SECTOR_SIZE/*offsetUnit*/;
 					
@@ -129,14 +129,14 @@ static int JumpToISOBootEntry(media_t media)
 			}
 		}
 
-		/* ¼ì²éÈë¿ÚÊÇ·ñÎªFAT¸ñÊ½ */
+		/* æ£€æŸ¥å…¥å£æ˜¯å¦ä¸ºFATæ ¼å¼ */
 		{
 			media_access access;
 			if(GetMediaAccess(media, &access, 512) == SUCCESS)
 			{
 				if(CheckIMGIdentifier(media) == SUCCESS &&
 					CheckIMGFileSystem(media) == SUCCESS)
-					retVal = SUCCESS;//ÕÒµ½IMGÈë¿Ú
+					retVal = SUCCESS;//æ‰¾åˆ°IMGå…¥å£
 			}
 		}
 	}
@@ -151,57 +151,57 @@ MEDIA_TYPE GetInputType(media_t media)
 	if(media)
 	{
 		if(CheckIMGIdentifier(media) == SUCCESS)
-			retVal = IMG;//ÊÇIMG¸ñÊ½
+			retVal = IMG;//æ˜¯IMGæ ¼å¼
 		else if(JumpToISOPrimVolDesc(media) == SUCCESS)
 		{
 			(void)RewindMedia(media);
-			retVal = ISO;//ÊÇISO¸ñÊ½
+			retVal = ISO;//æ˜¯ISOæ ¼å¼
 		}
 	}
 	
 	return retVal;
 }
 
-int DumpIMGFromISO(media_t media, const char *path)
+int DumpIMGFromISO(media_t media, const _TCHAR *path)
 {
-	static const char * const leftMargin = "    ";//×ó¼ä¾à
+	static const _TCHAR * const leftMargin = _T("    ");//å·¦é—´è·
 
 	int retVal = FAILED;
 
-	const char *imgPath = GetOutPath(path, ".img");//imgÎÄ¼şÊä³öÂ·¾¶
+	const _TCHAR *imgPath = GetOutPath(path, _T(".img"));//imgæ–‡ä»¶è¾“å‡ºè·¯å¾„
 
 	if(media && imgPath)
 	{
-		ColorPrintf(WHITE, "³¢ÊÔ´ÓISOÎÄ¼şÖĞÌáÈ¡IMG:\n\n");
-		ColorPrintf(WHITE, "%sÕıÔÚÑ°ÕÒIMGÈë¿Ú\t\t\t\t", leftMargin);
+		ColorPrintf(WHITE, _T("å°è¯•ä»ISOæ–‡ä»¶ä¸­æå–IMG:\n\n"));
+		ColorPrintf(WHITE, _T("%sæ­£åœ¨å¯»æ‰¾IMGå…¥å£\t\t\t"), leftMargin);
 
 		do
 		{
-			/* Ìø×ªµ½IMGÍ·²¿ */
+			/* è·³è½¬åˆ°IMGå¤´éƒ¨ */
 			if(JumpToISOBootEntry(media) == SUCCESS)
 			{
-				ColorPrintf(LIME, "³É¹¦\n");
-				ColorPrintf(WHITE, "%sÕıÔÚĞ´ÈëIMGÎÄ¼ş\t\t\t\t", leftMargin);
+				ColorPrintf(LIME, _T("æˆåŠŸ\n"));
+				ColorPrintf(WHITE, _T("%sæ­£åœ¨å†™å…¥IMGæ–‡ä»¶\t\t\t"), leftMargin);
 			}
 			else
 			{
-				ColorPrintf(RED, "Ê§°Ü\n");
+				ColorPrintf(RED, _T("å¤±è´¥\n"));
 				break;
 			}
 
-			/* °ÑIMGĞ´ÈëÎÄ¼ş */
+			/* æŠŠIMGå†™å…¥æ–‡ä»¶ */
 			if(WriteIMGToFile(media, imgPath) == SUCCESS)
 			{
-				ColorPrintf(LIME, "³É¹¦\n");
-				ColorPrintf(WHITE, "\n´¦ÀíÍê±Ï\n");
+				ColorPrintf(LIME, _T("æˆåŠŸ\n"));
+				ColorPrintf(WHITE, _T("\nå¤„ç†å®Œæ¯•\n"));
 			}
 			else
 			{
-				ColorPrintf(RED, "Ê§°Ü\n");
+				ColorPrintf(RED, _T("å¤±è´¥\n"));
 				break;
 			}
 
-			retVal = SUCCESS;//Ğ´Èë³É¹¦£¡
+			retVal = SUCCESS;//å†™å…¥æˆåŠŸï¼
 		}while(0);
 	}
 
@@ -210,7 +210,7 @@ int DumpIMGFromISO(media_t media, const char *path)
 
 int DisplayISOInfo(media_t media)
 {
-	static const char * const leftMargin = "    ";//×ó¼ä¾à
+	static const _TCHAR * const leftMargin = _T("    ");//å·¦é—´è·
 
 	int retVal = FAILED;
 
@@ -218,9 +218,9 @@ int DisplayISOInfo(media_t media)
 	{
 		media_access access;
 
-		ColorPrintf(WHITE, "¼ì²âµ½ISOÎÄ¼şĞÅÏ¢ÈçÏÂ£º\n\n");
+		ColorPrintf(WHITE, _T("æ£€æµ‹åˆ°ISOæ–‡ä»¶ä¿¡æ¯å¦‚ä¸‹ï¼š\n\n"));
 
-		/* Êä³öPrimVolDescÖĞĞÅÏ¢ */
+		/* è¾“å‡ºPrimVolDescä¸­ä¿¡æ¯ */
 		if(JumpToISOPrimVolDesc(media) == SUCCESS)
 		{
 			if(GetMediaAccess(media, &access, sizeof(PrimVolDesc)) == SUCCESS)
@@ -229,59 +229,59 @@ int DisplayISOInfo(media_t media)
 				const ISO9660TimeStr *createDate = (const ISO9660TimeStr *)(pcPVD->VolCreationDate);
 				const ISO9660TimeStr *modifyDate = (const ISO9660TimeStr *)(pcPVD->VolModifDate);
 
-				uint32_t volBlocks = LD_UINT32(pcPVD->VolSpaceSz);//ISO¾íÂß¼­¿éÊı
-				uint16_t bytsPerBlocks = LD_UINT16(pcPVD->LogicalBlockSz);//Âß¼­¿éËùÕ¼×Ö½ÚÊı
+				uint32_t volBlocks = LD_UINT32(pcPVD->VolSpaceSz);//ISOå·é€»è¾‘å—æ•°
+				uint16_t bytsPerBlocks = LD_UINT16(pcPVD->LogicalBlockSz);//é€»è¾‘å—æ‰€å å­—èŠ‚æ•°
 
-				ColorPrintf(WHITE, "%s¹âÅÌ±êÇ©£º\t\t\t\t", leftMargin);
-				ColorPrintf(LIME, "%.32s\n", pcPVD->VolID);
-				ColorPrintf(YELLOW, "%s¾íÂß¼­¿éÊı£º\t\t\t", leftMargin);
-				ColorPrintf(AQUA, "%u\n", volBlocks);
-				ColorPrintf(YELLOW, "%sÃ¿Âß¼­¿é×Ö½ÚÊı£º\t\t\t", leftMargin);
-				ColorPrintf(AQUA, "%u\n", bytsPerBlocks);
-				ColorPrintf(YELLOW, "%s¹âÅÌÈİÁ¿£º\t\t\t\t", leftMargin);
-				ColorPrintf(AQUA, "%u\n", volBlocks * bytsPerBlocks);
+				ColorPrintf(WHITE, _T("%så…‰ç›˜æ ‡ç­¾ï¼š\t\t\t\t"), leftMargin);
+				ColorPrintfA(LIME, "%.32s\n", pcPVD->VolID);
+				ColorPrintf(YELLOW, _T("%så·é€»è¾‘å—æ•°ï¼š\t\t\t"), leftMargin);
+				ColorPrintf(AQUA, _T("%u\n"), volBlocks);
+				ColorPrintf(YELLOW, _T("%sæ¯é€»è¾‘å—å­—èŠ‚æ•°ï¼š\t\t\t"), leftMargin);
+				ColorPrintf(AQUA, _T("%u\n"), bytsPerBlocks);
+				ColorPrintf(YELLOW, _T("%så…‰ç›˜å®¹é‡ï¼š\t\t\t\t"), leftMargin);
+				ColorPrintf(AQUA, _T("%u\n"), volBlocks * bytsPerBlocks);
 
-				/* Êä³ö´´½¨ÈÕÆÚºÍĞŞ¸ÄÈÕÆÚ */
+				/* è¾“å‡ºåˆ›å»ºæ—¥æœŸå’Œä¿®æ”¹æ—¥æœŸ */
 				if(createDate && modifyDate)
 				{
-					ColorPrintf(WHITE, "%s´´½¨ÈÕÆÚ£º\t\t\t\t", leftMargin);
-					ColorPrintf(LIME, "%.4s/%.2s/%.2s %.2s:%.2s:%.2s\n",
+					ColorPrintf(WHITE, _T("%såˆ›å»ºæ—¥æœŸï¼š\t\t\t\t"), leftMargin);
+					ColorPrintfA(LIME, "%.4s/%.2s/%.2s %.2s:%.2s:%.2s\n",
 						createDate->Year, createDate->Month, createDate->Day,
 						createDate->Hour, createDate->Minute, createDate->Second);
 
-					ColorPrintf(WHITE, "%sĞŞ¸ÄÈÕÆÚ£º\t\t\t\t", leftMargin);
-					ColorPrintf(LIME, "%.4s/%.2s/%.2s %.2s:%.2s:%.2s\n",
+					ColorPrintf(WHITE, _T("%sä¿®æ”¹æ—¥æœŸï¼š\t\t\t\t"), leftMargin);
+					ColorPrintfA(LIME, "%.4s/%.2s/%.2s %.2s:%.2s:%.2s\n",
 						createDate->Year, createDate->Month, createDate->Day,
 						createDate->Hour, createDate->Minute, createDate->Second);
 				}
 			}
 		}
 
-		/* Êä³öBootRecordVolDescÖĞĞÅÏ¢ */
+		/* è¾“å‡ºBootRecordVolDescä¸­ä¿¡æ¯ */
 		if(JumpToISOBootRecordVolDesc(media) == SUCCESS)
 		{
-			ColorPrintf(YELLOW, "%sÆô¶¯¹æ·¶£º\t\t\t\t", leftMargin);
-			ColorPrintf(AQUA, "EL TORITO\n");
+			ColorPrintf(YELLOW, _T("%så¯åŠ¨è§„èŒƒï¼š\t\t\t\t"), leftMargin);
+			ColorPrintf(AQUA, _T("EL TORITO\n"));
 
-			/* Êä³öValidationEntryÖĞĞÅÏ¢ */
+			/* è¾“å‡ºValidationEntryä¸­ä¿¡æ¯ */
 			if(JumpToISOValidationEntry(media) == SUCCESS)
 			{
-				ColorPrintf(WHITE, "%sÖ§³ÖÆ½Ì¨£º\t\t\t\t", leftMargin);
-				ColorPrintf(LIME, "%s\n", GetISOPlatformID(media));
+				ColorPrintf(WHITE, _T("%sæ”¯æŒå¹³å°ï¼š\t\t\t\t"), leftMargin);
+				ColorPrintf(LIME, _T("%s\n"), GetISOPlatformID(media));
 			}
 
-			/* Êä³öInitialEntryÖĞĞÅÏ¢ */
+			/* è¾“å‡ºInitialEntryä¸­ä¿¡æ¯ */
 			if(JumpToISOInitialEntry(media) == SUCCESS)
 			{
-				ColorPrintf(WHITE, "%s¹âÅÌÀàĞÍ£º\t\t\t\t", leftMargin);
-				ColorPrintf(LIME, "¿ÉÆô¶¯¹âÅÌ\n");
+				ColorPrintf(WHITE, _T("%så…‰ç›˜ç±»å‹ï¼š\t\t\t\t"), leftMargin);
+				ColorPrintf(LIME, _T("å¯å¯åŠ¨å…‰ç›˜\n"));
 
-				ColorPrintf(YELLOW, "%sÆô¶¯½éÖÊÀàĞÍ£º\t\t\t", leftMargin);
-				ColorPrintf(AQUA, "%s\n", GetISOBootMediaType(media));
+				ColorPrintf(YELLOW, _T("%så¯åŠ¨ä»‹è´¨ç±»å‹ï¼š\t\t\t"), leftMargin);
+				ColorPrintf(AQUA, _T("%s\n"), GetISOBootMediaType(media));
 			}
 		}
 
-		printf("\n");
+		_tprintf(_T("\n"));
 
 		retVal = SUCCESS;
 	}
@@ -297,93 +297,93 @@ int DisplayIMGInfo(media_t media)
 	if(GetMediaAccess(media, &access, sizeof(BPB)) == SUCCESS)
 	{
 		const BPB *pcBPB = (const BPB *)access.begin;
-		const char *fsType = NULL;	//ÎÄ¼şÏµÍ³ÀàĞÍ£¨FAT12/16/32£©
-		uint32_t totalSec;			//×ÜÉÈÇøÊı
-		uint32_t numTrks;			//´ÅµÀÊı
-		uint32_t volID = 0;			//¾í±ê
-		uint32_t secPerFat = 0;		//Ã¿¸öFAT±íËùÕ¼ÉÈÇøÊı
-		uint8_t drvNum = 0;			//Çı¶¯Æ÷ºÅ
+		const _TCHAR *fsType = NULL;	//æ–‡ä»¶ç³»ç»Ÿç±»å‹ï¼ˆFAT12/16/32ï¼‰
+		uint32_t totalSec;			//æ€»æ‰‡åŒºæ•°
+		uint32_t numTrks;			//ç£é“æ•°
+		uint32_t volID = 0;			//å·æ ‡
+		uint32_t secPerFat = 0;		//æ¯ä¸ªFATè¡¨æ‰€å æ‰‡åŒºæ•°
+		uint8_t drvNum = 0;			//é©±åŠ¨å™¨å·
 
-		/* ¼ÆËã×ÜÉÈÇøÊı */
+		/* è®¡ç®—æ€»æ‰‡åŒºæ•° */
 		if(LD_UINT16(pcBPB->Common.BPB_TotSec16))
 			totalSec = LD_UINT16(pcBPB->Common.BPB_TotSec16);
 		else
 			totalSec = LD_UINT32(pcBPB->Common.BPB_TotSec32);
 
-		/* ¼ÆËã´ÅµÀÊı */
+		/* è®¡ç®—ç£é“æ•° */
 		numTrks = totalSec / 
 			(LD_UINT16(pcBPB->Common.BPB_NumHeads) * LD_UINT16(pcBPB->Common.BPB_SecPerTrk));
 
-		/* »ñÈ¡¾í±ê¡¢Çı¶¯Æ÷ºÅ¡¢Ã¿FAT±íÉÈÇøÊıÒÔ¼°ÎÄ¼şÏµÍ³ÀàĞÍ */
+		/* è·å–å·æ ‡ã€é©±åŠ¨å™¨å·ã€æ¯FATè¡¨æ‰‡åŒºæ•°ä»¥åŠæ–‡ä»¶ç³»ç»Ÿç±»å‹ */
 		switch(GetIMGType(pcBPB))
 		{
 		case FAT12:
 			volID = LD_UINT32(pcBPB->Special.Fat16.BS_VolID);
 			drvNum = LD_UINT8(pcBPB->Special.Fat16.BS_DrvNum);
 			secPerFat = LD_UINT16(pcBPB->Common.BPB_FATSz16);
-			fsType = "FAT12";
+			fsType = _T("FAT12");
 			break;
 		case FAT16:
 			volID = LD_UINT32(pcBPB->Special.Fat16.BS_VolID);
 			drvNum = LD_UINT8(pcBPB->Special.Fat16.BS_DrvNum);
 			secPerFat = LD_UINT16(pcBPB->Common.BPB_FATSz16);
-			fsType = "FAT16";
+			fsType = _T("FAT16");
 			break;
 		case FAT32:
 			volID = LD_UINT32(pcBPB->Special.Fat32.BS_VolID);
 			drvNum = LD_UINT8(pcBPB->Special.Fat32.BS_DrvNum);
 			secPerFat = LD_UINT32(pcBPB->Special.Fat32.BPB_FATSz32);
-			fsType = "FAT32";
+			fsType = _T("FAT32");
 			break;
 		}
 
-		ColorPrintf(WHITE, "\tÏµÍ³±êÃû³Æ£º");
-		ColorPrintf(LIME, "%.8s", pcBPB->Common.BS_OEMName);
+		ColorPrintf(WHITE, _T("\tç³»ç»Ÿæ ‡åç§°ï¼š"));
+		ColorPrintfA(LIME, "%.8s", pcBPB->Common.BS_OEMName);
 
-		ColorPrintf(WHITE, "\t\tÎÄ¼şÏµÍ³£º");
-		ColorPrintf(LIME, "%s\n", fsType);
+		ColorPrintf(WHITE, _T("\t\tæ–‡ä»¶ç³»ç»Ÿï¼š"));
+		ColorPrintf(LIME, _T("%s\n"), fsType);
 
-		ColorPrintf(WHITE, "\t¾íĞòÁĞºÅ£º");
-		ColorPrintf(LIME, "0x%.4X", volID);
+		ColorPrintf(WHITE, _T("\tå·åºåˆ—å·ï¼š"));
+		ColorPrintf(LIME, _T("0x%.4X"), volID);
 
-		ColorPrintf(WHITE, "\t\t½éÖÊÀàĞÍ£º");
-		ColorPrintf(LIME, "0x%.1X\n", LD_UINT8(pcBPB->Common.BPB_Media));
+		ColorPrintf(WHITE, _T("\t\tä»‹è´¨ç±»å‹ï¼š"));
+		ColorPrintf(LIME, _T("0x%.1X\n"), LD_UINT8(pcBPB->Common.BPB_Media));
 
-		ColorPrintf(WHITE, "\tÎïÀíÇı¶¯Æ÷ºÅ£º");
-		ColorPrintf(LIME, "0x%.2X", drvNum);
+		ColorPrintf(WHITE, _T("\tç‰©ç†é©±åŠ¨å™¨å·ï¼š"));
+		ColorPrintf(LIME, _T("0x%.2X"), drvNum);
 
-		ColorPrintf(WHITE, "\t\tÃ¿ÉÈÇø×Ö½ÚÊı£º");
-		ColorPrintf(LIME, "%u\n", LD_UINT16(pcBPB->Common.BPB_BytsPerSec));
+		ColorPrintf(WHITE, _T("\t\tæ¯æ‰‡åŒºå­—èŠ‚æ•°ï¼š"));
+		ColorPrintf(LIME, _T("%u\n"), LD_UINT16(pcBPB->Common.BPB_BytsPerSec));
 
-		ColorPrintf(WHITE, "\tÒş²ØÉÈÇøÊı£º");
-		ColorPrintf(LIME, "%u", LD_UINT32(pcBPB->Common.BPB_HiddSec));
+		ColorPrintf(WHITE, _T("\téšè—æ‰‡åŒºæ•°ï¼š"));
+		ColorPrintf(LIME, _T("%u"), LD_UINT32(pcBPB->Common.BPB_HiddSec));
 
-		ColorPrintf(YELLOW, "\t\t\t´ÅµÀÊı£¨C£©£º");
-		ColorPrintf(AQUA, "%u\n", numTrks);
+		ColorPrintf(YELLOW, _T("\t\t\tç£é“æ•°ï¼ˆCï¼‰ï¼š"));
+		ColorPrintf(AQUA, _T("%u\n"), numTrks);
 
-		ColorPrintf(WHITE, "\tÃ¿´ØÉÈÇøÊı£º");
-		ColorPrintf(LIME, "%u", LD_UINT8(pcBPB->Common.BPB_SecPerClus));
+		ColorPrintf(WHITE, _T("\tæ¯ç°‡æ‰‡åŒºæ•°ï¼š"));
+		ColorPrintf(LIME, _T("%u"), LD_UINT8(pcBPB->Common.BPB_SecPerClus));
 
-		ColorPrintf(YELLOW, "\t\t\t´ÅÍ·Êı£¨H£©£º");
-		ColorPrintf(AQUA, "%u\n", LD_UINT16(pcBPB->Common.BPB_NumHeads));
+		ColorPrintf(YELLOW, _T("\t\t\tç£å¤´æ•°ï¼ˆHï¼‰ï¼š"));
+		ColorPrintf(AQUA, _T("%u\n"), LD_UINT16(pcBPB->Common.BPB_NumHeads));
 
-		ColorPrintf(WHITE, "\t±£ÁôÉÈÇøÊı£º");
-		ColorPrintf(LIME, "%u", LD_UINT16(pcBPB->Common.BPB_RsvdSecCnt));
+		ColorPrintf(WHITE, _T("\tä¿ç•™æ‰‡åŒºæ•°ï¼š"));
+		ColorPrintf(LIME, _T("%u"), LD_UINT16(pcBPB->Common.BPB_RsvdSecCnt));
 
-		ColorPrintf(YELLOW, "\t\t\tÃ¿´ÅµÀÉÈÇøÊı£¨S£©£º");
-		ColorPrintf(AQUA, "%u\n", LD_UINT16(pcBPB->Common.BPB_SecPerTrk));
+		ColorPrintf(YELLOW, _T("\t\t\tæ¯ç£é“æ‰‡åŒºæ•°ï¼ˆSï¼‰ï¼š"));
+		ColorPrintf(AQUA, _T("%u\n"), LD_UINT16(pcBPB->Common.BPB_SecPerTrk));
 
-		ColorPrintf(WHITE, "\tFAT±íÊı£º");
-		ColorPrintf(LIME, "%u", LD_UINT8(pcBPB->Common.BPB_NumFATs));
+		ColorPrintf(WHITE, _T("\tFATè¡¨æ•°ï¼š"));
+		ColorPrintf(LIME, _T("%u"), LD_UINT8(pcBPB->Common.BPB_NumFATs));
 
-		ColorPrintf(WHITE, "\t\t\tÃ¿FAT±íÉÈÇøÊı£º");
-		ColorPrintf(LIME, "%u\n", secPerFat);
+		ColorPrintf(WHITE, _T("\t\t\tæ¯FATè¡¨æ‰‡åŒºæ•°ï¼š"));
+		ColorPrintf(LIME, _T("%u\n"), secPerFat);
 
-		ColorPrintf(WHITE, "\t¸ùÄ¿Â¼ÏîÊı£º");
-		ColorPrintf(LIME, "%u", LD_UINT16(pcBPB->Common.BPB_RootEntCnt));
+		ColorPrintf(WHITE, _T("\tæ ¹ç›®å½•é¡¹æ•°ï¼š"));
+		ColorPrintf(LIME, _T("%u"), LD_UINT16(pcBPB->Common.BPB_RootEntCnt));
 
-		ColorPrintf(FUCHSIA, "\t\t\tÉÈÇø×ÜÊı£º");
-		ColorPrintf(AQUA, "%u\n", totalSec);
+		ColorPrintf(FUCHSIA, _T("\t\t\tæ‰‡åŒºæ€»æ•°ï¼š"));
+		ColorPrintf(AQUA, _T("%u\n"), totalSec);
 	}
 
 	return retVal;

@@ -1,36 +1,37 @@
-/*!
+ï»¿/*!
 \file ISOProcess.h
 \author LiuBao
 \version 1.0
 \date 2010/12/24
-\brief ÉùÃ÷ISO´¦Àíº¯Êı£¬¶¨ÒåISOµÄ½á¹¹Ìå
+\brief å£°æ˜ISOå¤„ç†å‡½æ•°ï¼Œå®šä¹‰ISOçš„ç»“æ„ä½“
 */
 #ifndef ISO_PROCESS
 #define ISO_PROCESS
 
+#include <tchar.h>		/* ä½¿ç”¨_TCHAR */
 #include "MapFile.h"
 
-#define SECTOR_SIZE 2048			///< ISOÃ¿ÉÈÇø±ÈÌØÊı 
+#define SECTOR_SIZE 2048			///< ISOæ¯æ‰‡åŒºæ¯”ç‰¹æ•° 
 
 /*!
-	ÓÉÓÚ´æÔÚÄÚ´æ¶ÔÆëÎÊÌâ£¬ÕâÀïÓÖÊ¹ÓÃÁË½á¹¹Ìå£¬Òò´Ë£¬±ØĞëÔÚ±àÒëÊ±È·ÈÏ½á¹¹ÌåµÄ´óĞ¡£¬
-	ÒÔ±£Ö¤Êı¾İÕıÈ·¶ÔÆë¡£ÔÚ¶ÔÒÆÖ²ĞÔÒªÇó½Ï¸ßÇé¿öÏÂÓ¦µ±Ê¹ÓÃºê¶¨ÒåÏà¶ÔÆ«ÒÆÁ¿À´´úÌæ½á¹¹Ìå£¡
+	ç”±äºå­˜åœ¨å†…å­˜å¯¹é½é—®é¢˜ï¼Œè¿™é‡Œåˆä½¿ç”¨äº†ç»“æ„ä½“ï¼Œå› æ­¤ï¼Œå¿…é¡»åœ¨ç¼–è¯‘æ—¶ç¡®è®¤ç»“æ„ä½“çš„å¤§å°ï¼Œ
+	ä»¥ä¿è¯æ•°æ®æ­£ç¡®å¯¹é½ã€‚åœ¨å¯¹ç§»æ¤æ€§è¦æ±‚è¾ƒé«˜æƒ…å†µä¸‹åº”å½“ä½¿ç”¨å®å®šä¹‰ç›¸å¯¹åç§»é‡æ¥ä»£æ›¿ç»“æ„ä½“ï¼
 */
 
 typedef struct _PrimVolDesc			///  Primary Volumn Description
 {
-	uint8_t PrimaryIndicator;		///< ±ØÎª1 
-	uint8_t ISO9660Identifier[5];	///< ±ØÎªCD001 
-	uint8_t DescVer;				///< Description Version£¬±ØÎª1 
-	uint8_t Unused_1;				///< Ó¦Îª00 
+	uint8_t PrimaryIndicator;		///< å¿…ä¸º1 
+	uint8_t ISO9660Identifier[5];	///< å¿…ä¸ºCD001 
+	uint8_t DescVer;				///< Description Versionï¼Œå¿…ä¸º1 
+	uint8_t Unused_1;				///< åº”ä¸º00 
 	uint8_t SysID[32];				///< System Identifier 
 	uint8_t VolID[32];				///< Volumn Identifier 
-	uint8_t Unused_2[8];			///< Ó¦Îª00 
-	uint8_t VolSpaceSz[8];			///< Volumn Space Size£¬733±ê×¼ 
-	uint8_t Unused_3[32];			///< Ó¦Îª00 
+	uint8_t Unused_2[8];			///< åº”ä¸º00 
+	uint8_t VolSpaceSz[8];			///< Volumn Space Sizeï¼Œ733æ ‡å‡† 
+	uint8_t Unused_3[32];			///< åº”ä¸º00 
 	uint8_t VolSetSz[4];			///< Volumn Set Size 
 	uint8_t VolSeqNum[4];			///< Volumn Sequence Number 
-	uint8_t LogicalBlockSz[4];		///< Logical Block Size£¬723±ê×¼ 
+	uint8_t LogicalBlockSz[4];		///< Logical Block Sizeï¼Œ723æ ‡å‡† 
 	uint8_t PathTableSz[8];			///< Path Table Size 
 	uint8_t TypeIPathTable[4];		///< Location of Occurrence of Type L Path Table 
 	uint8_t OptTypeIPathTable[4];	///< Location of Optional Occurrence of Type L Path Table 
@@ -49,35 +50,35 @@ typedef struct _PrimVolDesc			///  Primary Volumn Description
 	uint8_t VolExpDate[17];			///< Volumn Expiration Date And Time 
 	uint8_t VolEffectiveDate[17];	///< Volumn Effective Date And Time 
 	uint8_t FileStructureVer;		///< File Structure Version 
-	uint8_t Reserved_1;				///< Ó¦Îª00 
+	uint8_t Reserved_1;				///< åº”ä¸º00 
 	uint8_t AppUse[512];			///< Application Use 
-	uint8_t Reserved_2[653];		///< ±£Áô
+	uint8_t Reserved_2[653];		///< ä¿ç•™
 }PrimVolDesc;
 
 typedef struct _BootRecordVolDesc	///  Boot Record Volume Descriptor
 {
-	uint8_t BootRecordIndic;		///< Boot Record Indicator£¬±ØÎª0 
-	uint8_t ISO9660ID[5];			///< ISO9660 Identifier£¬±ØÎªCD001 
-	uint8_t DescVer;				///< Description Version£¬±ØÎª1 
-	uint8_t BootSysID[32];			///< Boot System Identifier£¬·ûºÏEL TORITOÆô¶¯¹æ·¶Ó¦ÒÔ¡°EL TORITO SPECIFICATION¡±¿ªÍ· 
-	uint8_t Unused_1[32];			///< ±£Áô
-	uint8_t SecToBootCat[4];		///< Sectors To Boot Catalog£¬DWORD£¬Ìø×ªµ½BootCatalogµÚÒ»¸öÉÈÇøËùĞèÉÈÇøÊı 
-	uint8_t Unused_2[1973];			///< ±£Áô
+	uint8_t BootRecordIndic;		///< Boot Record Indicatorï¼Œå¿…ä¸º0 
+	uint8_t ISO9660ID[5];			///< ISO9660 Identifierï¼Œå¿…ä¸ºCD001 
+	uint8_t DescVer;				///< Description Versionï¼Œå¿…ä¸º1 
+	uint8_t BootSysID[32];			///< Boot System Identifierï¼Œç¬¦åˆEL TORITOå¯åŠ¨è§„èŒƒåº”ä»¥â€œEL TORITO SPECIFICATIONâ€å¼€å¤´ 
+	uint8_t Unused_1[32];			///< ä¿ç•™
+	uint8_t SecToBootCat[4];		///< Sectors To Boot Catalogï¼ŒDWORDï¼Œè·³è½¬åˆ°BootCatalogç¬¬ä¸€ä¸ªæ‰‡åŒºæ‰€éœ€æ‰‡åŒºæ•° 
+	uint8_t Unused_2[1973];			///< ä¿ç•™
 }BootRecordVolDesc;
 
 typedef struct _ValidationEntry		///  Validation Entry
 {
-	uint8_t HeaderID;				///< ±ØÎª01 
-	uint8_t PlatformID;				///< 0=80x86£»1=Power PC£»2=Mac 
-	uint8_t Reserved[2];			///< ±£Áô
-	uint8_t ManufacturerID[24];		///< Éú²úÉÌ±êÊ¶ 
-	uint8_t CheckSum[2];			///< WORD£¬Ó¦µ±Îª0 
-	uint8_t EndofVE[2];				///< ±ØÎª55AA 
+	uint8_t HeaderID;				///< å¿…ä¸º01 
+	uint8_t PlatformID;				///< 0=80x86ï¼›1=Power PCï¼›2=Mac 
+	uint8_t Reserved[2];			///< ä¿ç•™
+	uint8_t ManufacturerID[24];		///< ç”Ÿäº§å•†æ ‡è¯† 
+	uint8_t CheckSum[2];			///< WORDï¼Œåº”å½“ä¸º0 
+	uint8_t EndofVE[2];				///< å¿…ä¸º55AA 
 }ValidationEntry;
 
 typedef struct _InitialEntry		///  Initial Entry
 {
-	uint8_t BootIndicator;			///< 88=Bootable£»00=Not Bootable 
+	uint8_t BootIndicator;			///< 88=Bootableï¼›00=Not Bootable 
 	
 	/*! 
 		0 - No Emulation\n
@@ -86,75 +87,75 @@ typedef struct _InitialEntry		///  Initial Entry
 		3 - 2.88 meg diskette\n
 		4 - Hard Disk(drive 80)
 	 */
-	uint8_t BootMediaType;			///< Æô¶¯½éÖÊÀàĞÍ
-	uint8_t LoadSegment[2];			///< WORD£¬½ö¶Ôx86¼Ü¹¹ÓĞĞ§£¬Èç¹û¸ÃÖµÎª0£¬Ê¹ÓÃÄ¬ÈÏ¶Î7C0£¬·ñÔòÊ¹ÓÃÖ¸¶¨¶Î 
-	uint8_t SystemType;				///< Æô¶¯Ó³ÏñµÄÏµÍ³ÀàĞÍµÄ¿½±´
-	uint8_t Unused_1;				///< ±£Áô
-	uint8_t SectorCount[2];			///< Æô¶¯³ÌĞò¼ÓÔØµÄÉÈÇøÊı 
-	uint8_t LoadRBA[4];				///< DWORD£¬Virtual DiskµÄ¿ªÊ¼µØÖ· 
-	uint8_t Unused_2[20];			///< ±£Áô
+	uint8_t BootMediaType;			///< å¯åŠ¨ä»‹è´¨ç±»å‹
+	uint8_t LoadSegment[2];			///< WORDï¼Œä»…å¯¹x86æ¶æ„æœ‰æ•ˆï¼Œå¦‚æœè¯¥å€¼ä¸º0ï¼Œä½¿ç”¨é»˜è®¤æ®µ7C0ï¼Œå¦åˆ™ä½¿ç”¨æŒ‡å®šæ®µ 
+	uint8_t SystemType;				///< å¯åŠ¨æ˜ åƒçš„ç³»ç»Ÿç±»å‹çš„æ‹·è´
+	uint8_t Unused_1;				///< ä¿ç•™
+	uint8_t SectorCount[2];			///< å¯åŠ¨ç¨‹åºåŠ è½½çš„æ‰‡åŒºæ•° 
+	uint8_t LoadRBA[4];				///< DWORDï¼ŒVirtual Diskçš„å¼€å§‹åœ°å€ 
+	uint8_t Unused_2[20];			///< ä¿ç•™
 }InitialEntry;
 
-typedef struct _ISO9660TimeStr		///  ISO9660Ê±¼ä½á¹¹Ìå
+typedef struct _ISO9660TimeStr		///  ISO9660æ—¶é—´ç»“æ„ä½“
 {
-  uint8_t Year[4];					///< Äê·İ
-  uint8_t Month[2];					///< ÔÂ·İ£º1...12 
-  uint8_t Day[2];					///< ÈÕÆÚ£º1...31 
-  uint8_t Hour[2];					///< Ğ¡Ê±£º0...23 
-  uint8_t Minute[2];				///< ·ÖÖÓ£º0...59 
-  uint8_t Second[2];				///< Ãë£º0...59 
-  uint8_t CentiSecond[2];			///< 1/100Ãë 
-  int8_t GMTOffset;					///< Æ«Àë¸ñÁÖÍşÖÎÊ±¼äµÄÖµ£¬ÒÔ15·ÖÖÓ¼ä¸ôÎªµ¥Î»£¬´Ó-48£¨¶«²¿£©µ½+52£¨Î÷²¿£© 
+  uint8_t Year[4];					///< å¹´ä»½
+  uint8_t Month[2];					///< æœˆä»½ï¼š1...12 
+  uint8_t Day[2];					///< æ—¥æœŸï¼š1...31 
+  uint8_t Hour[2];					///< å°æ—¶ï¼š0...23 
+  uint8_t Minute[2];				///< åˆ†é’Ÿï¼š0...59 
+  uint8_t Second[2];				///< ç§’ï¼š0...59 
+  uint8_t CentiSecond[2];			///< 1/100ç§’ 
+  int8_t GMTOffset;					///< åç¦»æ ¼æ—å¨æ²»æ—¶é—´çš„å€¼ï¼Œä»¥15åˆ†é’Ÿé—´éš”ä¸ºå•ä½ï¼Œä»-48ï¼ˆä¸œéƒ¨ï¼‰åˆ°+52ï¼ˆè¥¿éƒ¨ï¼‰ 
 }ISO9660TimeStr;
 
 /*!
-´Ó¹âÅÌÆğÊ¼Î»ÖÃÌø×ªµ½PrimVolDesc¿ªÊ¼´¦
-\param media Î»ÓÚ¹âÅÌÆğÊ¼Î»ÖÃµÄmedia_t
-\return Ìø×ª³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+ä»å…‰ç›˜èµ·å§‹ä½ç½®è·³è½¬åˆ°PrimVolDescå¼€å§‹å¤„
+\param media ä½äºå…‰ç›˜èµ·å§‹ä½ç½®çš„media_t
+\return è·³è½¬æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int JumpToISOPrimVolDesc(media_t media);
 
 /*!
-´ÓPrimVolDesc¿ªÊ¼´¦Ìø×ªµ½BootRecordVolDesc¿ªÊ¼´¦
-\param media Î»ÓÚPrimVolDescÆğÊ¼Î»ÖÃµÄmedia_t
-\return Ìø×ª³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+ä»PrimVolDescå¼€å§‹å¤„è·³è½¬åˆ°BootRecordVolDescå¼€å§‹å¤„
+\param media ä½äºPrimVolDescèµ·å§‹ä½ç½®çš„media_t
+\return è·³è½¬æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int JumpToISOBootRecordVolDesc(media_t media);
 
 /*!
-´ÓBootRecordVolDesc¿ªÊ¼´¦Ìø×ªµ½ValidationEntry
-\param media Î»ÓÚBootRecordVolDescÆğÊ¼Î»ÖÃµÄmedia_t
-\return Ìø×ª³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+ä»BootRecordVolDescå¼€å§‹å¤„è·³è½¬åˆ°ValidationEntry
+\param media ä½äºBootRecordVolDescèµ·å§‹ä½ç½®çš„media_t
+\return è·³è½¬æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int JumpToISOValidationEntry(media_t media);
 
 /*!
-´ÓValidationEntry¿ªÊ¼´¦Ìø×ªµ½InitialEntry
-\param media Î»ÓÚValidationEntryÆğÊ¼Î»ÖÃµÄmedia_t
-\return Ìø×ª³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+ä»ValidationEntryå¼€å§‹å¤„è·³è½¬åˆ°InitialEntry
+\param media ä½äºValidationEntryèµ·å§‹ä½ç½®çš„media_t
+\return è·³è½¬æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int JumpToISOInitialEntry(media_t media);
 
 /*!
-´ÓInitialEntry¿ªÊ¼´¦Ìø×ªµ½Æô¶¯Ó³ÏñÎ»ÖÃ£¨¿ÉÄÜÊÇIMG¸ñÊ½Ó³ÏñÒ²¿ÉÄÜÊÇÒıµ¼³ÌĞò£©
-\param media Î»ÓÚInitialEntryÆğÊ¼Î»ÖÃµÄmedia_t
-\return Ìø×ª³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+ä»InitialEntryå¼€å§‹å¤„è·³è½¬åˆ°å¯åŠ¨æ˜ åƒä½ç½®ï¼ˆå¯èƒ½æ˜¯IMGæ ¼å¼æ˜ åƒä¹Ÿå¯èƒ½æ˜¯å¼•å¯¼ç¨‹åºï¼‰
+\param media ä½äºInitialEntryèµ·å§‹ä½ç½®çš„media_t
+\return è·³è½¬æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int JumpToISOBootableImage(media_t media);
 
 /*!
-´ÓÎ»ÓÚValidationEntryµÄmedia_t»ñµÃPlatformID£¨"80x86"/"Power PC"/"Mac"£©
-\param media Î»ÓÚValidationEntryÆğÊ¼Î»ÖÃµÄmedia_t
-\return »ñµÃµÄPlatformID×Ö·û´®
+ä»ä½äºValidationEntryçš„media_tè·å¾—PlatformIDï¼ˆ"80x86"/"Power PC"/"Mac"ï¼‰
+\param media ä½äºValidationEntryèµ·å§‹ä½ç½®çš„media_t
+\return è·å¾—çš„PlatformIDå­—ç¬¦ä¸²
 */
-const char *GetISOPlatformID(media_t media);
+const _TCHAR *GetISOPlatformID(media_t media);
 
 /*!
-´ÓÎ»ÓÚInitialEntryµÄmedia_t»ñµÃBootMediaType
-£¨"·ÇÄ£Äâ"/"1.2M ÈíÅÌÄ£Äâ"/"1.44M ÈíÅÌÄ£Äâ"/"2.88M ÈíÅÌÄ£Äâ"/"Ó²ÅÌÄ£Äâ"£©
-\param media Î»ÓÚInitialEntryÆğÊ¼Î»ÖÃµÄmedia_t
-\return »ñµÃµÄÆô¶¯½éÖÊÀàĞÍ×Ö·û´®
+ä»ä½äºInitialEntryçš„media_tè·å¾—BootMediaType
+ï¼ˆ"éæ¨¡æ‹Ÿ"/"1.2M è½¯ç›˜æ¨¡æ‹Ÿ"/"1.44M è½¯ç›˜æ¨¡æ‹Ÿ"/"2.88M è½¯ç›˜æ¨¡æ‹Ÿ"/"ç¡¬ç›˜æ¨¡æ‹Ÿ"ï¼‰
+\param media ä½äºInitialEntryèµ·å§‹ä½ç½®çš„media_t
+\return è·å¾—çš„å¯åŠ¨ä»‹è´¨ç±»å‹å­—ç¬¦ä¸²
 */
-const char *GetISOBootMediaType(media_t media);
+const _TCHAR *GetISOBootMediaType(media_t media);
 
 #endif

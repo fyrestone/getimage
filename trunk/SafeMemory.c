@@ -1,9 +1,9 @@
-/*!
+ï»¿/*!
 \file SafeMemory.c
 \author LiuBao
 \version 1.0
 \date 2010/12/25
-\brief °²È«ÄÚ´æ²Ù×÷ÊµÏÖ
+\brief å®‰å…¨å†…å­˜æ“ä½œå®ç°
 */
 #include <stdlib.h>		/* malloc/free */
 #include <memory.h>		/* memset */
@@ -11,28 +11,28 @@
 #include "ColorPrint.h"	/* ColorPrintf */
 #include "SafeMemory.h"
 
-#undef malloc	/* Ö»ÓĞÕâÀï¿ÉÒÔÊ¹ÓÃmalloc */
-#undef free		/* Ö»ÓĞÕâÀï¿ÉÒÔÊ¹ÓÃfree */
+#undef malloc	/* åªæœ‰è¿™é‡Œå¯ä»¥ä½¿ç”¨malloc */
+#undef free		/* åªæœ‰è¿™é‡Œå¯ä»¥ä½¿ç”¨free */
 
-#define GarbageByte 0xCC	///< À¬»ø×Ö·û
-#define EndByte 0xE1		///< ½áÎ²Õ¼Î»·û£¬¼ì²âÊÇ·ñÔ½½ç
+#define GarbageByte 0xCC	///< åƒåœ¾å­—ç¬¦
+#define EndByte 0xE1		///< ç»“å°¾å ä½ç¬¦ï¼Œæ£€æµ‹æ˜¯å¦è¶Šç•Œ
 
-void *Mem_alloc(size_t size, const char *file, int line)
+void *Mem_alloc(size_t size, const _TCHAR *file, int line)
 {
 	void *mallocPtr = NULL;
 
 	assert(size);
 
 #ifdef _DEBUG
-	if((mallocPtr = malloc(size + sizeof(size_t) + 1)))//¶àÒ»¸ö½áÎ²Õ¼Î»·û¿Õ¼ä¡£
+	if((mallocPtr = malloc(size + sizeof(size_t) + 1)))//å¤šä¸€ä¸ªç»“å°¾å ä½ç¬¦ç©ºé—´ã€‚
 	{
 	#if MEM_DETAIL
-		ColorPrintf(YELLOW, "ÄÚ´æ·ÖÅä£¨%p£©£º%s£º%d->%u\n", mallocPtr, file, line, size);
+		ColorPrintf(YELLOW, _T("å†…å­˜åˆ†é…ï¼ˆ%pï¼‰ï¼š%sï¼š%d->%u\n"), mallocPtr, file, line, size);
 	#endif
-		*(size_t *)(mallocPtr) = size;						/* ´¢´æmalloc´óĞ¡ */
-		mallocPtr = (char *)(mallocPtr) + sizeof(size_t);	/* ÖØĞÂ¼ÆËãmallocÖ¸Õë */
-		memset(mallocPtr, GarbageByte, size);				/* ÓÃÀ¬»øÊı¾İÖØĞ´ */
-		*((char *)mallocPtr + size) = (char)EndByte;		/* Ğ´Èë½áÎ²Õ¼Î»·û */
+		*(size_t *)(mallocPtr) = size;						/* å‚¨å­˜mallocå¤§å° */
+		mallocPtr = (char *)(mallocPtr) + sizeof(size_t);	/* é‡æ–°è®¡ç®—mallocæŒ‡é’ˆ */
+		memset(mallocPtr, GarbageByte, size);				/* ç”¨åƒåœ¾æ•°æ®é‡å†™ */
+		*((char *)mallocPtr + size) = (char)EndByte;		/* å†™å…¥ç»“å°¾å ä½ç¬¦ */
 	}
 #else
 	mallocPtr = malloc(size);
@@ -40,34 +40,34 @@ void *Mem_alloc(size_t size, const char *file, int line)
 
 	if(!mallocPtr)
 	{
-		ColorPrintf(RED, "ÄÚ´æ·ÖÅäÊ§°Ü£º\n");
-		ColorPrintf(YELLOW, "´óĞ¡£º%u\n", size);
-		ColorPrintf(YELLOW, "ÎÄ¼ş£º%s\n", file);
-		ColorPrintf(YELLOW, "ĞĞºÅ£º%d\n", line);
+		ColorPrintf(RED, _T("å†…å­˜åˆ†é…å¤±è´¥ï¼š\n"));
+		ColorPrintf(YELLOW, _T("å¤§å°ï¼š%u\n"), size);
+		ColorPrintf(YELLOW, _T("æ–‡ä»¶ï¼š%s\n"), file);
+		ColorPrintf(YELLOW, _T("è¡Œå·ï¼š%d\n"), line);
 	}
 
 	return mallocPtr;
 }
 
-void Mem_free(void *ptr, const char *file, int line)
+void Mem_free(void *ptr, const _TCHAR *file, int line)
 {
 #ifdef _DEBUG
-	void *mallocPtr = NULL;	/* Êµ¼ÊmallocÖ¸Õë */
-	size_t mallocSize = 0;	/* Êµ¼Êmalloc´óĞ¡ */
+	void *mallocPtr = NULL;	/* å®é™…mallocæŒ‡é’ˆ */
+	size_t mallocSize = 0;	/* å®é™…mallocå¤§å° */
 
 	assert(ptr);
 
-	/* ¼ÆËãÊµ¼ÊmallocÖ¸Õë¼°malloc¿Õ¼ä´óĞ¡ */
+	/* è®¡ç®—å®é™…mallocæŒ‡é’ˆåŠmallocç©ºé—´å¤§å° */
 	mallocPtr = (char *)ptr - sizeof(size_t);
 	mallocSize = *(size_t *)(mallocPtr);
 
-	assert(*((char*)ptr + mallocSize) == (char)EndByte);//¼ì²âÊÇ·ñÔ½½ç¡£
+	assert(*((char*)ptr + mallocSize) == (char)EndByte);//æ£€æµ‹æ˜¯å¦è¶Šç•Œã€‚
 
-	/* ÓÃÀ¬»øÊı¾İÖØĞ´ */
+	/* ç”¨åƒåœ¾æ•°æ®é‡å†™ */
 	memset(ptr, GarbageByte, mallocSize);
 
 	#if MEM_DETAIL
-		ColorPrintf(YELLOW, "ÄÚ´æÏú»Ù£¨%p£©£º%s£º%d->%u\n", mallocPtr, file, line, mallocSize);
+		ColorPrintf(YELLOW, _T("å†…å­˜é”€æ¯ï¼ˆ%pï¼‰ï¼š%sï¼š%d->%u\n"), mallocPtr, file, line, mallocSize);
 	#endif
 
 	free(mallocPtr);
