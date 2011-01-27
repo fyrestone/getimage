@@ -14,8 +14,8 @@
 #undef malloc      /* 只有这里可以使用malloc */
 #undef free        /* 只有这里可以使用free */
 
-#define GarbageByte 0xCC    ///< 垃圾字符
-#define EndByte 0xE1        ///< 结尾占位符，检测是否越界
+#define GarbageByte 0xCC   ///< 垃圾字符
+#define EndByte 0xE1       ///< 结尾占位符，检测是否越界
 
 void *Mem_alloc(size_t size, const _TCHAR *file, int line)
 {
