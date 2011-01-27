@@ -144,13 +144,13 @@ int JumpToISOBootableImage(media_t media)
 	return retVal;
 }
 
-const char *GetISOPlatformID(media_t media)
+const _TCHAR *GetISOPlatformID(media_t media)
 {
-	static const char *Platform[] = 
+	static const _TCHAR *Platform[] = 
 	{
-		"80x86",
-		"Power PC",
-		"Mac"
+		_T("80x86"),
+		_T("Power PC"),
+		_T("Mac")
 	};
 
 	media_access access;
@@ -169,15 +169,15 @@ const char *GetISOPlatformID(media_t media)
 	return NULL;
 }
 
-const char *GetISOBootMediaType(media_t media)
+const _TCHAR *GetISOBootMediaType(media_t media)
 {
-	static const char *BootMediaType[] =
+	static const _TCHAR *BootMediaType[] =
 	{
-		"非模拟",
-		"1.2M 软盘模拟",
-		"1.44M 软盘模拟",
-		"2.88M 软盘模拟",
-		"硬盘模拟"
+		_T("非模拟"),
+		_T("1.2M 软盘模拟"),
+		_T("1.44M 软盘模拟"),
+		_T("2.88M 软盘模拟"),
+		_T("硬盘模拟")
 	};
 
 	media_access access;

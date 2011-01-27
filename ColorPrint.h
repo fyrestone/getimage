@@ -1,43 +1,59 @@
-/*!
+ï»¿/*!
 \file ColorPrint.h
 \author LiuBao
 \version 1.0
 \date 2010/12/28
-\brief Windows¿ØÖÆÌ¨²ÊÉ«Êä³ö½Ó¿Ú¼°É«²Ê¶¨Òå
+\brief Windowsæ§åˆ¶å°å½©è‰²è¾“å‡ºæ¥å£åŠè‰²å½©å®šä¹‰
 */
 #ifndef COLOR_PRINT
 #define COLOR_PRINT
 
-typedef enum _COLOR	///  É«²Ê¶¨Òå
+#include <tchar.h>	/* ä½¿ç”¨_TCHAR */
+
+typedef enum _COLOR	///  è‰²å½©å®šä¹‰
 {
-	BLACK,			///< ºÚÉ«
-	NAVY,			///< ÉîÀ¶É«
-	GREEN,			///< ÂÌÉ«
-	TEAL,			///< ÇàÉ«
-	MAROON,			///< ºÖºìÉ«
-	PURPLE,			///< ×ÏÉ«
-	OLIVE,			///< éÏé­ÂÌ
-	SILVER,			///< ÒøÉ«
-	GRAY,			///< »ÒÉ«
-	BLUE,			///< À¶É«
-	LIME,			///< »ÆÂÌÉ«
-	AQUA,			///< Ç³ÂÌÉ«
-	RED,			///< ºìÉ«
-	FUCHSIA,		///< ×ÏºìÉ«
-	YELLOW,			///< »ÆÉ«
-	WHITE			///< °×É«
+	BLACK,			///< é»‘è‰²
+	NAVY,			///< æ·±è“è‰²
+	GREEN,			///< ç»¿è‰²
+	TEAL,			///< é’è‰²
+	MAROON,			///< è¤çº¢è‰²
+	PURPLE,			///< ç´«è‰²
+	OLIVE,			///< æ©„æ¦„ç»¿
+	SILVER,			///< é“¶è‰²
+	GRAY,			///< ç°è‰²
+	BLUE,			///< è“è‰²
+	LIME,			///< é»„ç»¿è‰²
+	AQUA,			///< æµ…ç»¿è‰²
+	RED,			///< çº¢è‰²
+	FUCHSIA,		///< ç´«çº¢è‰²
+	YELLOW,			///< é»„è‰²
+	WHITE			///< ç™½è‰²
 }COLOR;
 
-/*!
-¿ØÖÆÌ¨²ÊÉ«Êä³ö£¬ÔÚprintf»ù´¡ÉÏÔö¼ÓÑÕÉ«Ñ¡Ôñ
-\param color Êä³öÑÕÉ«
-\param format Êä³ö¸ñÊ½£¬Í¬printf
-\return Ğ´ÈëµÄ×Ö·ûÊıÁ¿£¬³ö´í·µ»Ø¸ºÖµ£¬Í¬printf
-*/
-int ColorPrintf(COLOR color, const char *format, ...);
+#ifdef _UNICODE
+#define ColorPrintf ColorPrintfW
+#else
+#define ColorPrintf ColorPrintfA
+#endif
 
 /*!
-°´ÑÕÉ«Ãû´òÓ¡ËùÓĞÉ«²Ê£¬ÓÃÓÚ²âÊÔÉ«²ÊÊä³ö
+æ§åˆ¶å°å½©è‰²è¾“å‡ºï¼Œåœ¨printfåŸºç¡€ä¸Šå¢åŠ é¢œè‰²é€‰æ‹©ï¼ˆUnicodeç‰ˆæœ¬ï¼‰
+\param color è¾“å‡ºé¢œè‰²
+\param format è¾“å‡ºæ ¼å¼ï¼ŒåŒprintf
+\return å†™å…¥çš„å­—ç¬¦æ•°é‡ï¼Œå‡ºé”™è¿”å›è´Ÿå€¼ï¼ŒåŒprintf
+*/
+int ColorPrintfW(COLOR color, const wchar_t *format, ...);
+
+/*!
+æ§åˆ¶å°å½©è‰²è¾“å‡ºï¼Œåœ¨printfåŸºç¡€ä¸Šå¢åŠ é¢œè‰²é€‰æ‹©ï¼ˆANSIç‰ˆæœ¬ï¼‰
+\param color è¾“å‡ºé¢œè‰²
+\param format è¾“å‡ºæ ¼å¼ï¼ŒåŒprintf
+\return å†™å…¥çš„å­—ç¬¦æ•°é‡ï¼Œå‡ºé”™è¿”å›è´Ÿå€¼ï¼ŒåŒprintf
+*/
+int ColorPrintfA(COLOR color, const char *format, ...);
+
+/*!
+æŒ‰é¢œè‰²åæ‰“å°æ‰€æœ‰è‰²å½©ï¼Œç”¨äºæµ‹è¯•è‰²å½©è¾“å‡º
 */
 void PrintAllColor();
 

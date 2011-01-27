@@ -1,24 +1,24 @@
-/*!
+ï»¿/*!
 \file IMGProcess.h
 \author LiuBao
 \version 1.0
 \date 2010/12/25
-\brief ÉùÃ÷IMG´¦Àíº¯Êı£¬¶¨ÒåFATÎÄ¼şÏµÍ³µÄ½á¹¹Ìå
+\brief å£°æ˜IMGå¤„ç†å‡½æ•°ï¼Œå®šä¹‰FATæ–‡ä»¶ç³»ç»Ÿçš„ç»“æ„ä½“
 */
 #ifndef IMAGE_PROCESS
 #define IMAGE_PROCESS
 
 #include "MapFile.h"
 
-#define MIN_FAT16 4085	///< FAT16Êı¾İ×îÉÙ´ØÊı	
-#define MIN_FAT32 65525	///< FAT32Êı¾İ×îÉÙ´ØÊı	
+#define MIN_FAT16 4085	///< FAT16æ•°æ®æœ€å°‘ç°‡æ•°	
+#define MIN_FAT32 65525	///< FAT32æ•°æ®æœ€å°‘ç°‡æ•°	
 
-typedef int FS_TYPE;	///< FAT¸ñÊ½¶¨Òå
+typedef int FS_TYPE;	///< FATæ ¼å¼å®šä¹‰
 
-#define FAT_ERR 0x10	///< ´íÎóFAT¸ñÊ½	
-#define FAT12 0x11		///< FAT12¸ñÊ½
-#define FAT16 0x12		///< FAT16¸ñÊ½
-#define FAT32 0x13		///< FAT32¸ñÊ½		
+#define FAT_ERR 0x10	///< é”™è¯¯FATæ ¼å¼	
+#define FAT12 0x11		///< FAT12æ ¼å¼
+#define FAT16 0x12		///< FAT16æ ¼å¼
+#define FAT32 0x13		///< FAT32æ ¼å¼		
 
 /*
 	BPB->BIOS Parameter Block
@@ -26,84 +26,84 @@ typedef int FS_TYPE;	///< FAT¸ñÊ½¶¨Òå
 */
 
 /*
-	ÓÉÓÚ´æÔÚÄÚ´æ¶ÔÆëÎÊÌâ£¬ÕâÀïÓÖÊ¹ÓÃÁË½á¹¹Ìå£¬Òò´Ë£¬±ØĞëÔÚ±àÒëÊ±È·ÈÏ½á¹¹ÌåµÄ´óĞ¡£¬
-	ÒÔ±£Ö¤Êı¾İÕıÈ·¶ÔÆë¡£ÔÚ¶ÔÒÆÖ²ĞÔÒªÇó½Ï¸ßÇé¿öÏÂÓ¦µ±Ê¹ÓÃºê¶¨ÒåÏà¶ÔÆ«ÒÆÁ¿À´´úÌæ½á¹¹Ìå£¡
+	ç”±äºå­˜åœ¨å†…å­˜å¯¹é½é—®é¢˜ï¼Œè¿™é‡Œåˆä½¿ç”¨äº†ç»“æ„ä½“ï¼Œå› æ­¤ï¼Œå¿…é¡»åœ¨ç¼–è¯‘æ—¶ç¡®è®¤ç»“æ„ä½“çš„å¤§å°ï¼Œ
+	ä»¥ä¿è¯æ•°æ®æ­£ç¡®å¯¹é½ã€‚åœ¨å¯¹ç§»æ¤æ€§è¦æ±‚è¾ƒé«˜æƒ…å†µä¸‹åº”å½“ä½¿ç”¨å®å®šä¹‰ç›¸å¯¹åç§»é‡æ¥ä»£æ›¿ç»“æ„ä½“ï¼
 */
 
-typedef struct _BPBCommon		///  BPBÖĞFAT12/16/32¹²ÓÃ²¿·Ö
+typedef struct _BPBCommon		///  BPBä¸­FAT12/16/32å…±ç”¨éƒ¨åˆ†
 {
-	uint8_t BS_JmpBoot[3];		///< Ìø×ªÖ¸Áî£¬Ìø×ªµ½DBRÖĞµÄÒıµ¼³ÌĞò
-	uint8_t BS_OEMName[8];		///< ¾íµÄOEMÃû³Æ
-	uint8_t BPB_BytsPerSec[2];	///< Ã¿ÉÈÇø°üº¬×Ö½ÚÊı
-	uint8_t BPB_SecPerClus[1];	///< Ã¿´Ø°üº¬ÉÈÇøÊı
-	uint8_t BPB_RsvdSecCnt[2];	///< ±£ÁôÉÈÇøÊıÄ¿£¬Ö¸µÚÒ»¸öFAT±í¿ªÊ¼Ç°µÄÉÈÇøÊı£¬°üÀ¨DBR±¾Éí
-	uint8_t BPB_NumFATs[1];		///< ¾íFAT±íÊı
-	uint8_t BPB_RootEntCnt[2];	///< ¾í¸ùÈë¿ÚµãÊı
-	uint8_t BPB_TotSec16[2];	///< ¾íÉÈÇø×ÜÊı£¬¶ÔÓÚ´óÓÚ65535¸öÉÈÇøµÄ¾í£¬±¾×Ö¶ÎÎª0
-	uint8_t BPB_Media[1];		///< ¾í½éÖÊÀàĞÍ
-	uint8_t BPB_FATSz16[2];		///< Ã¿¸öFAT±íÕ¼ÓÃÉÈÇøÊı
-	uint8_t BPB_SecPerTrk[2];	///< Ã¿´ÅµÀ°üº¬ÉÈÇøÊı
-	uint8_t BPB_NumHeads[2];	///< ¾í´ÅÍ·Êı
-	uint8_t BPB_HiddSec[4];		///< ¾íÒş²Ø´ÅÍ·Êı
-	uint8_t BPB_TotSec32[4];	///< ¾íÉÈÇø×ÜÊı£¬´óÓÚ65535¸öÉÈÇøµÄ¾íÓÃ±¾×Ö¶Î±íÊ¾
+	uint8_t BS_JmpBoot[3];		///< è·³è½¬æŒ‡ä»¤ï¼Œè·³è½¬åˆ°DBRä¸­çš„å¼•å¯¼ç¨‹åº
+	uint8_t BS_OEMName[8];		///< å·çš„OEMåç§°
+	uint8_t BPB_BytsPerSec[2];	///< æ¯æ‰‡åŒºåŒ…å«å­—èŠ‚æ•°
+	uint8_t BPB_SecPerClus[1];	///< æ¯ç°‡åŒ…å«æ‰‡åŒºæ•°
+	uint8_t BPB_RsvdSecCnt[2];	///< ä¿ç•™æ‰‡åŒºæ•°ç›®ï¼ŒæŒ‡ç¬¬ä¸€ä¸ªFATè¡¨å¼€å§‹å‰çš„æ‰‡åŒºæ•°ï¼ŒåŒ…æ‹¬DBRæœ¬èº«
+	uint8_t BPB_NumFATs[1];		///< å·FATè¡¨æ•°
+	uint8_t BPB_RootEntCnt[2];	///< å·æ ¹å…¥å£ç‚¹æ•°
+	uint8_t BPB_TotSec16[2];	///< å·æ‰‡åŒºæ€»æ•°ï¼Œå¯¹äºå¤§äº65535ä¸ªæ‰‡åŒºçš„å·ï¼Œæœ¬å­—æ®µä¸º0
+	uint8_t BPB_Media[1];		///< å·ä»‹è´¨ç±»å‹
+	uint8_t BPB_FATSz16[2];		///< æ¯ä¸ªFATè¡¨å ç”¨æ‰‡åŒºæ•°
+	uint8_t BPB_SecPerTrk[2];	///< æ¯ç£é“åŒ…å«æ‰‡åŒºæ•°
+	uint8_t BPB_NumHeads[2];	///< å·ç£å¤´æ•°
+	uint8_t BPB_HiddSec[4];		///< å·éšè—ç£å¤´æ•°
+	uint8_t BPB_TotSec32[4];	///< å·æ‰‡åŒºæ€»æ•°ï¼Œå¤§äº65535ä¸ªæ‰‡åŒºçš„å·ç”¨æœ¬å­—æ®µè¡¨ç¤º
 }BPBCommon;
 
-typedef struct _BPBFat16		///  BPBÖĞFAT16ÌØÊâ²¿·Ö
+typedef struct _BPBFat16		///  BPBä¸­FAT16ç‰¹æ®Šéƒ¨åˆ†
 {
-	uint8_t BS_DrvNum[1];		///< Çı¶¯Æ÷±àºÅ
-	uint8_t BS_Reserved1[1];	///< ±£Áô×Ö¶Î
-	uint8_t BS_BootSig[1];		///< ´ÅÅÌÀ©Õ¹Òıµ¼Çø±êÇ©£¬WindowsÒªÇó¸Ã±êÇ©Îª0x28»òÕß0x29
-	uint8_t BS_VolID[4];		///< ´ÅÅÌ¾íID
-	uint8_t BS_VolLab[11];		///< ´ÅÅÌ¾í±ê
-	uint8_t BS_FilSysType[8];	///< ´ÅÅÌÉÏµÄÎÄ¼şÏµÍ³ÀàĞÍ
+	uint8_t BS_DrvNum[1];		///< é©±åŠ¨å™¨ç¼–å·
+	uint8_t BS_Reserved1[1];	///< ä¿ç•™å­—æ®µ
+	uint8_t BS_BootSig[1];		///< ç£ç›˜æ‰©å±•å¼•å¯¼åŒºæ ‡ç­¾ï¼ŒWindowsè¦æ±‚è¯¥æ ‡ç­¾ä¸º0x28æˆ–è€…0x29
+	uint8_t BS_VolID[4];		///< ç£ç›˜å·ID
+	uint8_t BS_VolLab[11];		///< ç£ç›˜å·æ ‡
+	uint8_t BS_FilSysType[8];	///< ç£ç›˜ä¸Šçš„æ–‡ä»¶ç³»ç»Ÿç±»å‹
 }BPBFat16;
 
-typedef struct _BPBFat32		///  BPBÖĞFAT32ÌØÊâ²¿·Ö
+typedef struct _BPBFat32		///  BPBä¸­FAT32ç‰¹æ®Šéƒ¨åˆ†
 {
-	uint8_t BPB_FATSz32[4];		///< Ã¿¸öFAT±íÕ¼ÓÃÉÈÇøÊı£¬FAT32ÌØÓĞ£¬´ËÊ±BPB_FATSz16±ØĞëÎª0
-	uint8_t BPB_ExtFlags[2];	///< [0:3]»î¶¯FAT±íË÷ÒıºÅ\n [4:6]±£Áô\n [7]Îª0¾µÏñµ½ËùÓĞFAT±í£¬Îª1Ö»ÓĞÒ»¸ö»î¶¯FAT±í\n [8:15]±£Áô
-	uint8_t BPB_FSVer[2];		///< ¸ßÎ»ÎªFAT32µÄÖ÷°æ±¾ºÅ£¬µÍÎ»Îª´Î°æ±¾ºÅ
-	uint8_t BPB_RootClus[4];	///< ¸ùÄ¿Â¼ËùÔÚµÚÒ»¸ö´ØµÄ´ØºÅ£¬Í¨³£¸ÃÊıÖµÎª2£¬µ«²»ÊÇ±ØĞëÎª2
-	uint8_t BPB_FSInfo[2];		///< ±£ÁôÇøÖĞFAT32¾íFSINFO½á¹¹ËùÕ¼µÄÉÈÇøÊı£¬Í¨³£Îª1
-	uint8_t BPB_BkBootSec[2];	///< Èç¹û²»Îª0£¬±íÊ¾ÔÚ±£ÁôÇøÖĞÒıµ¼¼ÇÂ¼µÄ±¸·İÊı¾İËùÕ¼µÄÉÈÇøÊı£¬Í¨³£Îª6
-	uint8_t BPB_Reserved[12];	///< ±£Áô
-	uint8_t BS_DrvNum[1];		///< Çı¶¯Æ÷±àºÅ
-	uint8_t BS_Reserved1[1];	///< ±£Áô
-	uint8_t BS_BootSig[1];		///< ´ÅÅÌÀ©Õ¹Òıµ¼Çø±êÇ©£¬WindowsÒªÇó¸Ã±êÇ©Îª0x28»òÕß0x29
-	uint8_t BS_VolID[4];		///< ´ÅÅÌ¾íID
-	uint8_t BS_VolLab[11];		///< ´ÅÅÌ¾í±ê
-	uint8_t BS_FilSysType[8];	///< ´ÅÅÌÉÏµÄÎÄ¼şÏµÍ³ÀàĞÍ
+	uint8_t BPB_FATSz32[4];		///< æ¯ä¸ªFATè¡¨å ç”¨æ‰‡åŒºæ•°ï¼ŒFAT32ç‰¹æœ‰ï¼Œæ­¤æ—¶BPB_FATSz16å¿…é¡»ä¸º0
+	uint8_t BPB_ExtFlags[2];	///< [0:3]æ´»åŠ¨FATè¡¨ç´¢å¼•å·\n [4:6]ä¿ç•™\n [7]ä¸º0é•œåƒåˆ°æ‰€æœ‰FATè¡¨ï¼Œä¸º1åªæœ‰ä¸€ä¸ªæ´»åŠ¨FATè¡¨\n [8:15]ä¿ç•™
+	uint8_t BPB_FSVer[2];		///< é«˜ä½ä¸ºFAT32çš„ä¸»ç‰ˆæœ¬å·ï¼Œä½ä½ä¸ºæ¬¡ç‰ˆæœ¬å·
+	uint8_t BPB_RootClus[4];	///< æ ¹ç›®å½•æ‰€åœ¨ç¬¬ä¸€ä¸ªç°‡çš„ç°‡å·ï¼Œé€šå¸¸è¯¥æ•°å€¼ä¸º2ï¼Œä½†ä¸æ˜¯å¿…é¡»ä¸º2
+	uint8_t BPB_FSInfo[2];		///< ä¿ç•™åŒºä¸­FAT32å·FSINFOç»“æ„æ‰€å çš„æ‰‡åŒºæ•°ï¼Œé€šå¸¸ä¸º1
+	uint8_t BPB_BkBootSec[2];	///< å¦‚æœä¸ä¸º0ï¼Œè¡¨ç¤ºåœ¨ä¿ç•™åŒºä¸­å¼•å¯¼è®°å½•çš„å¤‡ä»½æ•°æ®æ‰€å çš„æ‰‡åŒºæ•°ï¼Œé€šå¸¸ä¸º6
+	uint8_t BPB_Reserved[12];	///< ä¿ç•™
+	uint8_t BS_DrvNum[1];		///< é©±åŠ¨å™¨ç¼–å·
+	uint8_t BS_Reserved1[1];	///< ä¿ç•™
+	uint8_t BS_BootSig[1];		///< ç£ç›˜æ‰©å±•å¼•å¯¼åŒºæ ‡ç­¾ï¼ŒWindowsè¦æ±‚è¯¥æ ‡ç­¾ä¸º0x28æˆ–è€…0x29
+	uint8_t BS_VolID[4];		///< ç£ç›˜å·ID
+	uint8_t BS_VolLab[11];		///< ç£ç›˜å·æ ‡
+	uint8_t BS_FilSysType[8];	///< ç£ç›˜ä¸Šçš„æ–‡ä»¶ç³»ç»Ÿç±»å‹
 }BPBFat32;
 
-typedef struct _BPB				///  512±ÈÌØIMGÍ·²¿
+typedef struct _BPB				///  512æ¯”ç‰¹IMGå¤´éƒ¨
 {
-	BPBCommon Common;			///< BPBÖĞFAT12/16/32¹²ÓÃ²¿·Ö
+	BPBCommon Common;			///< BPBä¸­FAT12/16/32å…±ç”¨éƒ¨åˆ†
 	union
 	{
 		BPBFat16 Fat16;
 		BPBFat32 Fat32;
-	}Special;					///< BPBÖĞFAT12/16ÓëFAT32²»Í¬²¿·Ö
-	uint8_t Interval[420];		///< ¼ä¸ô
-	uint8_t EndFlag[2];			///< DBR½áÊøÇ©Ãû
+	}Special;					///< BPBä¸­FAT12/16ä¸FAT32ä¸åŒéƒ¨åˆ†
+	uint8_t Interval[420];		///< é—´éš”
+	uint8_t EndFlag[2];			///< DBRç»“æŸç­¾å
 }BPB;
 
 /*!
-¼ì²éIMGÎÄ¼şµÄÊ¶±ğ±ê¼Ç£¨Ìø×ª±ê¼Ç£©
-\param media Î»ÖÃÔÚIMGÍ·²¿µÄmedia_t
-\return Èç¹û¼ì²âÍ¨¹ı£¨ÊÇIMG£©·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+æ£€æŸ¥IMGæ–‡ä»¶çš„è¯†åˆ«æ ‡è®°ï¼ˆè·³è½¬æ ‡è®°ï¼‰
+\param media ä½ç½®åœ¨IMGå¤´éƒ¨çš„media_t
+\return å¦‚æœæ£€æµ‹é€šè¿‡ï¼ˆæ˜¯IMGï¼‰è¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int CheckIMGIdentifier(media_t media);
 
 /*!
-¼ì²éIMGÎÄ¼şÏµÍ³Ê¶±ğ±ê¼Ç
-\param media Î»ÖÃÔÚIMGÍ·²¿µÄmedia_t
-\return Èç¹û¼ì²âÍ¨¹ı£¨ÊÇIMGÎÄ¼şÏµÍ³£©·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+æ£€æŸ¥IMGæ–‡ä»¶ç³»ç»Ÿè¯†åˆ«æ ‡è®°
+\param media ä½ç½®åœ¨IMGå¤´éƒ¨çš„media_t
+\return å¦‚æœæ£€æµ‹é€šè¿‡ï¼ˆæ˜¯IMGæ–‡ä»¶ç³»ç»Ÿï¼‰è¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int CheckIMGFileSystem(media_t media);
 
 /*!
-»ñÈ¡IMGÎÄ¼şÏµÍ³ÀàĞÍ
-\param pcBPB BPB½á¹¹ÌåÖ¸Õë
+è·å–IMGæ–‡ä»¶ç³»ç»Ÿç±»å‹
+\param pcBPB BPBç»“æ„ä½“æŒ‡é’ˆ
 \return FAT12/FAT16/FAT32/FAT_ERR
 */
 FS_TYPE GetIMGType(const BPB *pcBPB);

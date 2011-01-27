@@ -1,9 +1,9 @@
-/*!
+ï»¿/*!
 \file ProjDef.h
 \author LiuBao
 \version 1.0
 \date 2011/1/23
-\brief ÏîÄ¿¼¶¶¨Òå
+\brief é¡¹ç›®çº§å®šä¹‰
 */
 #ifndef PROJDEF
 #define PROJDEF
@@ -11,7 +11,7 @@
 #undef SUCCESS
 #undef FAILED
 
-#define SUCCESS 0	///< º¯ÊýÖ´ÐÐ³É¹¦·µ»Ø
-#define FAILED -1	///< º¯ÊýÖ´ÐÐÊ§°Ü·µ»Ø
+#define SUCCESS 0	///< å‡½æ•°æ‰§è¡ŒæˆåŠŸè¿”å›ž
+#define FAILED -1	///< å‡½æ•°æ‰§è¡Œå¤±è´¥è¿”å›ž
 
 #endif

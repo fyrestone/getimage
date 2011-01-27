@@ -1,110 +1,111 @@
-/*!
+ï»¿/*!
 \file GetImage.c
 \author LiuBao
 \version 1.0
 \date 2011/1/23
-\brief GetImageµÄmainº¯Êı¼°Õë¶Ô²»Í¬²ÎÊıµÄ´¦Àíº¯Êı
+\brief GetImageçš„mainå‡½æ•°åŠé’ˆå¯¹ä¸åŒå‚æ•°çš„å¤„ç†å‡½æ•°
 */
 #include <stdio.h>
-#include <conio.h>					/* Ê¹ÓÃ_getch */
+#include <conio.h>					/* ä½¿ç”¨_getch */
+#include <locale.h>					/* ä½¿ç”¨setlocale */
 #include "ProjDef.h"
-#include "ArgParser\carg_parser.h"	/* Ê¹ÓÃArgParser²ÎÊı½âÎö */
+#include "ArgParser\carg_parser.h"	/* ä½¿ç”¨ArgParserå‚æ•°è§£æ */
 #include "ColorPrint.h"
 #include "Process.h"
 
-#define PROGRAM_NAME "GETIMAGE"	///< ³ÌĞòÃû
-#define PROGRAM_YEAR "2010"		///< Äê·İ
-#define PROGRAM_VERSION "1.5"	///< °æ±¾
+#define PROGRAM_NAME _T("GETIMAGE")	///< ç¨‹åºå
+#define PROGRAM_YEAR _T("2010")		///< å¹´ä»½
+#define PROGRAM_VERSION _T("1.5")	///< ç‰ˆæœ¬
 
-/// °´ÈÎÒâ¼üÍË³ö
+/// æŒ‰ä»»æ„é”®é€€å‡º
 #define PRESS_ANY_KEY_AND_CONTINUE			\
 	do										\
 	{										\
-		ColorPrintf(WHITE, ".");			\
+		ColorPrintf(WHITE, _T("."));		\
 		_getch();							\
 	}while(0)
 
 /*!
-²âÊÔDebugºê
+æµ‹è¯•Debugå®
 */
 void TestDebugFlag()
 {
-	ColorPrintf(AQUA, "¿ªÊ¼²âÊÔdebugºê£º\n");
+	ColorPrintf(AQUA, _T("å¼€å§‹æµ‹è¯•debugå®ï¼š\n"));
 
 #ifdef _DEBUG
-	puts("µ±Ç°ºêÎª£º_DEBUG");
+	_putts(_T("å½“å‰å®ä¸ºï¼š_DEBUG"));
 #endif
 #ifdef NDEBUG
-	puts("µ±Ç°ºêÎª£ºNDEBUG");
+	_putts(_T("å½“å‰å®ä¸ºï¼šNDEBUG"));
 #endif
 }
 
 /*!
-´òÓ¡°æÈ¨Í·
+æ‰“å°ç‰ˆæƒå¤´
 */
 void ShowTitle()
 {
-	printf("\n%s %s\t°æÈ¨ËùÓĞ(c) 2009-2010 Áõ±¦ %s\n\n", PROGRAM_NAME, PROGRAM_VERSION, __DATE__);
+	_tprintf(_T("\n%s %s\tç‰ˆæƒæ‰€æœ‰(c) 2009-2010 åˆ˜å® %s\n\n"), PROGRAM_NAME, PROGRAM_VERSION, _T(__DATE__));
 }
 
 /*!
-´òÓ¡°ïÖúĞÅÏ¢
+æ‰“å°å¸®åŠ©ä¿¡æ¯
 */
 void ShowHelp()
 {
-	printf("ÓÃ·¨£º\tgetimage [-f|-d] <ÎÄ¼ş»òÉè±¸>\n");
-	printf("Ñ¡Ïî£º\n");
-	printf("\t-h, --help\t\tÏÔÊ¾±¾°ïÖú\n");
-	printf("\t-v, --version\t\tÏÔÊ¾±¾³ÌĞòÃû¼°°æ±¾ºÅ\n");
-	printf("\t-f, --file\t\t´ò¿ªÒ»¸öÎÄ¼ş\n");
-	printf("\t-d, --device\t\t´ò¿ªÒ»¸öÉè±¸\n");
-	printf("Ä¬ÈÏ£º\nµ±ÎŞÑ¡ÏîÊ±½«ÊäÈëµÄµÚÒ»¸ö²ÎÊı×÷ÎªÎÄ¼ş´¦Àí£º\n"
-		"ÈôÎªISO£¬Ôò×Ô¶¯ÌáÈ¡ÆäÖĞµÄÆô¶¯´ÅÅÌÓ³Ïñµ½ISOÎÄ¼şËùÔÚÄ¿Â¼£¬Éú³ÉµÄIMGÓëISOÍ¬Ãû£»\n"
-		"ÈôÎªIMG£¬ÔòÏÔÊ¾Æä¹æ¸ñĞÅÏ¢\n");
+	_tprintf(_T("ç”¨æ³•ï¼š\tgetimage [-f|-d] <æ–‡ä»¶æˆ–è®¾å¤‡>\n"));
+	_tprintf(_T("é€‰é¡¹ï¼š\n"));
+	_tprintf(_T("\t-h, --help\t\tæ˜¾ç¤ºæœ¬å¸®åŠ©\n"));
+	_tprintf(_T("\t-v, --version\t\tæ˜¾ç¤ºæœ¬ç¨‹åºååŠç‰ˆæœ¬å·\n"));
+	_tprintf(_T("\t-f, --file\t\tæ‰“å¼€ä¸€ä¸ªæ–‡ä»¶\n"));
+	_tprintf(_T("\t-d, --device\t\tæ‰“å¼€ä¸€ä¸ªè®¾å¤‡\n"));
+	_tprintf(_T("é»˜è®¤ï¼š\nå½“æ— é€‰é¡¹æ—¶å°†è¾“å…¥çš„ç¬¬ä¸€ä¸ªå‚æ•°ä½œä¸ºæ–‡ä»¶å¤„ç†ï¼š\n")
+		_T("è‹¥ä¸ºISOï¼Œåˆ™è‡ªåŠ¨æå–å…¶ä¸­çš„å¯åŠ¨ç£ç›˜æ˜ åƒåˆ°ISOæ–‡ä»¶æ‰€åœ¨ç›®å½•ï¼Œç”Ÿæˆçš„IMGä¸ISOåŒåï¼›\n")
+		_T("è‹¥ä¸ºIMGï¼Œåˆ™æ˜¾ç¤ºå…¶è§„æ ¼ä¿¡æ¯\n"));
 }
 
 /*!
-´òÓ¡´íÎóĞÅÏ¢
+æ‰“å°é”™è¯¯ä¿¡æ¯
 */
-void ShowError(const char *msg, const char *selfPath)
+void ShowError(const _TCHAR *msg, const _TCHAR *selfPath)
 {
 	if(msg && msg[0])
 	{
-		ColorPrintf(RED, "%s£º%s\n", PROGRAM_NAME, msg);
-		ColorPrintf(WHITE, "Çë³¢ÊÔ ¡°%s --help¡± »ñµÃ°ïÖúĞÅÏ¢£¡\n", selfPath);
+		ColorPrintf(RED, _T("%sï¼š%s\n"), PROGRAM_NAME, msg);
+		ColorPrintf(WHITE, _T("è¯·å°è¯• â€œ%s --helpâ€ è·å¾—å¸®åŠ©ä¿¡æ¯ï¼\n"), selfPath);
 	}
 }
 
 /*!
-Ä¬ÈÏÑ¡Ïî´¦Àíº¯Êı
+é»˜è®¤é€‰é¡¹å¤„ç†å‡½æ•°
 */
-int DefaultOption(int argc, char **argv)
+int DefaultOption(int argc, _TCHAR **argv)
 {
 	int retVal = FAILED;
 
 	media_t media;
 
 	if(argc != 2 || !(media = OpenMedia(argv[1], 128000)))
-		ColorPrintf(RED, "ÊäÈëÎÄ¼ş£º%s Ó³ÉäÊ§°Ü£¡\n", argv[1]);
+		ColorPrintf(RED, _T("è¾“å…¥æ–‡ä»¶ï¼š%s æ˜ å°„å¤±è´¥ï¼\n"), argv[1]);
 	else
 	{
-		ColorPrintf(WHITE, "%s", "¼ì²âµ½ÊäÈëÎÄ¼şÎª");
+		ColorPrintf(WHITE, _T("æ£€æµ‹åˆ°è¾“å…¥æ–‡ä»¶ä¸º"));
 
 		switch(GetInputType(media))
 		{
 		case ISO:
-			ColorPrintf(LIME, "%s", "ISO");
-			ColorPrintf(WHITE, "£¬Ä¬ÈÏ×÷ÎªAcronisÆô¶¯ISO´¦Àí£º\n\n");
+			ColorPrintf(LIME, _T("ISO"));
+			ColorPrintf(WHITE, _T("ï¼Œé»˜è®¤ä½œä¸ºAcroniså¯åŠ¨ISOå¤„ç†ï¼š\n\n"));
 			DisplayISOInfo(media);
 			retVal = DumpIMGFromISO(media, argv[1]);
 			break;
 		case IMG:
-			ColorPrintf(LIME, "%s", "IMG");
-			ColorPrintf(WHITE, "£¬Ä¬ÈÏÏÔÊ¾IMG´ÅÅÌÓ³Ïñ¹æ¸ñ£º\n\n");
+			ColorPrintf(LIME, _T("IMG"));
+			ColorPrintf(WHITE, _T("ï¼Œé»˜è®¤æ˜¾ç¤ºIMGç£ç›˜æ˜ åƒè§„æ ¼ï¼š\n\n"));
 			retVal = DisplayIMGInfo(media);
 			break;
 		default:
-			ColorPrintf(RED, "%s\n", "Î´ÖªÀàĞÍ");
+			ColorPrintf(RED, _T("æœªçŸ¥ç±»å‹\n"));
 		}
 
 		CloseMedia(&media);
@@ -113,38 +114,40 @@ int DefaultOption(int argc, char **argv)
 	return retVal;
 }
 
-int main(int argc, char **argv)
+int _tmain(int argc, _TCHAR **argv)
 {
 	int argIndex;
 	struct Arg_parser parser;
 	const struct ap_Option options[] =
 	{
 		/*
-		¶ÌÑ¡Ïî³¬¹ıunsigned char·¶Î§ÔòÈÏÎªÎŞ¶ÌÑ¡Ïî£¬
-		³¤Ñ¡ÏîÎªNULLÔòÈÏÎªÎŞ³¤Ñ¡Ïî£¬
-		ap_yes´ú±í£¨Èç£º-a£©Ñ¡ÏîºóÃæ¸úÓĞ²ÎÊı£¬
-		ap_no´ú±íÎŞ²ÎÊı£¬ap_maybe´ú±í²ÎÊı¿ÉÓĞ¿ÉÎŞ
+		çŸ­é€‰é¡¹è¶…è¿‡unsigned charèŒƒå›´åˆ™è®¤ä¸ºæ— çŸ­é€‰é¡¹ï¼Œ
+		é•¿é€‰é¡¹ä¸ºNULLåˆ™è®¤ä¸ºæ— é•¿é€‰é¡¹ï¼Œ
+		ap_yesä»£è¡¨ï¼ˆå¦‚ï¼š-aï¼‰é€‰é¡¹åé¢è·Ÿæœ‰å‚æ•°ï¼Œ
+		ap_noä»£è¡¨æ— å‚æ•°ï¼Œap_maybeä»£è¡¨å‚æ•°å¯æœ‰å¯æ— 
 		*/
 
-		/* ¶ÌÑ¡Ïî£¬	¶ÔÓ¦³¤²ÎÊı£¬	²ÎÊı */
-		{'f',		"file",		ap_yes},
-		{'d',		"device",	ap_yes},
-		{'h',		"help",		ap_no},
-		{'v',		"version",	ap_no},
+		/* çŸ­é€‰é¡¹ï¼Œ	å¯¹åº”é•¿å‚æ•°ï¼Œ	å‚æ•° */
+		{'f',		_T("file"),		ap_yes},
+		{'d',		_T("device"),	ap_yes},
+		{'h',		_T("help"),		ap_no},
+		{'v',		_T("version"),	ap_no},
 		{0,			0,			ap_no}
 	};
 
-	ShowTitle();//´òÓ¡°æÈ¨Í·
+	setlocale(LC_ALL, "Chinese_People's Republic of China.936");
 
-	/* ³õÊ¼»¯²ÎÊı½âÎö */
-	if(!ap_init(&parser, argc, (const char * const *)argv, options, 0))
+	ShowTitle();//æ‰“å°ç‰ˆæƒå¤´
+
+	/* åˆå§‹åŒ–å‚æ•°è§£æ */
+	if(!ap_init(&parser, argc, argv, options, 0))
 	{
-		ColorPrintf(RED, "ÄÚ´æºÄ¾¡£¡\n");
+		ColorPrintf(RED, _T("å†…å­˜è€—å°½ï¼\n"));
 		PRESS_ANY_KEY_AND_CONTINUE;
 		return -1;
 	}
 
-	/* Èç¹û²ÎÊı´íÎó */
+	/* å¦‚æœå‚æ•°é”™è¯¯ */
 	if(ap_error(&parser))
 	{
 		ShowError(ap_error(&parser), argv[0]);
@@ -152,28 +155,28 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	/* Èç¹û½âÎö³öµÄ²ÎÊı¸öÊıÎª0 */
+	/* å¦‚æœè§£æå‡ºçš„å‚æ•°ä¸ªæ•°ä¸º0 */
 	if(!ap_arguments(&parser))
 		ShowHelp();
 
-	/* ±éÀú½âÎö³öµÄ²ÎÊı */
+	/* éå†è§£æå‡ºçš„å‚æ•° */
 	for(argIndex = 0; argIndex < ap_arguments(&parser); ++argIndex)
 	{
-		const int code = ap_code(&parser, argIndex);//½âÎö³öµÄ¶ÌÑ¡Ïî
-		const char *arg = ap_argument(&parser, argIndex);//½âÎö³öµÄÑ¡Ïî¶ÔÓ¦µÄ²ÎÊı
+		const int code = ap_code(&parser, argIndex);//è§£æå‡ºçš„çŸ­é€‰é¡¹
+		const _TCHAR *arg = ap_argument(&parser, argIndex);//è§£æå‡ºçš„é€‰é¡¹å¯¹åº”çš„å‚æ•°
 
 		switch(code)
 		{
 		case 'f':
-			printf("¼ì²âµ½²ÎÊıÎª£º%s\n", arg);
+			_tprintf(_T("æ£€æµ‹åˆ°å‚æ•°ä¸ºï¼š%s\n"), arg);
 			break;
 		case 'd':
-			printf("¼ì²âµ½²ÎÊıÎª£º%s\n", arg);
+			_tprintf(_T("æ£€æµ‹åˆ°å‚æ•°ä¸ºï¼š%s\n"), arg);
 			break;
 		case 'h':
 			ShowHelp();
 			break;
-		case 'v'://É¶¶¼²»×ö
+		case 'v'://å•¥éƒ½ä¸åš
 			break;
 		default:
 			if(!argIndex)
@@ -182,6 +185,9 @@ int main(int argc, char **argv)
 
 		if(!code) break;
 	}
+
+	/* é”€æ¯å‚æ•°è§£æ */
+	ap_free(&parser);
 
 	PRESS_ANY_KEY_AND_CONTINUE;
 	return 0;

@@ -1,47 +1,48 @@
-/*!
+ï»¿/*!
 \file Process.h
 \author LiuBao
 \version 1.0
 \date 2011/1/23
-\brief ÉùÃ÷´¦Àíº¯Êı
+\brief å£°æ˜å¤„ç†å‡½æ•°
 */
 #ifndef PROCESS
 #define PROCESS
 
+#include <tchar.h>		/* ä½¿ç”¨_TCHAR */
 #include "MapFile.h"
 
-typedef int MEDIA_TYPE;	///< ½éÖÊ¸ñÊ½¶¨Òå
+typedef int MEDIA_TYPE;	///< ä»‹è´¨æ ¼å¼å®šä¹‰
 
-#define UNKNOWN 0x0		///< ÈÎºÎÎ´ÖªÀàĞÍ
-#define IMG 0x1			///< IMG¸ñÊ½
-#define ISO 0x2			///< ISO¸ñÊ½	
+#define UNKNOWN 0x0		///< ä»»ä½•æœªçŸ¥ç±»å‹
+#define IMG 0x1			///< IMGæ ¼å¼
+#define ISO 0x2			///< ISOæ ¼å¼	
 
 /*!
-»ñµÃ½éÖÊÀàĞÍ£¬¿ÉÄÜÊÇUNKNOWN¡¢IMG¡¢ISO
-\param media Î»ÖÃÔÚ½éÖÊÍ·²¿µÄmedia_t
-\return ½éÖÊÀàĞÍ£¨UNKNOWN¡¢IMG¡¢ISO£©
+è·å¾—ä»‹è´¨ç±»å‹ï¼Œå¯èƒ½æ˜¯UNKNOWNã€IMGã€ISO
+\param media ä½ç½®åœ¨ä»‹è´¨å¤´éƒ¨çš„media_t
+\return ä»‹è´¨ç±»å‹ï¼ˆUNKNOWNã€IMGã€ISOï¼‰
 */
 MEDIA_TYPE GetInputType(media_t media);
 
 /*!
-´ÓISOÖĞÌáÈ¡³öÆô¶¯IMGÓ³Ïñ£¬±£´æÔÚISOÎÄ¼şËùÔÚÂ·¾¶£¬À©Õ¹ÃûÎª.img
-\param media Î»ÖÃÔÚISOÍ·²¿µÄmedia_t
-\param path ISOÎÄ¼ş¾ø¶ÔÂ·¾¶
-\return ÌáÈ¡³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+ä»ISOä¸­æå–å‡ºå¯åŠ¨IMGæ˜ åƒï¼Œä¿å­˜åœ¨ISOæ–‡ä»¶æ‰€åœ¨è·¯å¾„ï¼Œæ‰©å±•åä¸º.img
+\param media ä½ç½®åœ¨ISOå¤´éƒ¨çš„media_t
+\param path ISOæ–‡ä»¶ç»å¯¹è·¯å¾„
+\return æå–æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
-int DumpIMGFromISO(media_t media, const char *path);
+int DumpIMGFromISO(media_t media, const _TCHAR *path);
 
 /*!
-Êä³öISO¹æ¸ñĞÅÏ¢
-\param media Î»ÖÃÔÚISOÍ·²¿µÄmedia_t
-\return ³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+è¾“å‡ºISOè§„æ ¼ä¿¡æ¯
+\param media ä½ç½®åœ¨ISOå¤´éƒ¨çš„media_t
+\return æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int DisplayISOInfo(media_t media);
 
 /*!
-Êä³öIMG¹æ¸ñĞÅÏ¢
-\param media Î»ÖÃÔÚIMGÍ·²¿µÄmedia_t
-\return ³É¹¦·µ»ØSUCCESS£»·ñÔò·µ»ØFAILED
+è¾“å‡ºIMGè§„æ ¼ä¿¡æ¯
+\param media ä½ç½®åœ¨IMGå¤´éƒ¨çš„media_t
+\return æˆåŠŸè¿”å›SUCCESSï¼›å¦åˆ™è¿”å›FAILED
 */
 int DisplayIMGInfo(media_t media);
 

@@ -1,4 +1,4 @@
-/*  Arg_parser - A POSIX/GNU command line argument parser. (C version)
+﻿/*  Arg_parser - A POSIX/GNU command line argument parser. (C version)
     Copyright (C) 2006, 2007, 2008, 2009, 2010 Antonio Diaz Diaz.
 
     This library is free software: you can redistribute it and/or modify
@@ -49,6 +49,8 @@
     (without whitespace), or `--<long_option>=<argument>'.
 */
 
+#include <tchar.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -58,7 +60,7 @@ enum ap_Has_arg { ap_no, ap_yes, ap_maybe };
 struct ap_Option
   {
   int code;			// Short option letter or code ( code != 0 )
-  const char * name;		// Long option name (maybe null)
+  const _TCHAR * name;		// Long option name (maybe null)
   enum ap_Has_arg has_arg;
   };
 
@@ -66,26 +68,26 @@ struct ap_Option
 struct ap_Record
   {
   int code;
-  char * argument;
+  _TCHAR * argument;
   };
 
 
 struct Arg_parser
   {
   struct ap_Record * data;
-  char * error;
+  _TCHAR * error;
   int data_size;
   int error_size;
   };
 
 
 char ap_init( struct Arg_parser * const ap,
-              const int argc, const char * const argv[],
+              const int argc, const _TCHAR * const argv[],
               const struct ap_Option options[], const char in_order );
 
 void ap_free( struct Arg_parser * const ap );
 
-const char * ap_error( const struct Arg_parser * const ap );
+const _TCHAR * ap_error( const struct Arg_parser * const ap );
 
     // The number of arguments parsed (may be different from argc)
 int ap_arguments( const struct Arg_parser * const ap );
@@ -94,7 +96,7 @@ int ap_arguments( const struct Arg_parser * const ap );
     // Else ap_argument( i ) is the option's argument (or empty).
 int ap_code( const struct Arg_parser * const ap, const int i );
 
-const char * ap_argument( const struct Arg_parser * const ap, const int i );
+const _TCHAR * ap_argument( const struct Arg_parser * const ap, const int i );
 
 #ifdef __cplusplus
 }

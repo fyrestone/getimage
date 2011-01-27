@@ -1,27 +1,46 @@
-/*!
+ï»¿/*!
 \file ColorPrint.c
 \author LiuBao
 \version 1.0
 \date 2010/12/28
-\brief Windows¿ØÖÆÌ¨²ÊÉ«Êä³öº¯ÊıÊµÏÖ
+\brief Windowsæ§åˆ¶å°å½©è‰²è¾“å‡ºå‡½æ•°å®ç°
 */
 #include <stdio.h>		/* vprintf */
-#include <stdarg.h>		/* ±ä²Î´¦Àí */
-#include <Windows.h>	/* ¿ØÖÆÌ¨²Ù×÷ */
+#include <stdarg.h>		/* å˜å‚å¤„ç† */
+#include <Windows.h>	/* æ§åˆ¶å°æ“ä½œ */
 #include "ColorPrint.h"
 
-int ColorPrintf(COLOR color, const char *format, ...)
+int ColorPrintfW(COLOR color, const wchar_t *format, ...)
 {
 	int retVal;
+
 	va_list ap;
 	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	(void)SetConsoleTextAttribute(hCon, color|0);
-	va_start(ap, format);//³õÊ¼»¯ap¡£
+	va_start(ap, format);//åˆå§‹åŒ–apã€‚
+
+	retVal = vwprintf(format, ap);
+
+	va_end(ap);//æ¸…ç†apã€‚
+	(void)SetConsoleTextAttribute(hCon, SILVER|0);
+
+	return retVal;
+}
+
+int ColorPrintfA(COLOR color, const char * format, ...)
+{
+	int retVal;
+
+	va_list ap;
+	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	(void)SetConsoleTextAttribute(hCon, color|0);
+	va_start(ap, format);//åˆå§‹åŒ–apã€‚
 
 	retVal = vprintf(format, ap);
 
-	va_end(ap);//ÇåÀíap¡£
+	va_end(ap);//æ¸…ç†apã€‚
 	(void)SetConsoleTextAttribute(hCon, SILVER|0);
 
 	return retVal;
@@ -30,14 +49,14 @@ int ColorPrintf(COLOR color, const char *format, ...)
 void PrintAllColor()
 {
 	int i;
-	const char *colorName[] = 
+	const _TCHAR *colorName[] = 
 	{
-		"BLACK", "NAVY", "GREEN", "TEAL",
-		"MAROON", "PURPLE", "OLIVE", "SILVER", "GRAY",
-		"BLUE", "LIME", "AQUA", "RED", "FUCHSIA",
-		"YELLOW", "WHITE"
+		_T("BLACK"), _T("NAVY"), _T("GREEN"), _T("TEAL"),
+		_T("MAROON"), _T("PURPLE"), _T("OLIVE"), _T("SILVER"), _T("GRAY"),
+		_T("BLUE"), _T("LIME"), _T("AQUA"), _T("RED"), _T("FUCHSIA"),
+		_T("YELLOW"), _T("WHITE")
 	};
 
-	for(i = 0 ; i < sizeof(colorName) / sizeof(const char *) ; ++i)
-		ColorPrintf((COLOR)i, "%s\n", colorName[i]);
+	for(i = 0 ; i < sizeof(colorName) / sizeof(colorName[0]) ; ++i)
+		ColorPrintf((COLOR)i, _T("%s\n"), colorName[i]);
 }

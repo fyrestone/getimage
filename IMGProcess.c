@@ -1,9 +1,9 @@
-/*!
+ï»¿/*!
 \file IMGProcess.c
 \author LiuBao
 \version 1.0
 \date 2010/12/25
-\brief IMG´¦Àíº¯Êı
+\brief IMGå¤„ç†å‡½æ•°
 */
 #include <assert.h>
 #include "ProjDef.h"
@@ -31,21 +31,21 @@ int CheckIMGFileSystem(media_t media)
 
 	if(GetMediaAccess(media, &access, 512) == SUCCESS)
 	{
-		/*Èô0x55AA½áÎ²£¬ÈÏÎªÆäÎªBR*/
+		/*è‹¥0x55AAç»“å°¾ï¼Œè®¤ä¸ºå…¶ä¸ºBR*/
 		if(LD_UINT16(access.begin + 510) == (uint16_t)0xAA55)
 		{
 			const BPB *pcBPB = (const BPB *)access.begin;
 
-			/*¼ì²â¡°FAT¡±×Ö·û´®*/
+			/*æ£€æµ‹â€œFATâ€å­—ç¬¦ä¸²*/
 			if((LD_UINT32(pcBPB->Special.Fat16.BS_FilSysType) & 0xFFFFFF) == 0x544146)
-				return SUCCESS;//¼ì²â³É¹¦
+				return SUCCESS;//æ£€æµ‹æˆåŠŸ
 
 			if((LD_UINT32(pcBPB->Special.Fat32.BS_FilSysType) & 0xFFFFFF) == 0x544146)
-				return SUCCESS;//¼ì²â³É¹¦
+				return SUCCESS;//æ£€æµ‹æˆåŠŸ
 		}
 	}
 
-	return FAILED;//¼ì²âÊ§°Ü
+	return FAILED;//æ£€æµ‹å¤±è´¥
 }
 
 FS_TYPE GetIMGType(const BPB *pcBPB)
@@ -53,42 +53,42 @@ FS_TYPE GetIMGType(const BPB *pcBPB)
 	FS_TYPE retVal = FAT_ERR;
 
 	/*
-		FATµÄ×ÜÉÈÇøÊı£¨TotalSec£©ÓÉ¾í±£ÁôÉÈÇøÊı£¨RsvdSecCnt£©¡¢FAT±íËùÕ¼ÉÈÇøÊı£¨NumFats * FatSz£©¡¢
-		¸ùÄ¿Â¼ÏîËùÕ¼ÉÈÇøÊı£¨RootDirSec£¬ÓÉÓÚFAT32µÄ¸ùÄ¿Â¼ÏîµÈÍ¬ÓÚÆÕÍ¨ÎÄ¼ş£¬FAT32µÄRootDirSectorsÎª0£©¡¢
-		Êı¾İËùÕ¼ÉÈÇøÊı£¨DataSec£©ËÄ²¿·ÖÒÀ´Î¹¹³É¡£ÆäÖĞ±£ÁôÉÈÇøÊı°üº¬ÁËFATÍ·²¿£¨BPB£©¡£
+		FATçš„æ€»æ‰‡åŒºæ•°ï¼ˆTotalSecï¼‰ç”±å·ä¿ç•™æ‰‡åŒºæ•°ï¼ˆRsvdSecCntï¼‰ã€FATè¡¨æ‰€å æ‰‡åŒºæ•°ï¼ˆNumFats * FatSzï¼‰ã€
+		æ ¹ç›®å½•é¡¹æ‰€å æ‰‡åŒºæ•°ï¼ˆRootDirSecï¼Œç”±äºFAT32çš„æ ¹ç›®å½•é¡¹ç­‰åŒäºæ™®é€šæ–‡ä»¶ï¼ŒFAT32çš„RootDirSectorsä¸º0ï¼‰ã€
+		æ•°æ®æ‰€å æ‰‡åŒºæ•°ï¼ˆDataSecï¼‰å››éƒ¨åˆ†ä¾æ¬¡æ„æˆã€‚å…¶ä¸­ä¿ç•™æ‰‡åŒºæ•°åŒ…å«äº†FATå¤´éƒ¨ï¼ˆBPBï¼‰ã€‚
 	*/
 	if(pcBPB)
 	{
-		uint32_t totalSec;		/* ×ÜÉÈÇøÊı */
-		uint32_t rsvdSec;		/* ±£ÁôÉÈÇøÊı£¨°üº¬FATÍ·µÄ512×Ö½Ú£© */
-		uint32_t fatSec;		/* FATÎÄ¼ş·ÖÅä±íËùÕ¼ÉÈÇøÊı */
-		uint32_t rootDirSec;	/* ¸ùÄ¿Â¼ËùÕ¼ÉÈÇøÊı */
-		uint32_t dataSec;		/* Êı¾İËùÕ¼ÉÈÇøÊı£¨°üÀ¨²»×ãÒ»´ØµÄÉÈÇø£© */
-		uint32_t dataClusters;	/* Êı¾İËùÕ¼´ØÊı */
+		uint32_t totalSec;		/* æ€»æ‰‡åŒºæ•° */
+		uint32_t rsvdSec;		/* ä¿ç•™æ‰‡åŒºæ•°ï¼ˆåŒ…å«FATå¤´çš„512å­—èŠ‚ï¼‰ */
+		uint32_t fatSec;		/* FATæ–‡ä»¶åˆ†é…è¡¨æ‰€å æ‰‡åŒºæ•° */
+		uint32_t rootDirSec;	/* æ ¹ç›®å½•æ‰€å æ‰‡åŒºæ•° */
+		uint32_t dataSec;		/* æ•°æ®æ‰€å æ‰‡åŒºæ•°ï¼ˆåŒ…æ‹¬ä¸è¶³ä¸€ç°‡çš„æ‰‡åŒºï¼‰ */
+		uint32_t dataClusters;	/* æ•°æ®æ‰€å ç°‡æ•° */
 
-		/* ¼ÆËãtotalSec */
+		/* è®¡ç®—totalSec */
 		if(LD_UINT16(pcBPB->Common.BPB_TotSec16))
 			totalSec = LD_UINT16(pcBPB->Common.BPB_TotSec16);
 		else
 			totalSec = LD_UINT32(pcBPB->Common.BPB_TotSec32);
 
-		/* ¼ÆËãrsvdSec */
+		/* è®¡ç®—rsvdSec */
 		rsvdSec = LD_UINT16(pcBPB->Common.BPB_RsvdSecCnt);
 
-		/* ¼ÆËãfatSec */
+		/* è®¡ç®—fatSec */
 		if(LD_UINT16(pcBPB->Common.BPB_FATSz16))
 			fatSec = LD_UINT8(pcBPB->Common.BPB_NumFATs) * LD_UINT16(pcBPB->Common.BPB_FATSz16);
 		else
 			fatSec = LD_UINT8(pcBPB->Common.BPB_NumFATs) * LD_UINT32(pcBPB->Special.Fat32.BPB_FATSz32);
 
-		/* ¼ÆËãrootDirSec */
+		/* è®¡ç®—rootDirSec */
 		rootDirSec = ((LD_UINT16(pcBPB->Common.BPB_RootEntCnt) * 32) + (LD_UINT16(pcBPB->Common.BPB_BytsPerSec) - 1))
 			/ LD_UINT16(pcBPB->Common.BPB_BytsPerSec);
 
-		/* ¼ÆËãdataSec */
+		/* è®¡ç®—dataSec */
 		dataSec = totalSec - rsvdSec - fatSec - rootDirSec;
 
-		/* ¼ÆËãdataClusters */
+		/* è®¡ç®—dataClusters */
 		dataClusters = dataSec / LD_UINT8(pcBPB->Common.BPB_SecPerClus);
 
 		assert(dataSec);
