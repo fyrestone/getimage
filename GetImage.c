@@ -18,11 +18,11 @@
 #define PROGRAM_VERSION _T("1.5")     ///< 版本
 
 /// 按任意键退出
-#define PRESS_ANY_KEY_AND_CONTINUE            \
-    do                                        \
-    {                                        \
-        ColorPrintf(WHITE, _T("."));        \
-        _getch();                            \
+#define PRESS_ANY_KEY_AND_CONTINUE     \
+    do                                 \
+    {                                  \
+        ColorPrintf(WHITE, _T("."));   \
+        _getch();                      \
     }while(0)
 
 /*!
@@ -60,8 +60,8 @@ void ShowHelp()
     _tprintf(_T("\t-f, --file\t\t打开一个文件\n"));
     _tprintf(_T("\t-d, --device\t\t打开一个设备\n"));
     _tprintf(_T("默认：\n当无选项时将输入的第一个参数作为文件处理：\n")
-        _T("若为ISO，则自动提取其中的启动磁盘映像到ISO文件所在目录，生成的IMG与ISO同名；\n")
-        _T("若为IMG，则显示其规格信息\n"));
+             _T("若为ISO，则自动提取其中的启动磁盘映像到ISO文件所在目录，生成的IMG与ISO同名；\n")
+             _T("若为IMG，则显示其规格信息\n"));
 }
 
 /*!
@@ -128,11 +128,11 @@ int _tmain(int argc, _TCHAR **argv)
         */
 
         /* 短选项，    对应长参数，    参数 */
-        {'f',        _T("file"),        ap_yes},
+        {'f',        _T("file"),      ap_yes},
         {'d',        _T("device"),    ap_yes},
-        {'h',        _T("help"),        ap_no},
-        {'v',        _T("version"),    ap_no},
-        {0,            0,            ap_no}
+        {'h',        _T("help"),      ap_no},
+        {'v',        _T("version"),   ap_no},
+        {0,          0,               ap_no}
     };
 
     setlocale(LC_ALL, "Chinese_People's Republic of China.936");

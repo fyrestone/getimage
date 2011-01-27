@@ -51,10 +51,10 @@ void PrintAllColor()
     int i;
     const _TCHAR *colorName[] = 
     {
-        _T("BLACK"), _T("NAVY"), _T("GREEN"), _T("TEAL"),
-        _T("MAROON"), _T("PURPLE"), _T("OLIVE"), _T("SILVER"), _T("GRAY"),
-        _T("BLUE"), _T("LIME"), _T("AQUA"), _T("RED"), _T("FUCHSIA"),
-        _T("YELLOW"), _T("WHITE")
+        _T("BLACK"), _T("NAVY"), _T("GREEN"), _T("TEAL"), _T("MAROON"), 
+        _T("PURPLE"), _T("OLIVE"), _T("SILVER"), _T("GRAY"), _T("BLUE"),
+        _T("LIME"), _T("AQUA"), _T("RED"), _T("FUCHSIA"),_T("YELLOW"), 
+        _T("WHITE")
     };
 
     for(i = 0 ; i < sizeof(colorName) / sizeof(colorName[0]) ; ++i)

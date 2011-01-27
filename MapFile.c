@@ -505,21 +505,21 @@ void MapTestUnit(const _TCHAR *path)
                 ColorPrintf(GREEN, _T("通过\n"));
 
                 ColorPrintf(WHITE, _T("正在测试跳转\t\t\t\t"));
-                assert(NEW(backupMedia));                                                                                /*!< 创建backupMedia */
-                assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));                                                /*!< 备份media到backupMedia */
-                assert(SeekMedia(testMedia, testMedia->accessSize, MEDIA_SET) != SUCCESS);                            /*!< 测试跳转到可访问范围边界，应当失败 */
-                assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));                                            /*!< 跳转失败时，media值应当不变 */
-                assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);                        /*!< 测试跳转到可访问范围边界-1，应当成功 */
-                assert(RewindMedia(testMedia) == SUCCESS);                                                            /*!< 重置media */
-                assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));                                            /*!< 检查重置后media应当与原始media相同 */
-                assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);                        /*!< 测试跳转到可访问范围边界-1，应当成功 */
-                assert(SeekMedia(testMedia, -(int64_t)(testMedia->actualViewSize - 1), MEDIA_CUR) == SUCCESS);        /*!< 从当前向后跳回同样长度 */
-                assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));                                            /*!< 检查重置后media应当与原始media相同 */
-                assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);                        /*!< 测试跳转到可访问范围边界-1，应当成功 */
-                assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));                                                /*!< 备份当前media到backupMedia */
-                assert(SeekMedia(testMedia, -(int64_t)(testMedia->actualViewSize - 1)/2, MEDIA_CUR) == SUCCESS);    /*!< 向后跳回（可访问范围边界-1）/2 */
-                assert(SeekMedia(testMedia, (int64_t)(testMedia->actualViewSize - 1)/2, MEDIA_CUR) == SUCCESS);        /*!< 向前跳回（可访问范围边界-1）/2 */
-                assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));                                            /*!< 检查跳回后media应当与上次备份的backupMedia相同 */
+                assert(NEW(backupMedia));                                                                         /*!< 创建backupMedia */
+                assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));                                       /*!< 备份media到backupMedia */
+                assert(SeekMedia(testMedia, testMedia->accessSize, MEDIA_SET) != SUCCESS);                        /*!< 测试跳转到可访问范围边界，应当失败 */
+                assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));                                      /*!< 跳转失败时，media值应当不变 */
+                assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);                    /*!< 测试跳转到可访问范围边界-1，应当成功 */
+                assert(RewindMedia(testMedia) == SUCCESS);                                                        /*!< 重置media */
+                assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));                                      /*!< 检查重置后media应当与原始media相同 */
+                assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);                    /*!< 测试跳转到可访问范围边界-1，应当成功 */
+                assert(SeekMedia(testMedia, -(int64_t)(testMedia->actualViewSize - 1), MEDIA_CUR) == SUCCESS);    /*!< 从当前向后跳回同样长度 */
+                assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));                                      /*!< 检查重置后media应当与原始media相同 */
+                assert(SeekMedia(testMedia, testMedia->accessSize - 1, MEDIA_SET) == SUCCESS);                    /*!< 测试跳转到可访问范围边界-1，应当成功 */
+                assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));                                       /*!< 备份当前media到backupMedia */
+                assert(SeekMedia(testMedia, -(int64_t)(testMedia->actualViewSize - 1)/2, MEDIA_CUR) == SUCCESS);  /*!< 向后跳回（可访问范围边界-1）/2 */
+                assert(SeekMedia(testMedia, (int64_t)(testMedia->actualViewSize - 1)/2, MEDIA_CUR) == SUCCESS);   /*!< 向前跳回（可访问范围边界-1）/2 */
+                assert(!memcmp(backupMedia, testMedia, sizeof(*testMedia)));                                      /*!< 检查跳回后media应当与上次备份的backupMedia相同 */
                 ColorPrintf(GREEN, _T("通过\n"));
 
                 CloseMedia(&testMedia);
@@ -561,30 +561,30 @@ void MapTestUnit(const _TCHAR *path)
                 ColorPrintf(GREEN, _T("通过\n"));
 
                 ColorPrintf(WHITE, _T("正在测试跳转\t\t\t\t"));
-                assert(NEW(backupMedia));                                                                                /*!< 创建backupMedia */
-                assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));                                                /*!< 备份media到backupMedia */
-                assert(SeekMedia(testMedia, testMedia->allocGran - 1, MEDIA_SET) == SUCCESS);                        /*!< 局部跳转，应该不会切换映射视图 */
-                assert(testMedia->pView == backupMedia->pView);                                                            /*!< 检查局部跳转后视图仍然是原来视图 */
-                assert(testMedia->viewPos.QuadPart == backupMedia->viewPos.QuadPart);                                    /*!< 检查局部跳转后视图位置仍然是原来位置 */
-                assert(testMedia->currPos.QuadPart != testMedia->viewPos.QuadPart);                                        /*!< 检查局部跳转后当前位置应当与视图位置不同 */
-                assert(RewindMedia(testMedia) == SUCCESS);                                                            /*!< 重置media */
-                assert(!memcmp(testMedia, backupMedia, sizeof(*testMedia)));                                            /*!< 检查重置后的media与以前备份的相同 */
-                assert(SeekMedia(testMedia, testMedia->allocGran, MEDIA_SET) == SUCCESS);                            /*!< 跳转一个内存粒度，应该刚好切换视图 */
-                assert(testMedia->pView != backupMedia->pView);                                                            /*!< 检查跳转后视图是否已切换 */
-                assert(testMedia->currPos.QuadPart == testMedia->viewPos.QuadPart);                                        /*!< 由于跳转位置刚好切换视图，跳转后当前位置应当与视图位置相同 */
-                assert(testMedia->accessSize == testMedia->actualViewSize);                                                /*!< 由于跳转位置刚好切换视图，跳转后可访问大小正好是实际视图大小 */
-                assert(testMedia->viewSize == backupMedia->viewSize);                                                    /*!< 跳转后视图大小应当不变 */
-                assert(testMedia->actualViewSize < backupMedia->actualViewSize);                                        /*!< 由于跳转位置距离文件末尾长度小于视图大小，跳转后实际视图大小应当小于视图大小 */
-                assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));                                                /*!< 保存跳转后的media到backupMedia */
-                assert(SeekMedia(testMedia, -1, MEDIA_CUR) == SUCCESS);                                                /*!< 向后跳转1，应该切换视图 */
-                assert(testMedia->pView != backupMedia->pView);                                                            /*!< 检查跳转后视图是否已切换 */
-                assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));                                                /*!< 保存跳转后的media到backupMedia */
-                assert(SeekMedia(testMedia, -(int64_t)(testMedia->allocGran - 1), MEDIA_CUR) == SUCCESS);            /*!< 这时从当前位置向后跳转一个内存粒度 */
-                assert(testMedia->viewPos.QuadPart == 0);                                                                /*!< 这时相当于RewindMedia后，视图位置应当为0 */
-                assert(testMedia->currPos.QuadPart == 0);                                                                /*!< 这时相当于RewindMedia后，当前位置应当为0 */
-                assert(testMedia->actualViewSize == testMedia->viewSize);                                                /*!< 实际视图大小应当与视图大小相同 */
-                assert(SeekMedia(testMedia, testMedia->allocGran - 1, MEDIA_SET) == SUCCESS);                        /*!< 再向前跳回一个内存粒度 */
-                assert(!memcmp(testMedia, backupMedia, sizeof(*testMedia)));                                            /*!< 检查media与上次备份的backupMeida相同 */
+                assert(NEW(backupMedia));                                                                  /*!< 创建backupMedia */
+                assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));                                /*!< 备份media到backupMedia */
+                assert(SeekMedia(testMedia, testMedia->allocGran - 1, MEDIA_SET) == SUCCESS);              /*!< 局部跳转，应该不会切换映射视图 */
+                assert(testMedia->pView == backupMedia->pView);                                            /*!< 检查局部跳转后视图仍然是原来视图 */
+                assert(testMedia->viewPos.QuadPart == backupMedia->viewPos.QuadPart);                      /*!< 检查局部跳转后视图位置仍然是原来位置 */
+                assert(testMedia->currPos.QuadPart != testMedia->viewPos.QuadPart);                        /*!< 检查局部跳转后当前位置应当与视图位置不同 */
+                assert(RewindMedia(testMedia) == SUCCESS);                                                 /*!< 重置media */
+                assert(!memcmp(testMedia, backupMedia, sizeof(*testMedia)));                               /*!< 检查重置后的media与以前备份的相同 */
+                assert(SeekMedia(testMedia, testMedia->allocGran, MEDIA_SET) == SUCCESS);                  /*!< 跳转一个内存粒度，应该刚好切换视图 */
+                assert(testMedia->pView != backupMedia->pView);                                            /*!< 检查跳转后视图是否已切换 */
+                assert(testMedia->currPos.QuadPart == testMedia->viewPos.QuadPart);                        /*!< 由于跳转位置刚好切换视图，跳转后当前位置应当与视图位置相同 */
+                assert(testMedia->accessSize == testMedia->actualViewSize);                                /*!< 由于跳转位置刚好切换视图，跳转后可访问大小正好是实际视图大小 */
+                assert(testMedia->viewSize == backupMedia->viewSize);                                      /*!< 跳转后视图大小应当不变 */
+                assert(testMedia->actualViewSize < backupMedia->actualViewSize);                           /*!< 由于跳转位置距离文件末尾长度小于视图大小，跳转后实际视图大小应当小于视图大小 */
+                assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));                                /*!< 保存跳转后的media到backupMedia */
+                assert(SeekMedia(testMedia, -1, MEDIA_CUR) == SUCCESS);                                    /*!< 向后跳转1，应该切换视图 */
+                assert(testMedia->pView != backupMedia->pView);                                            /*!< 检查跳转后视图是否已切换 */
+                assert(memcpy(backupMedia, testMedia, sizeof(*testMedia)));                                /*!< 保存跳转后的media到backupMedia */
+                assert(SeekMedia(testMedia, -(int64_t)(testMedia->allocGran - 1), MEDIA_CUR) == SUCCESS);  /*!< 这时从当前位置向后跳转一个内存粒度 */
+                assert(testMedia->viewPos.QuadPart == 0);                                                  /*!< 这时相当于RewindMedia后，视图位置应当为0 */
+                assert(testMedia->currPos.QuadPart == 0);                                                  /*!< 这时相当于RewindMedia后，当前位置应当为0 */
+                assert(testMedia->actualViewSize == testMedia->viewSize);                                  /*!< 实际视图大小应当与视图大小相同 */
+                assert(SeekMedia(testMedia, testMedia->allocGran - 1, MEDIA_SET) == SUCCESS);              /*!< 再向前跳回一个内存粒度 */
+                assert(!memcmp(testMedia, backupMedia, sizeof(*testMedia)));                               /*!< 检查media与上次备份的backupMeida相同 */
                 ColorPrintf(GREEN, _T("通过\n"));
 
                 CloseMedia(&testMedia);
