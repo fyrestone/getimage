@@ -5,58 +5,58 @@
 \date 2010/12/28
 \brief Windows控制台彩色输出函数实现
 */
-#include <stdio.h>		/* vprintf */
-#include <stdarg.h>		/* 变参处理 */
-#include <Windows.h>	/* 控制台操作 */
+#include <stdio.h>        /* vprintf */
+#include <stdarg.h>       /* 变参处理 */
+#include <Windows.h>      /* 控制台操作 */
 #include "ColorPrint.h"
 
 int ColorPrintfW(COLOR color, const wchar_t *format, ...)
 {
-	int retVal;
+    int retVal;
 
-	va_list ap;
-	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+    va_list ap;
+    HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	(void)SetConsoleTextAttribute(hCon, color|0);
-	va_start(ap, format);//初始化ap。
+    (void)SetConsoleTextAttribute(hCon, color|0);
+    va_start(ap, format);//初始化ap。
 
-	retVal = vwprintf(format, ap);
+    retVal = vwprintf(format, ap);
 
-	va_end(ap);//清理ap。
-	(void)SetConsoleTextAttribute(hCon, SILVER|0);
+    va_end(ap);//清理ap。
+    (void)SetConsoleTextAttribute(hCon, SILVER|0);
 
-	return retVal;
+    return retVal;
 }
 
 int ColorPrintfA(COLOR color, const char * format, ...)
 {
-	int retVal;
+    int retVal;
 
-	va_list ap;
-	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+    va_list ap;
+    HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	(void)SetConsoleTextAttribute(hCon, color|0);
-	va_start(ap, format);//初始化ap。
+    (void)SetConsoleTextAttribute(hCon, color|0);
+    va_start(ap, format);//初始化ap。
 
-	retVal = vprintf(format, ap);
+    retVal = vprintf(format, ap);
 
-	va_end(ap);//清理ap。
-	(void)SetConsoleTextAttribute(hCon, SILVER|0);
+    va_end(ap);//清理ap。
+    (void)SetConsoleTextAttribute(hCon, SILVER|0);
 
-	return retVal;
+    return retVal;
 }
 
 void PrintAllColor()
 {
-	int i;
-	const _TCHAR *colorName[] = 
-	{
-		_T("BLACK"), _T("NAVY"), _T("GREEN"), _T("TEAL"),
-		_T("MAROON"), _T("PURPLE"), _T("OLIVE"), _T("SILVER"), _T("GRAY"),
-		_T("BLUE"), _T("LIME"), _T("AQUA"), _T("RED"), _T("FUCHSIA"),
-		_T("YELLOW"), _T("WHITE")
-	};
+    int i;
+    const _TCHAR *colorName[] = 
+    {
+        _T("BLACK"), _T("NAVY"), _T("GREEN"), _T("TEAL"),
+        _T("MAROON"), _T("PURPLE"), _T("OLIVE"), _T("SILVER"), _T("GRAY"),
+        _T("BLUE"), _T("LIME"), _T("AQUA"), _T("RED"), _T("FUCHSIA"),
+        _T("YELLOW"), _T("WHITE")
+    };
 
-	for(i = 0 ; i < sizeof(colorName) / sizeof(colorName[0]) ; ++i)
-		ColorPrintf((COLOR)i, _T("%s\n"), colorName[i]);
+    for(i = 0 ; i < sizeof(colorName) / sizeof(colorName[0]) ; ++i)
+        ColorPrintf((COLOR)i, _T("%s\n"), colorName[i]);
 }

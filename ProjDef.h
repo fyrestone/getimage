@@ -11,7 +11,7 @@
 #undef SUCCESS
 #undef FAILED
 
-#define SUCCESS 0	///< 函数执行成功返回
-#define FAILED -1	///< 函数执行失败返回
+#define SUCCESS 0    ///< 函数执行成功返回
+#define FAILED -1    ///< 函数执行失败返回
 
 #endif

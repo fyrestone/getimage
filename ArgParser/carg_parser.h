@@ -59,8 +59,8 @@ enum ap_Has_arg { ap_no, ap_yes, ap_maybe };
 
 struct ap_Option
   {
-  int code;			// Short option letter or code ( code != 0 )
-  const _TCHAR * name;		// Long option name (maybe null)
+  int code;            // Short option letter or code ( code != 0 )
+  const _TCHAR * name;        // Long option name (maybe null)
   enum ap_Has_arg has_arg;
   };
 
