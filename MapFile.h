@@ -73,13 +73,5 @@ int GetMediaAccess(T media, media_access *access, uint32_t len);
 */
 int DumpMedia(T media, FILE *fp, int64_t size);
 
-#ifdef _DEBUG
-    /*!
-    单元测试用例
-    \param path 打开文件路径
-    */
-    void MapTestUnit(const _TCHAR *path);
-#endif
-
 #undef T
 #endif
