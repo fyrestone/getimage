@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="lcut">
+      <UniqueIdentifier>{c1a831e8-3746-4ee3-995e-e52213a52631}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GetImage">
+      <UniqueIdentifier>{95f480dd-7e30-4eda-b5d2-fa9b0b049e22}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="runTest.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="lcut\lcut.c">
+      <Filter>lcut</Filter>
+    </ClCompile>
+    <ClCompile Include="MapFile_Test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ColorPrint.c">
+      <Filter>GetImage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IMGProcess.c">
+      <Filter>GetImage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ISOProcess.c">
+      <Filter>GetImage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MapFile.c">
+      <Filter>GetImage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Process.c">
+      <Filter>GetImage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SafeMemory.c">
+      <Filter>GetImage</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lcut\apr_ring.h">
+      <Filter>lcut</Filter>
+    </ClInclude>
+    <ClInclude Include="lcut\lcut.h">
+      <Filter>lcut</Filter>
+    </ClInclude>
+    <ClInclude Include="MapFile_Test.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ColorPrint.h">
+      <Filter>GetImage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IMGProcess.h">
+      <Filter>GetImage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IntTypes.h">
+      <Filter>GetImage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ISOProcess.h">
+      <Filter>GetImage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MapFile.h">
+      <Filter>GetImage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Process.h">
+      <Filter>GetImage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ProjDef.h">
+      <Filter>GetImage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SafeMemory.h">
+      <Filter>GetImage</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
