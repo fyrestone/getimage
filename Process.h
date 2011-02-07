@@ -54,4 +54,10 @@ int DisplayISOInfo(media_t media);
 */
 int DisplayIMGInfo(media_t media);
 
+/*!
+判断父进程是否为CMD
+\return 父进程是CMD，返回SUCCESS；否则返回FAILED
+*/
+int isUnderExplorer();
+
 #endif

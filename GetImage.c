@@ -17,12 +17,15 @@
 #define PROGRAM_YEAR _T("2010")       ///< 年份
 #define PROGRAM_VERSION _T("1.5")     ///< 版本
 
-/// 按任意键退出
-#define PRESS_ANY_KEY_AND_CONTINUE     \
-    do                                 \
-    {                                  \
-        ColorPrintf(WHITE, _T("."));   \
-        _getch();                      \
+/// 按任意键退出，当且仅当父进程是explorer.exe时有效
+#define PRESS_ANY_KEY_AND_CONTINUE          \
+    do                                      \
+    {                                       \
+        if(isUnderExplorer() == SUCCESS)    \
+        {                                   \
+            ColorPrintf(WHITE, _T("."));    \
+            _getch();                       \
+        }                                   \
     }while(0)
 
 /*!
@@ -65,6 +68,14 @@ static void ShowHelp()
 }
 
 /*!
+打印版本信息
+*/
+static void ShowVersion()
+{
+    _tprintf(_T("版本：%s\n"), PROGRAM_VERSION);
+}
+
+/*!
 打印错误信息
 \param msg 错误信息字符串
 \param selfPath 本程序绝对路径
@@ -102,6 +113,8 @@ static int GetImage(const _TCHAR *input, const _TCHAR *output)
             ColorPrintf(LIME, _T("ISO"));
             ColorPrintf(WHITE, _T("，默认作为Acronis启动ISO处理：\n\n"));
             if(DisplayISOInfo(media) == SUCCESS)
+                retVal = SUCCESS;
+            if(output)
                 retVal = DumpIMGFromISO(media, output);
             break;
         case IMG:
@@ -126,10 +139,10 @@ int _tmain(int argc, _TCHAR **argv)
     const struct ap_Option options[] =
     {
         /*
-            短选项超过unsigned char范围则认为无短选项，
-            长选项为NULL则认为无长选项，
-            ap_yes代表（如：-a）选项后面跟有参数，
-            ap_no代表无参数，ap_maybe代表参数可有可无
+        短选项超过unsigned char范围则认为无短选项，
+        长选项为NULL则认为无长选项，
+        ap_yes代表（如：-a）选项后面跟有参数，
+        ap_no代表无参数，ap_maybe代表参数可有可无
         */
 
         /* 短选项，    对应长参数，    参数 */
@@ -140,14 +153,16 @@ int _tmain(int argc, _TCHAR **argv)
         {0,          0,               ap_no}
     };
 
+    /* 设置地域信息，改变wprintf */
     setlocale(LC_ALL, "Chinese_People's Republic of China.936");
 
-    ShowTitle();//打印版权头
+    /* 打印版权头 */
+    ShowTitle();
 
     /* 初始化参数解析 */
     if(!ap_init(&parser, argc, argv, options, 0))
     {
-        ColorPrintf(RED, _T("内存耗尽！\n"));
+        ShowError(_T("内存耗尽"), argv[0]);
         PRESS_ANY_KEY_AND_CONTINUE;
         return -1;
     }
@@ -163,9 +178,10 @@ int _tmain(int argc, _TCHAR **argv)
     /* 如果解析出的参数个数为0 */
     if(!ap_arguments(&parser))
         ShowHelp();
-
+    else
     {
         const _TCHAR *input = NULL, *output = NULL;
+        int iCount = 0, oCount = 0, hCount = 0, vCount = 0;
 
         /* 遍历解析出的参数 */
         for(argIndex = 0; argIndex < ap_arguments(&parser); ++argIndex)
@@ -177,37 +193,52 @@ int _tmain(int argc, _TCHAR **argv)
             {
             case 'i':
                 input = arg;
+                ++iCount;
                 break;
             case 'o':
                 output = arg;
+                ++oCount;
                 break;
             case 'h':
-                ShowHelp();
+                ++hCount;
                 break;
-            case 'v'://啥都不做
+            case 'v':
+                ++vCount;
                 break;
             default:
-                //当前仅当argv[1]无法识别为有效选项，且只有一个运行参数时
-                if(!argIndex && argc == 2)
-                {
-                    const _TCHAR *output = GetOutPath(argv[1], _T(".img"));
-                    
-                    if(output)//获取输出路径成功
-                        GetImage(argv[1], output);
-                    else//获取输出路径失败
-                        ColorPrintf(RED, _T("输出路径为空！\n"));
-                }
+                break;
             }
 
             if(!code) break;
         }
 
-        if(input && !output)
-            ShowError(_T("无输出路径"), argv[0]);
-        else if(!input && output)
-            ShowError(_T("无输入路径"), argv[0]);
-        else if(input && output)
-            GetImage(input, output);
+        {
+            int valid = 0;
+
+            /* 
+            getimage -i <输入路径>
+            getimage -i <输入路径> -o <输出路径>
+            */
+            if(iCount == 1 && (oCount == 0 || oCount == 1) && !hCount && !vCount)
+            {
+                (void)GetImage(input, output);
+                valid = 1;
+            }
+            /* getimage <输入路径> */
+            else if(argc == 2 && !iCount && !oCount && !hCount && !vCount)
+            {
+                (void)GetImage(argv[1], GetOutPath(argv[1], _T(".img")));
+                valid = 1;
+            }
+            /* getimage -v */
+            else if(argc == 2 && vCount == 1)
+            {
+                ShowVersion();
+                valid = 1;
+            }
+
+            if(!valid) ShowHelp();
+        }
     }
 
     /* 销毁参数解析 */

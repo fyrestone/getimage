@@ -414,7 +414,11 @@ static int MapMediaAccess(T media, media_access *access, uint32_t len)
 
     if(len <= media->accessSize)
     {
-        access->begin = (unsigned char *)media->pView + media->viewSize - media->accessSize;
+        if(media->viewSize)//如果分块映射
+            access->begin = (unsigned char *)media->pView + media->viewSize - media->accessSize;
+        else//如果完全映射
+            access->begin = (unsigned char *)media->pView + media->currPos.LowPart;
+
         access->len = len;
 
         retVal = SUCCESS;
