@@ -55,22 +55,29 @@ void Mem_free(void *ptr, const _TCHAR *file, int line)
     void *mallocPtr = NULL;   /* 实际malloc指针 */
     size_t mallocSize = 0;    /* 实际malloc大小 */
 
-    assert(ptr);
+    if(ptr)
+    {
+        /* 计算实际malloc指针及malloc空间大小 */
+        mallocPtr = (char *)ptr - sizeof(size_t);
+        mallocSize = *(size_t *)(mallocPtr);
 
-    /* 计算实际malloc指针及malloc空间大小 */
-    mallocPtr = (char *)ptr - sizeof(size_t);
-    mallocSize = *(size_t *)(mallocPtr);
+        assert(*((char*)ptr + mallocSize) == (char)EndByte);//检测是否越界。
 
-    assert(*((char*)ptr + mallocSize) == (char)EndByte);//检测是否越界。
-
-    /* 用垃圾数据重写 */
-    memset(ptr, GarbageByte, mallocSize);
+        /* 用垃圾数据重写 */
+        memset(ptr, GarbageByte, mallocSize);
 
     #if MEM_DETAIL
         ColorPrintf(YELLOW, _T("内存销毁（%p）：%s：%d->%u\n"), mallocPtr, file, line, mallocSize);
     #endif
 
-    free(mallocPtr);
+        free(mallocPtr);
+    }
+    else
+    {
+    #if MEM_DETAIL
+        ColorPrintf(YELLOW, _T("空指针销毁：%s：%d\n"), file, line);
+    #endif
+    }
 #else
     free(ptr);
 #endif // _DEBUG

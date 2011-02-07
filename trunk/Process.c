@@ -6,6 +6,7 @@
 \brief 处理函数实现
 */
 #include <Windows.h>     /* 使用MAX_PATH宏 */
+#include <io.h>          /* _access，检测文件存在 */
 #include <stdio.h>       /* 使用FILE */
 #include <assert.h>
 #include "ProjDef.h"
@@ -17,42 +18,9 @@
 static _TCHAR PATH[MAX_PATH];   /* GetOutPath输出缓冲区，每次调用都会覆盖 */
 
 /*!
-获得输出路径，由iso路径获得提取出的img的写入路径（不可重入）
-/param selfPath iso路径
-/param extention 把iso扩展名修改为的扩展名，如'.img'
-/return 输出路径
-*/
-static const _TCHAR *GetOutPath(const _TCHAR *path, const _TCHAR *extention)
-{
-    const _TCHAR *retVal = NULL;
-
-    const _TCHAR *endOfSelfPath = path + _tcslen(path);//初始化指向路径字串结尾符
-
-    /* 找到扩展名左边的“.” */
-    while(*endOfSelfPath != '.' && endOfSelfPath != path)
-        --endOfSelfPath;
-
-    if(endOfSelfPath != path)
-    {
-        _TCHAR *target = PATH;
-
-        /* 拷贝ISO路径的扩展名前部分 */
-        while(path != endOfSelfPath)
-            *target++ = *path++;
-    
-        /* 写入扩展名 */
-        while((*target++  = *extention++));
-        
-        retVal = PATH;//获取输出路径
-    }
-
-    return retVal;
-}
-
-/*!
-从img起始位置提取出img写入到selfPath路径
+从img起始位置提取出img写入到path路径
 \param imageEntry 位置在img起始的media_t
-\param selfPath img写入路径
+\param path img写入路径
 \return 成功返回SUCCESS；否则返回FAILED
 */
 static int WriteIMGToFile(media_t imageEntry, const _TCHAR *path)
@@ -144,6 +112,36 @@ static int JumpToISOBootEntry(media_t media)
     return retVal;
 }
 
+const _TCHAR *GetOutPath(const _TCHAR *path, const _TCHAR *extention)
+{
+    const _TCHAR *retVal = NULL;
+
+    if(!_taccess(path, 0/* 检测存在 */))//如果文件存在
+    {
+        const _TCHAR *endOfSelfPath = path + _tcslen(path);//初始化指向路径字串结尾符
+
+        /* 找到扩展名左边的“.” */
+        while(*endOfSelfPath != '.' && endOfSelfPath != path)
+            --endOfSelfPath;
+
+        if(endOfSelfPath != path)
+        {
+            _TCHAR *target = PATH;
+
+            /* 拷贝ISO路径的扩展名前部分 */
+            while(path != endOfSelfPath)
+                *target++ = *path++;
+
+            /* 写入扩展名 */
+            while((*target++  = *extention++));
+
+            retVal = PATH;//获取输出路径
+        }
+    }
+
+    return retVal;
+}
+
 MEDIA_TYPE GetInputType(media_t media)
 {
     MEDIA_TYPE retVal = UNKNOWN;
@@ -162,13 +160,11 @@ MEDIA_TYPE GetInputType(media_t media)
     return retVal;
 }
 
-int DumpIMGFromISO(media_t media, const _TCHAR *path)
+int DumpIMGFromISO(media_t media, const _TCHAR *imgPath)
 {
     static const _TCHAR * const leftMargin = _T("    ");//左间距
 
     int retVal = FAILED;
-
-    const _TCHAR *imgPath = GetOutPath(path, _T(".img"));//img文件输出路径
 
     if(media && imgPath)
     {
