@@ -61,6 +61,7 @@ void CloseMedia(T *media);
 \param access 访问结构体指针
 \param len 从当前位置向后可访问长度
 \return 成功获取返回SUCCESS；否则返回FAILED
+\warning 若当前位置向后偏移len超出介质，函数调用失败
 */
 int GetMediaAccess(T media, media_access *access, uint32_t len);
 
@@ -70,6 +71,7 @@ int GetMediaAccess(T media, media_access *access, uint32_t len);
 \param fp 输出指针，可以stdout或者可写的文件指针
 \param size 抽取大小
 \return 抽取成功返回SUCCESS；否则返回FAILED
+\warning 若size <= 0，函数调用失败\n若当前位置向后偏移size超出介质，函数调用失败
 */
 int DumpMedia(T media, FILE *fp, int64_t size);
 

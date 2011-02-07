@@ -43,7 +43,7 @@ void TestDebugFlag()
 /*!
 打印版权头
 */
-void ShowTitle()
+static void ShowTitle()
 {
     _tprintf(_T("\n%s %s\t版权所有(c) 2009-2010 刘宝 %s\n\n"), PROGRAM_NAME, PROGRAM_VERSION, _T(__DATE__));
 }
@@ -51,14 +51,14 @@ void ShowTitle()
 /*!
 打印帮助信息
 */
-void ShowHelp()
+static void ShowHelp()
 {
-    _tprintf(_T("用法：\tgetimage [-f|-d] <文件或设备>\n"));
+    _tprintf(_T("用法：\tgetimage -i <文件/设备> -o <输出路径>\n"));
     _tprintf(_T("选项：\n"));
     _tprintf(_T("\t-h, --help\t\t显示本帮助\n"));
     _tprintf(_T("\t-v, --version\t\t显示本程序名及版本号\n"));
-    _tprintf(_T("\t-f, --file\t\t打开一个文件\n"));
-    _tprintf(_T("\t-d, --device\t\t打开一个设备\n"));
+    _tprintf(_T("\t-i, --input\t\t输入文件/设备路径\n"));
+    _tprintf(_T("\t-o, --output\t\t输出路径\n"));
     _tprintf(_T("默认：\n当无选项时将输入的第一个参数作为文件处理：\n")
              _T("若为ISO，则自动提取其中的启动磁盘映像到ISO文件所在目录，生成的IMG与ISO同名；\n")
              _T("若为IMG，则显示其规格信息\n"));
@@ -66,8 +66,10 @@ void ShowHelp()
 
 /*!
 打印错误信息
+\param msg 错误信息字符串
+\param selfPath 本程序绝对路径
 */
-void ShowError(const _TCHAR *msg, const _TCHAR *selfPath)
+static void ShowError(const _TCHAR *msg, const _TCHAR *selfPath)
 {
     if(msg && msg[0])
     {
@@ -77,16 +79,19 @@ void ShowError(const _TCHAR *msg, const _TCHAR *selfPath)
 }
 
 /*!
-默认选项处理函数
+对input处理，若是ISO，则提取IMG到output；否则打印IMG规格信息
+\param input 输入路径
+\param output 输出路径
+\return 处理成功，返回SUCCESS；否则返回FAILED
 */
-int DefaultOption(int argc, _TCHAR **argv)
+static int GetImage(const _TCHAR *input, const _TCHAR *output)
 {
     int retVal = FAILED;
 
     media_t media;
 
-    if(argc != 2 || !(media = OpenMedia(argv[1], 128000)))
-        ColorPrintf(RED, _T("输入文件：%s 映射失败！\n"), argv[1]);
+    if(!(media = OpenMedia(input, 128000)))
+        ColorPrintf(RED, _T("输入文件：%s 打开失败！\n"), input);
     else
     {
         ColorPrintf(WHITE, _T("检测到输入文件为"));
@@ -96,8 +101,8 @@ int DefaultOption(int argc, _TCHAR **argv)
         case ISO:
             ColorPrintf(LIME, _T("ISO"));
             ColorPrintf(WHITE, _T("，默认作为Acronis启动ISO处理：\n\n"));
-            DisplayISOInfo(media);
-            retVal = DumpIMGFromISO(media, argv[1]);
+            if(DisplayISOInfo(media) == SUCCESS)
+                retVal = DumpIMGFromISO(media, output);
             break;
         case IMG:
             ColorPrintf(LIME, _T("IMG"));
@@ -128,8 +133,8 @@ int _tmain(int argc, _TCHAR **argv)
         */
 
         /* 短选项，    对应长参数，    参数 */
-        {'f',        _T("file"),      ap_yes},
-        {'d',        _T("device"),    ap_yes},
+        {'i',        _T("input"),     ap_yes},
+        {'o',        _T("output"),    ap_yes},
         {'h',        _T("help"),      ap_no},
         {'v',        _T("version"),   ap_no},
         {0,          0,               ap_no}
@@ -159,31 +164,50 @@ int _tmain(int argc, _TCHAR **argv)
     if(!ap_arguments(&parser))
         ShowHelp();
 
-    /* 遍历解析出的参数 */
-    for(argIndex = 0; argIndex < ap_arguments(&parser); ++argIndex)
     {
-        const int code = ap_code(&parser, argIndex);//解析出的短选项
-        const _TCHAR *arg = ap_argument(&parser, argIndex);//解析出的选项对应的参数
+        const _TCHAR *input = NULL, *output = NULL;
 
-        switch(code)
+        /* 遍历解析出的参数 */
+        for(argIndex = 0; argIndex < ap_arguments(&parser); ++argIndex)
         {
-        case 'f':
-            _tprintf(_T("检测到参数为：%s\n"), arg);
-            break;
-        case 'd':
-            _tprintf(_T("检测到参数为：%s\n"), arg);
-            break;
-        case 'h':
-            ShowHelp();
-            break;
-        case 'v'://啥都不做
-            break;
-        default:
-            if(!argIndex)
-                DefaultOption(argc, argv);
+            const int code = ap_code(&parser, argIndex);//解析出的短选项
+            const _TCHAR *arg = ap_argument(&parser, argIndex);//解析出的选项对应的参数
+
+            switch(code)
+            {
+            case 'i':
+                input = arg;
+                break;
+            case 'o':
+                output = arg;
+                break;
+            case 'h':
+                ShowHelp();
+                break;
+            case 'v'://啥都不做
+                break;
+            default:
+                //当前仅当argv[1]无法识别为有效选项，且只有一个运行参数时
+                if(!argIndex && argc == 2)
+                {
+                    const _TCHAR *output = GetOutPath(argv[1], _T(".img"));
+                    
+                    if(output)//获取输出路径成功
+                        GetImage(argv[1], output);
+                    else//获取输出路径失败
+                        ColorPrintf(RED, _T("输出路径为空！\n"));
+                }
+            }
+
+            if(!code) break;
         }
 
-        if(!code) break;
+        if(input && !output)
+            ShowError(_T("无输出路径"), argv[0]);
+        else if(!input && output)
+            ShowError(_T("无输入路径"), argv[0]);
+        else if(input && output)
+            GetImage(input, output);
     }
 
     /* 销毁参数解析 */

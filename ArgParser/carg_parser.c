@@ -27,7 +27,6 @@ Public License.
 
 #include <stdlib.h>
 #include <string.h>
-#include "../SafeMemory.h"
 
 #include "carg_parser.h"
 
@@ -36,7 +35,7 @@ Public License.
 static void * ap_resize_buffer( void * buf, const int min_size )
 {
     if( buf ) buf = realloc( buf, min_size );
-    else buf = MALLOC( min_size );
+    else buf = malloc( min_size );
     return buf;
 }
 
@@ -76,8 +75,8 @@ static char add_error( struct Arg_parser * const ap, const _TCHAR * const msg )
 static void free_data( struct Arg_parser * const ap )
 {
     int i;
-    for( i = 0; i < ap->data_size; ++i ) FREE( ap->data[i].argument );
-    if( ap->data ) { FREE( ap->data ); ap->data = 0; }
+    for( i = 0; i < ap->data_size; ++i ) free( ap->data[i].argument );
+    if( ap->data ) { free( ap->data ); ap->data = 0; }
     ap->data_size = 0;
 }
 
@@ -259,7 +258,7 @@ char ap_init( struct Arg_parser * const ap,
         while( argind < argc )
             if( !push_back_record( ap, 0, argv[argind++] ) ) return 0;
     }
-    if( non_options ) FREE( (void *)non_options );
+    if( non_options ) free( (void *)non_options );
     return 1;
 }
 
@@ -267,7 +266,7 @@ char ap_init( struct Arg_parser * const ap,
 void ap_free( struct Arg_parser * const ap )
 {
     free_data( ap );
-    if( ap->error ) { FREE( ap->error ); ap->error = 0; }
+    if( ap->error ) { free( ap->error ); ap->error = 0; }
     ap->error_size = 0;
 }
 

@@ -30,8 +30,7 @@ typedef int MapFileType;                    ///< 映射文件类型
 struct T                       ///  抽象数据类型media_t定义
 {
     const _TCHAR *name;        ///< 打开的介质名（路径）
-    HANDLE hFile;              ///< 映射介质时使用的句柄
-    FILE *pFile;               ///< 直接IO时使用的结构体
+    HANDLE hFile;              ///< 当文件映射时存放映射句柄；当直接IO存放介质句柄
     PVOID pView;               ///< 映射介质时，视图指针
     uint32_t allocGran;        ///< 内存分配粒度
     uint32_t viewSize;         ///< 视图大小，映射时使用VIEW，直接IO时使用重定向缓冲区大小
@@ -199,9 +198,8 @@ static void TestMapFileOpen(lcut_tc_t *tc, void *data)
             hack_t hack = (hack_t)media;
 
             LCUT_ASSERT(tc, "OpenMedia返回NULL", hack != NULL);
-            LCUT_ASSERT(tc, "文件映射时，media_t->hFile为NULL", hack->hFile != NULL);
+            LCUT_ASSERT(tc, "文件映射时，media_t->hFile为INVALID_HANDLE_VALUE", hack->hFile != INVALID_HANDLE_VALUE);
             LCUT_ASSERT(tc, "文件映射时，media_t->pView为NULL", hack->pView != NULL);
-            LCUT_ASSERT(tc, "文件映射时，media_t->pFile不为NULL", hack->pFile == NULL);
             LCUT_ASSERT(tc, "media_t中内存分配粒度错误", hack->allocGran == allocGran);
             LCUT_ASSERT(tc, "media_t中文件大小错误", hack->size.QuadPart == fileSize.QuadPart);
             LCUT_ASSERT(tc, "media_t中可访问视图大小为0", hack->accessSize != 0);
@@ -376,6 +374,19 @@ static void TestMapFileJumpWithSplitMap(lcut_tc_t *tc, void *data)
     }
 }
 
+static void TestDirectIODevice(lcut_tc_t *tc, void *data)
+{
+    media_t media = OpenMedia(_T("\\\\.\\D:"), 0);
+
+    if(media && SeekMedia(media, ((hack_t)media)->size.QuadPart - 2048, MEDIA_CUR) == SUCCESS)
+    {
+        media_access access;
+
+        if(GetMediaAccess(media, &access, 4096) == SUCCESS)
+            assert(0);
+    }
+}
+
 lcut_ts_t *CreateMapFileTestSuite()
 {
     lcut_ts_t *suite = NULL;
@@ -386,6 +397,7 @@ lcut_ts_t *CreateMapFileTestSuite()
     LCUT_TC_ADD(suite, "测试文件映射打开文件", TestMapFileOpen, NULL, NULL, NULL);
     LCUT_TC_ADD(suite, "测试完全文件映射跳转", TestMapFileJumpWithFullMap, NULL, NULL, NULL);
     LCUT_TC_ADD(suite, "测试分块文件映射跳转", TestMapFileJumpWithSplitMap, NULL, NULL, NULL);
+    LCUT_TC_ADD(suite, "测试直接IO", TestDirectIODevice, NULL, NULL, NULL);
 
     return suite;
 }
