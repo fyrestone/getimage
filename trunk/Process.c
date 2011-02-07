@@ -7,6 +7,7 @@
 */
 #include <Windows.h>     /* 使用MAX_PATH宏 */
 #include <io.h>          /* _access，检测文件存在 */
+#include <Psapi.h>       /* 使用GetModuleBaseName */
 #include <stdio.h>       /* 使用FILE */
 #include <assert.h>
 #include "ProjDef.h"
@@ -16,6 +17,32 @@
 #include "ISOProcess.h"
 
 static _TCHAR PATH[MAX_PATH];   /* GetOutPath输出缓冲区，每次调用都会覆盖 */
+
+typedef enum
+{
+    ProcessBasicInformation = 0,
+    ProcessDebugPort = 7,
+    ProcessWow64Information = 26,
+    ProcessImageFileName = 27
+}PROCESSINFOCLASS;
+
+typedef NTSTATUS (NTAPI *pfnNtQueryInformationProcess)(
+    IN  HANDLE ProcessHandle,                       ///< 进程句柄
+    IN  PROCESSINFOCLASS ProcessInformationClass,   ///< 信息类型
+    OUT PVOID ProcessInformation,                   ///< 缓冲指针
+    IN  ULONG ProcessInformationLength,             ///< 以字节为单位的缓冲大小
+    OUT PULONG ReturnLength    OPTIONAL             ///< 写入缓冲的字节数
+    );
+
+typedef struct                              ///  线程基本信息
+{
+      DWORD ExitStatus;                     ///< 接收进程终止状态
+      DWORD PebBaseAddress;                 ///< 接收进程环境块地址
+      DWORD AffinityMask;                   ///< 接收进程关联掩码
+      DWORD BasePriority;                   ///< 接收进程的优先级类
+      ULONG UniqueProcessId;                ///< 接收进程ID
+      ULONG InheritedFromUniqueProcessId;   ///< 接收父进程ID
+}PROCESS_BASIC_INFORMATION;
 
 /*!
 从img起始位置提取出img写入到path路径
@@ -162,14 +189,12 @@ MEDIA_TYPE GetInputType(media_t media)
 
 int DumpIMGFromISO(media_t media, const _TCHAR *imgPath)
 {
-    static const _TCHAR * const leftMargin = _T("    ");//左间距
-
     int retVal = FAILED;
 
     if(media && imgPath)
     {
-        ColorPrintf(WHITE, _T("尝试从ISO文件中提取IMG:\n\n"));
-        ColorPrintf(WHITE, _T("%s正在寻找IMG入口\t\t\t"), leftMargin);
+        ColorPrintf(WHITE, _T("\n尝试从ISO文件中提取IMG:\n\n"));
+        ColorPrintf(WHITE, _T("\t正在寻找IMG入口\t\t\t"));
 
         do
         {
@@ -177,7 +202,7 @@ int DumpIMGFromISO(media_t media, const _TCHAR *imgPath)
             if(JumpToISOBootEntry(media) == SUCCESS)
             {
                 ColorPrintf(LIME, _T("成功\n"));
-                ColorPrintf(WHITE, _T("%s正在写入IMG文件\t\t\t"), leftMargin);
+                ColorPrintf(WHITE, _T("\t正在写入IMG文件\t\t\t"));
             }
             else
             {
@@ -206,8 +231,6 @@ int DumpIMGFromISO(media_t media, const _TCHAR *imgPath)
 
 int DisplayISOInfo(media_t media)
 {
-    static const _TCHAR * const leftMargin = _T("    ");//左间距
-
     int retVal = FAILED;
 
     if(media)
@@ -228,24 +251,24 @@ int DisplayISOInfo(media_t media)
                 uint32_t volBlocks = LD_UINT32(pcPVD->VolSpaceSz);//ISO卷逻辑块数
                 uint16_t bytsPerBlocks = LD_UINT16(pcPVD->LogicalBlockSz);//逻辑块所占字节数
 
-                ColorPrintf(WHITE, _T("%s光盘标签：\t\t\t\t"), leftMargin);
+                ColorPrintf(WHITE, _T("\t光盘标签：\t\t\t"));
                 ColorPrintfA(LIME, "%.32s\n", pcPVD->VolID);
-                ColorPrintf(YELLOW, _T("%s卷逻辑块数：\t\t\t"), leftMargin);
+                ColorPrintf(YELLOW, _T("\t卷逻辑块数：\t\t\t"));
                 ColorPrintf(AQUA, _T("%u\n"), volBlocks);
-                ColorPrintf(YELLOW, _T("%s每逻辑块字节数：\t\t\t"), leftMargin);
+                ColorPrintf(YELLOW, _T("\t每逻辑块字节数：\t\t"));
                 ColorPrintf(AQUA, _T("%u\n"), bytsPerBlocks);
-                ColorPrintf(YELLOW, _T("%s光盘容量：\t\t\t\t"), leftMargin);
+                ColorPrintf(YELLOW, _T("\t光盘容量：\t\t\t"));
                 ColorPrintf(AQUA, _T("%u\n"), volBlocks * bytsPerBlocks);
 
                 /* 输出创建日期和修改日期 */
                 if(createDate && modifyDate)
                 {
-                    ColorPrintf(WHITE, _T("%s创建日期：\t\t\t\t"), leftMargin);
+                    ColorPrintf(WHITE, _T("\t创建日期：\t\t\t"));
                     ColorPrintfA(LIME, "%.4s/%.2s/%.2s %.2s:%.2s:%.2s\n",
                         createDate->Year, createDate->Month, createDate->Day,
                         createDate->Hour, createDate->Minute, createDate->Second);
 
-                    ColorPrintf(WHITE, _T("%s修改日期：\t\t\t\t"), leftMargin);
+                    ColorPrintf(WHITE, _T("\t修改日期：\t\t\t"));
                     ColorPrintfA(LIME, "%.4s/%.2s/%.2s %.2s:%.2s:%.2s\n",
                         createDate->Year, createDate->Month, createDate->Day,
                         createDate->Hour, createDate->Minute, createDate->Second);
@@ -256,28 +279,26 @@ int DisplayISOInfo(media_t media)
         /* 输出BootRecordVolDesc中信息 */
         if(JumpToISOBootRecordVolDesc(media) == SUCCESS)
         {
-            ColorPrintf(YELLOW, _T("%s启动规范：\t\t\t\t"), leftMargin);
+            ColorPrintf(YELLOW, _T("\t启动规范：\t\t\t"));
             ColorPrintf(AQUA, _T("EL TORITO\n"));
 
             /* 输出ValidationEntry中信息 */
             if(JumpToISOValidationEntry(media) == SUCCESS)
             {
-                ColorPrintf(WHITE, _T("%s支持平台：\t\t\t\t"), leftMargin);
+                ColorPrintf(WHITE, _T("\t支持平台：\t\t\t"));
                 ColorPrintf(LIME, _T("%s\n"), GetISOPlatformID(media));
             }
 
             /* 输出InitialEntry中信息 */
             if(JumpToISOInitialEntry(media) == SUCCESS)
             {
-                ColorPrintf(WHITE, _T("%s光盘类型：\t\t\t\t"), leftMargin);
+                ColorPrintf(WHITE, _T("\t光盘类型：\t\t\t"));
                 ColorPrintf(LIME, _T("可启动光盘\n"));
 
-                ColorPrintf(YELLOW, _T("%s启动介质类型：\t\t\t"), leftMargin);
+                ColorPrintf(YELLOW, _T("\t启动介质类型：\t\t\t"));
                 ColorPrintf(AQUA, _T("%s\n"), GetISOBootMediaType(media));
             }
         }
-
-        _tprintf(_T("\n"));
 
         retVal = SUCCESS;
     }
@@ -380,6 +401,54 @@ int DisplayIMGInfo(media_t media)
 
         ColorPrintf(FUCHSIA, _T("\t\t\t扇区总数："));
         ColorPrintf(AQUA, _T("%u\n"), totalSec);
+    }
+
+    return retVal;
+}
+
+int isUnderExplorer()
+{
+    int retVal = FAILED;
+
+    static _TCHAR *explorer = _T("explorer.exe");
+    pfnNtQueryInformationProcess NtQueryInformationProcess;
+
+    /* 从NTDLL加载NtQueryInformationProcess函数地址 */
+    {
+        HMODULE hNtDll = LoadLibrary(_T("ntdll.dll"));
+
+        if(hNtDll)
+            NtQueryInformationProcess = (pfnNtQueryInformationProcess)GetProcAddress(
+            hNtDll, "NtQueryInformationProcess");
+    }
+
+    if(NtQueryInformationProcess)
+    {
+        /* 获取当前进程句柄 */
+        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, GetCurrentProcessId());
+
+        if(hProcess != INVALID_HANDLE_VALUE)
+        {
+            PROCESS_BASIC_INFORMATION pbi;
+
+            /* 查询进程信息 */
+            if(!NtQueryInformationProcess(
+                hProcess, ProcessBasicInformation, 
+                &pbi, sizeof(PROCESS_BASIC_INFORMATION), NULL))
+            {
+                HANDLE hFather = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pbi.InheritedFromUniqueProcessId);
+                TCHAR fatherName[100];
+
+                /* 获取进程的完整路径，兼容于64位进程 */
+                if(hFather && GetProcessImageFileName(
+                    hFather, fatherName, sizeof(fatherName) / sizeof(TCHAR)))
+                {
+                    /* 如果父进程名跟explorer相同 */
+                    if(!_tcscmp(fatherName + _tcslen(fatherName) - _tcslen(explorer), explorer))
+                        return SUCCESS;
+                }
+            }
+        }
     }
 
     return retVal;

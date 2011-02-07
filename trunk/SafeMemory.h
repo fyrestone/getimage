@@ -12,7 +12,7 @@
 #include <stddef.h>       /* 使用size_t */
 
 /// 内存分配销毁信息跟踪宏，置0关闭输出，置1开启输出（仅debug下有效）
-#define MEM_DETAIL 1    
+#define MEM_DETAIL 0    
 
 #define malloc 不要直接调用malloc!    ///< 禁用malloc    
 #define free 不要直接调用free!        ///< 禁用free
