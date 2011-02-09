@@ -355,51 +355,51 @@ int DisplayIMGInfo(media_t media)
         }
 
         ColorPrintf(WHITE, _T("\t系统标名称："));
-        ColorPrintfA(LIME, "%.8s", pcBPB->Common.BS_OEMName);
+        ColorPrintfA(LIME, "%-20s", pcBPB->Common.BS_OEMName);
 
-        ColorPrintf(WHITE, _T("\t\t文件系统："));
+        ColorPrintf(WHITE, _T("文件系统："));
         ColorPrintf(LIME, _T("%s\n"), fsType);
 
         ColorPrintf(WHITE, _T("\t卷序列号："));
-        ColorPrintf(LIME, _T("0x%.4X"), volID);
+        ColorPrintf(LIME, _T("0x%-20.8X"), volID);
 
-        ColorPrintf(WHITE, _T("\t\t介质类型："));
-        ColorPrintf(LIME, _T("0x%.1X\n"), LD_UINT8(pcBPB->Common.BPB_Media));
+        ColorPrintf(WHITE, _T("介质类型："));
+        ColorPrintf(LIME, _T("0x%.2X\n"), LD_UINT8(pcBPB->Common.BPB_Media));
 
         ColorPrintf(WHITE, _T("\t物理驱动器号："));
-        ColorPrintf(LIME, _T("0x%.2X"), drvNum);
+        ColorPrintf(LIME, _T("0x%-16.2X"), drvNum);
 
-        ColorPrintf(WHITE, _T("\t\t每扇区字节数："));
+        ColorPrintf(WHITE, _T("每扇区字节数："));
         ColorPrintf(LIME, _T("%u\n"), LD_UINT16(pcBPB->Common.BPB_BytsPerSec));
 
         ColorPrintf(WHITE, _T("\t隐藏扇区数："));
-        ColorPrintf(LIME, _T("%u"), LD_UINT32(pcBPB->Common.BPB_HiddSec));
+        ColorPrintf(LIME, _T("%-20u"), LD_UINT32(pcBPB->Common.BPB_HiddSec));
 
-        ColorPrintf(YELLOW, _T("\t\t\t磁道数（C）："));
+        ColorPrintf(YELLOW, _T("磁道数（C）："));
         ColorPrintf(AQUA, _T("%u\n"), numTrks);
 
         ColorPrintf(WHITE, _T("\t每簇扇区数："));
-        ColorPrintf(LIME, _T("%u"), LD_UINT8(pcBPB->Common.BPB_SecPerClus));
+        ColorPrintf(LIME, _T("%-20u"), LD_UINT8(pcBPB->Common.BPB_SecPerClus));
 
-        ColorPrintf(YELLOW, _T("\t\t\t磁头数（H）："));
+        ColorPrintf(YELLOW, _T("磁头数（H）："));
         ColorPrintf(AQUA, _T("%u\n"), LD_UINT16(pcBPB->Common.BPB_NumHeads));
 
         ColorPrintf(WHITE, _T("\t保留扇区数："));
-        ColorPrintf(LIME, _T("%u"), LD_UINT16(pcBPB->Common.BPB_RsvdSecCnt));
+        ColorPrintf(LIME, _T("%-20u"), LD_UINT16(pcBPB->Common.BPB_RsvdSecCnt));
 
-        ColorPrintf(YELLOW, _T("\t\t\t每磁道扇区数（S）："));
+        ColorPrintf(YELLOW, _T("每磁道扇区数（S）："));
         ColorPrintf(AQUA, _T("%u\n"), LD_UINT16(pcBPB->Common.BPB_SecPerTrk));
 
         ColorPrintf(WHITE, _T("\tFAT表数："));
-        ColorPrintf(LIME, _T("%u"), LD_UINT8(pcBPB->Common.BPB_NumFATs));
+        ColorPrintf(LIME, _T("%-23u"), LD_UINT8(pcBPB->Common.BPB_NumFATs));
 
-        ColorPrintf(WHITE, _T("\t\t\t每FAT表扇区数："));
+        ColorPrintf(WHITE, _T("每FAT表扇区数："));
         ColorPrintf(LIME, _T("%u\n"), secPerFat);
 
         ColorPrintf(WHITE, _T("\t根目录项数："));
-        ColorPrintf(LIME, _T("%u"), LD_UINT16(pcBPB->Common.BPB_RootEntCnt));
+        ColorPrintf(LIME, _T("%-20u"), LD_UINT16(pcBPB->Common.BPB_RootEntCnt));
 
-        ColorPrintf(FUCHSIA, _T("\t\t\t扇区总数："));
+        ColorPrintf(FUCHSIA, _T("扇区总数："));
         ColorPrintf(AQUA, _T("%u\n"), totalSec);
     }
 
