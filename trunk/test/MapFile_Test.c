@@ -423,6 +423,25 @@ static void TestDirectIODevice(lcut_tc_t *tc, void *data)
     //}
 }
 
+static void TestMapFileAccess(lcut_tc_t *tc, void *data)
+{
+    uint32_t allocGran = 0;
+
+    if(AllocGran(&allocGran) == SUCCESS && 
+        CreateMapFile(MAP_FILE_PATH, allocGran, LARGER_THAN_ALLOC_GRAN) == SUCCESS)
+    {
+        media_t testMedia = OpenMedia(MAP_FILE_PATH, 0);
+        media_access access;
+        media_access access2;
+
+        GetMediaAccess(testMedia, &access, ((hack_t)testMedia)->map.size.LowPart);
+        GetMediaAccess(testMedia, &access2, ((hack_t)testMedia)->map.size.LowPart - 9);
+        SeekMedia(testMedia, 9, MEDIA_CUR);
+        GetMediaAccess(testMedia, &access, ((hack_t)testMedia)->map.size.LowPart - 9);
+        CloseMedia(&testMedia);
+    }
+}
+
 static void TestMapFileDump(lcut_tc_t *tc, void *data)
 {
     uint32_t allocGran = 0;
@@ -438,6 +457,7 @@ static void TestMapFileDump(lcut_tc_t *tc, void *data)
 
         SeekMedia(testMedia, 10, MEDIA_CUR);
         DumpMedia(testMedia, fp, ((hack_t)testMedia)->map.size.QuadPart - 10);
+        CloseMedia(&testMedia);
     }
 }
 
@@ -452,6 +472,7 @@ lcut_ts_t *CreateMapFileTestSuite()
     LCUT_TC_ADD(suite, "测试完全文件映射跳转", TestMapFileJumpWithFullMap, NULL, NULL, NULL);
     LCUT_TC_ADD(suite, "测试分块文件映射跳转", TestMapFileJumpWithSplitMap, NULL, NULL, NULL);
     LCUT_TC_ADD(suite, "测试直接IO", TestDirectIODevice, NULL, NULL, NULL);
+    LCUT_TC_ADD(suite, "测试映射文件访问", TestMapFileAccess, NULL, NULL, NULL);
     LCUT_TC_ADD(suite, "测试映射文件抽取", TestMapFileDump, NULL, NULL, NULL);
 
     return suite;
