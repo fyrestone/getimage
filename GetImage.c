@@ -48,7 +48,7 @@ void TestDebugFlag()
 */
 static void ShowTitle()
 {
-    _tprintf(_T("\n%s %s\t版权所有(c) 2009-2010 刘宝 %s\n\n"), PROGRAM_NAME, PROGRAM_VERSION, _T(__DATE__));
+    _tprintf(_T("\n%s %s\t版权所有(c) 2009-2011 zihongdelei@yahoo.com.cn %s\n\n"), PROGRAM_NAME, PROGRAM_VERSION, _T(__DATE__));
 }
 
 /*!
@@ -56,15 +56,33 @@ static void ShowTitle()
 */
 static void ShowHelp()
 {
-    _tprintf(_T("用法：\tgetimage -i <文件/设备> -o <输出路径>\n"));
-    _tprintf(_T("选项：\n"));
+    ColorPrintf(WHITE, _T("用法："));
+    _tprintf(_T("\tgetimage -i <输入文件/设备路径> -o <输出路径>\n"));
+    ColorPrintf(WHITE, _T("选项：\n"));
     _tprintf(_T("\t-h, --help\t\t显示本帮助\n"));
     _tprintf(_T("\t-v, --version\t\t显示本程序名及版本号\n"));
     _tprintf(_T("\t-i, --input\t\t输入文件/设备路径\n"));
     _tprintf(_T("\t-o, --output\t\t输出路径\n"));
-    _tprintf(_T("默认：\n当无选项时将输入的第一个参数作为文件处理：\n")
-             _T("若为ISO，则自动提取其中的启动磁盘映像到ISO文件所在目录，生成的IMG与ISO同名；\n")
-             _T("若为IMG，则显示其规格信息\n"));
+    ColorPrintf(WHITE, _T("注意：\n"));
+    _tprintf(_T("\tVista/Windows 7下打开本地磁盘分区，需要使用管理员权限运行本程序\n"));
+    _tprintf(_T("\t本程序规格显示，仅支持IMG（FAT12/16/32）、ISO（标准映像）\n"));
+    ColorPrintf(WHITE, _T("使用举例：\n"));
+    ColorPrintf(WHITE, _T("\n1、getimage <输入文件路径>\n"));
+    _tprintf(_T("   ├显示IMG文件规格；提取ISO文件的启动IMG映像到<ISO文件无扩展名路径 + .img>\n"));
+    _tprintf(_T("   ├getimage E:\\test.iso 提取test.iso的启动IMG映像到E:\\test.img\n"));
+    _tprintf(_T("   └getimage E:\\test.img 显示test.img的规格\n"));
+    ColorPrintf(WHITE, _T("\n2、getimage <输入设备路径>\n"));
+    _tprintf(_T("   ├显示（IMG/ISO）设备规格\n"));
+    _tprintf(_T("   └getimage \\\\.\\H: 显示H盘的规格\n"));
+    ColorPrintf(WHITE, _T("\n3、getimage -i <输入文件/设备路径>\n"));
+    _tprintf(_T("   ├显示（IMG/ISO）文件/设备规格\n"));
+    _tprintf(_T("   ├getimage E:\\test.iso 显示test.iso的规格\n"));
+    _tprintf(_T("   ├getimage E:\\test.img 显示test.img的规格\n"));
+    _tprintf(_T("   └getimage -i \\\\.\\H: 显示H盘的规格\n"));
+    ColorPrintf(WHITE, _T("\n4、getimage -i <输入文件/设备路径> -o <输出路径>\n"));
+    _tprintf(_T("   ├显示IMG文件/设备规格；提取ISO文件/设备的启动IMG映像到<输出路径>\n"));
+    _tprintf(_T("   ├getimage -i \\\\.\\H: -o E:\\test.img\n"));
+    _tprintf(_T("   └getimage -i E:\\test.iso -o E:\\test.img\n"));
 }
 
 /*!
@@ -111,7 +129,7 @@ static int GetImage(const _TCHAR *input, const _TCHAR *output)
         {
         case ISO:
             ColorPrintf(LIME, _T("ISO"));
-            ColorPrintf(WHITE, _T("，默认作为Acronis启动ISO处理：\n\n"));
+            ColorPrintf(WHITE, _T("，支持Acronis启动ISO：\n\n"));
             if(DisplayISOInfo(media) == SUCCESS)
                 retVal = SUCCESS;
             if(output)

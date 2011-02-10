@@ -7,7 +7,7 @@
 */
 #include <Windows.h>     /* 使用MAX_PATH宏 */
 #include <io.h>          /* _access，检测文件存在 */
-#include <Psapi.h>       /* 使用GetModuleBaseName */
+#include <Psapi.h>       /* 使用GetProcessImageFileName */
 #include <stdio.h>       /* 使用FILE */
 #include <assert.h>
 #include "ProjDef.h"

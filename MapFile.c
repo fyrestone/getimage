@@ -626,6 +626,8 @@ static int MapMediaAccess(T media, media_access *access, uint32_t len)
                 void *writePtr = buffer;//备份buffer到writePtr
                 retVal = DumpMapMedia(media, len, MemOut, &writePtr);
 
+                assert(((char *)writePtr - (char *)buffer) == len);
+
                 if(retVal == SUCCESS)
                 {
                     struct elem_t *el = (struct elem_t *)MALLOC(sizeof(struct elem_t));
@@ -821,12 +823,12 @@ static int DumpRawMedia(T media, int64_t size, Redirector processor, void *data)
         if(size <= (int64_t)media->raw.accessSize)
         {
             /* 直接处理缓冲区中内容 */
-            retVal = processor(media->raw.pBuffer, size, data);
+            retVal = processor(media->raw.pBuffer, (uint32_t)size, data);
         }
         else
         { 
             void *buffer;                   //缓冲区指针，动态申请，大小为1个扇区大小
-            LARGE_INTEGER offset = media->raw.currPos;//代替ol的偏移量进行计算
+            //LARGE_INTEGER offset = media->raw.currPos;//代替ol的偏移量进行计算
             LARGE_INTEGER alignedBegin;     //对齐开始偏移量
             LARGE_INTEGER alignedEnd;       //对齐结束偏移量
             OVERLAPPED ol;                  //读取偏移量，用于ReadFile
@@ -851,7 +853,7 @@ static int DumpRawMedia(T media, int64_t size, Redirector processor, void *data)
             assert(alignedEnd.QuadPart - alignedBegin.QuadPart <= UINT_MAX);
             assert(!((alignedEnd.QuadPart - alignedBegin.QuadPart) % media->raw.sectorSize));
 
-            sectors = (alignedEnd.QuadPart - alignedBegin.QuadPart) / media->raw.sectorSize;
+            sectors = (uint32_t)((alignedEnd.QuadPart - alignedBegin.QuadPart) / media->raw.sectorSize);
 
             /* 动态申请空间 */
             buffer = MALLOC(media->raw.sectorSize);
@@ -890,7 +892,7 @@ static int DumpRawMedia(T media, int64_t size, Redirector processor, void *data)
 
                     if(--sectors)//扇区数-1 > 0
                     {
-                        int i;
+                        uint32_t i;
 
                         alignedBegin.QuadPart += media->raw.sectorSize;
 
