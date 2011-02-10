@@ -19,7 +19,7 @@
 
 typedef struct T *T;
 
-typedef struct media_access      ///  介质访问结构体，由GetMediaAccess获得
+typedef struct media_access      ///  介质访问结构体，由GetMediaAccess填充
 {
     const unsigned char *begin;  ///< 介质访问指针
     uint32_t len;                ///< 可访问介质大小
